@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "ESNext",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "ESNext",
+      "dom",
+      "DOM.Iterable"
+    ],
+    "incremental": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "Services/*": ["./src/services/*"],
+      "Screens/*": ["./src/sreens/*"],
+      "Components/*": ["./src/components/*"]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "build",
+    "scripts",
+    "acceptance-tests",
+    "webpack",
+    "node_modules",
+    "jest",
+    "src/setupTests.ts"
+  ],
+  "types": [
+    "typePatches",
+    "node"
+  ],
+}

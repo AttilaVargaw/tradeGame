@@ -1,0 +1,32 @@
+@import "~bootstrap/scss/bootstrap";
+
+body {
+    font-family: sans-serif;
+    user-select: none;
+}
+
+h2 {
+    padding-top: 0.8em;
+}
+
+h3 {
+    padding-top: .5em;
+    padding-bottom: .5em
+}
+
+.row {
+    padding-top: .2em;
+    padding-bottom: .2em
+}
+
+.popover-arrow {
+    display: none !important;
+}
+
+/*input {
+    margin-bottom: 2em;
+}
+
+select {
+    margin-bottom: 2em;
+}*/
