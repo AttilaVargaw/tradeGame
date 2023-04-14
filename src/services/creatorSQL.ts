@@ -167,4 +167,4 @@ export const creatorSQL = `
     INSERT INTO sqlite_sequence VALUES('IndustrialBuildings',3);
     COMMIT;
     
-`
+`;

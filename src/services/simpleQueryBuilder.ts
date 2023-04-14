@@ -40,7 +40,7 @@ type WhereEquitation<T> = {
 }
 
 function whereEquationToString<T>({ operator = '=', A, AAttr, value = null }: WhereEquitation<T>) {
-    const addQuotations = typeof value
+    const addQuotations = typeof value && AAttr !== "ID"
 
     return `${A}.${AAttr}${operator}${value ? `${addQuotations ? '"' : ''}${value}${addQuotations ? '"' : ''} ` : 'NULL'}`
 }

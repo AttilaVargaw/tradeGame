@@ -22,8 +22,7 @@ tauri-plugin-localhost = "0.1.0"
 portpicker = "0.1"
 
 [dependencies.tauri-plugin-sql]
-git = "https://github.com/tauri-apps/tauri-plugin-sql"
-#tag = "v0.1.0"
+git = "https://github.com/tauri-apps/plugins-workspace"
 features = ["sqlite"] # or "postgres", or "mysql"
 branch = "dev"
 
