@@ -1,23 +1,44 @@
-import { FC, useEffect, useState } from "react";
-import Col from "react-bootstrap/esm/Col";
-import Row from "react-bootstrap/esm/Row";
+import { InsHTMLAttributes, forwardRef, useEffect, useState } from "react";
+import { useWindowSize } from "./hooks/useWIndowSize";
 
-export const TopMenu: FC = () => {
-    const [time, setTime] = useState('')
-    const [date, setDate] = useState('')
+export function TopMenu() {
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
 
-    useEffect(() => {
-        const timeout = setInterval(() => {
-            const time = new Date( new Date().setFullYear(1899, 1, 1) - new Date(2020).valueOf())
-            setTime(time.toLocaleTimeString())
-            setDate(time.toLocaleDateString())
-        }, 1000);
+  useEffect(() => {
+    const timeout = setInterval(() => {
+      const time = new Date(
+        new Date().setFullYear(1899, 1, 1) - new Date(2020).valueOf()
+      );
+      setTime(time.toLocaleTimeString());
+      setDate(time.toLocaleDateString());
+    }, 1000);
 
-        return () => clearInterval(timeout)
-    }, [])
+    return () => clearInterval(timeout);
+  }, []);
 
-    return <Row style={{ color: 'black', padding: 'auto' }}>
-        <Col>{5556.22} ℳ</Col>
-        <Col>{date} {time}</Col>
-    </Row>
+  return (
+    <div
+      style={{
+        background: "white",
+        display: "flex",
+        flexDirection: "row",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+          margin: "1em",
+        }}
+      >
+        <div>
+          {date} {time}
+        </div>
+        <div>{5556.22} ℳ</div>
+      </div>
+    </div>
+  );
 }

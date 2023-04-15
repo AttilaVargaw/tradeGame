@@ -1,8 +1,9 @@
 @import "~bootstrap/scss/bootstrap";
 
-body {
+html, body {
     font-family: sans-serif;
     user-select: none;
+    height: 100%;
 }
 
 h2 {
