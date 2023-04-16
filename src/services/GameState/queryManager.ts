@@ -51,5 +51,5 @@ export function getQuery(type: "getCities" | "getCity"): string {
     }
   }
 
-  return queries.get(type)!;
+  return queries.get(type) || "";
 }

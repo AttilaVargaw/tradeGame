@@ -596,7 +596,12 @@ const getCityIndustrialResourceChanges = async (ID: string) => {
 
   return Object.entries(groupBy(aggregated, "nameKey")).map<ResourceChange>(
     ([key, coll]) => {
-      const { descriptionKey, ID, num, buildingNum } = coll[0] as any;
+      const { descriptionKey, ID, num, buildingNum } = coll[0] as {
+        descriptionKey: string;
+        ID: string;
+        num: number;
+        buildingNum: number;
+      };
 
       return {
         num: num * buildingNum,

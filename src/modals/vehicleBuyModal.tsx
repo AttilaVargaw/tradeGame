@@ -25,6 +25,7 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
             style={{
               justifyContent: "center",
               aspectRatio: 1,
+              paddingBottom: "1em"
             }}
           >
             <Placeholder width="100%" height="100%" />

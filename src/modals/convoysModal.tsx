@@ -70,8 +70,6 @@ export const ConvoyModal = ({
     []
   );
 
-  console.log({ isOpen });
-
   return (
     <Modal show={isOpen} onHide={onRequestClose} size="xl">
       <Modal.Header closeButton>

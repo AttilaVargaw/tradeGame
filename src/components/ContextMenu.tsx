@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/esm/Button";
 import Popover from "react-bootstrap/esm/Popover";
 import {
@@ -24,29 +24,45 @@ export const ContextMenu: FC = () => {
       .unsubscribe;
   }, []);
 
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function OutsideEventListener(ev: MouseEvent) {
+      if (
+        !popoverRef.current?.contains(ev.target as Node) &&
+        contextMenuPositionState
+      ) {
+        setContextMenuPositionState(null);
+      }
+    }
+
+    window.addEventListener("mousedown", OutsideEventListener);
+
+    return () => window.removeEventListener("mousedown", OutsideEventListener);
+  }, [contextMenuPositionState]);
+
   return (
     <>
-      {contextMenuPositionState && (
-        <Popover
-          hidden={!contextMenuPositionObservable}
-          placement="right"
-          id="popover-contained"
-          style={{
-            position: "absolute",
-            top: contextMenuPositionState[1],
-            left: contextMenuPositionState[0],
-          }}
-        >
-          <Popover.Header as="h3">Popover right</Popover.Header>
-          <Popover.Body>
-            {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
-              <Button key={labelKey} onClick={onClick} disabled={disabled}>
-                {labelKey}
-              </Button>
-            ))}
-          </Popover.Body>
-        </Popover>
-      )}
+      <Popover
+        ref={popoverRef}
+        hidden={!contextMenuPositionState}
+        placement="right"
+        id="popover-contained"
+        style={{
+          position: "absolute",
+          top: contextMenuPositionState ? contextMenuPositionState[1] : 0,
+          left: contextMenuPositionState ? contextMenuPositionState[0] : 0,
+        }}
+      >
+        <Popover.Header as="h3">Popover right</Popover.Header>
+        <Popover.Body>
+          {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
+            <Button key={labelKey} onClick={onClick} disabled={disabled}>
+              {labelKey}
+            </Button>
+          ))}
+        </Popover.Body>
+      </Popover>
     </>
   );
 };

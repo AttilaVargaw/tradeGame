@@ -42,7 +42,6 @@ export function WorldMap(): JSX.Element {
   const [selectedCities, setSelectedCities] = useState<string[]>(["", ""]);
   const [showConvoyModal, setShowConvoyModal] = useState(false);
   const [showVehicleBuyModal, setShowVehicleBuyModal] = useState(false);
-  const [contextMenuOpened, setContextMenuOpened] = useState(false);
 
   useEffect(() => {
     gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
@@ -52,7 +51,6 @@ export function WorldMap(): JSX.Element {
     const onClick = () => {
       gameState.addTradeRoute(selectedCities);
       setContextMenuPosition(null);
-      setContextMenuOpened(false);
     };
 
     return addToContextMenu({ disabled: false, labelKey: "addRoute", onClick });
@@ -92,7 +90,8 @@ export function WorldMap(): JSX.Element {
       // { capture: true }
     );
 
-    return () => window.removeEventListener("contextmenu", contextMenuHandler);
+    return () =>
+      document.removeEventListener("contextmenu", contextMenuHandler);
   }, []);
 
   const onDoubleClick = useCallback(
@@ -117,17 +116,9 @@ export function WorldMap(): JSX.Element {
   const onContextMenu = useCallback<React.MouseEventHandler<HTMLDivElement>>(
     ({ nativeEvent: { clientX, clientY } }) => {
       setContextMenuPosition([clientX, clientY]);
-      setContextMenuOpened(true);
     },
     []
   );
-
-  const hideContextMenu = useCallback(() => {
-    if (contextMenuOpened) {
-      setContextMenuPosition(null);
-      setContextMenuOpened(false);
-    }
-  }, [contextMenuOpened]);
 
   const { height, width } = useWindowSize();
 
@@ -152,10 +143,7 @@ export function WorldMap(): JSX.Element {
   const mapHeight = useMemo(() => `${height * 0.9}px`, [height]);
 
   return (
-    <div
-      onMouseUp={hideContextMenu}
-      style={{ display: "flex", flexDirection: "column" }}
-    >
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {currentCity && (
         <SelectedCityContext.Provider value={currentCity}>
           <CityDataModal

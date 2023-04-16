@@ -21,7 +21,6 @@ export default function TradeRouteModal({
   const [routeData, setRouteData] = useState<TradeRouteProps>();
 
   useEffect(() => {
-    console.log(routeID);
     if (routeID) {
       gameState.getTradeRoute(routeID).then(setRouteData);
     }
