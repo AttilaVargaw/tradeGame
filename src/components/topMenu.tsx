@@ -1,7 +1,6 @@
-import { InsHTMLAttributes, forwardRef, useEffect, useState } from "react";
-import { useWindowSize } from "./hooks/useWIndowSize";
+import { useEffect, useState } from "react";
 
-export function TopMenu() {
+export function TopMenu({ height }: { height: string }) {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
 
@@ -23,6 +22,7 @@ export function TopMenu() {
         background: "white",
         display: "flex",
         flexDirection: "row",
+        height,
       }}
     >
       <div

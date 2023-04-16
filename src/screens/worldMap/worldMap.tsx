@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -123,8 +124,7 @@ export function WorldMap(): JSX.Element {
   }, []);
 
   const { height, width } = useWindowSize();
-  const topMenuRef = useRef<HTMLDivElement>(null);
-  const sideMenuRef = useRef<HTMLDivElement>(null);
+
   const mapContainerRef = useRef<LeafletMap>(null);
 
   useEffect(() => {
@@ -136,6 +136,14 @@ export function WorldMap(): JSX.Element {
 
     return () => window.removeEventListener("resize", eventHandler);
   }, []);
+
+  const menuHeight = useMemo(() => `${height * 0.1}px`, [height]);
+
+  const menuWidth = useMemo(() => `${width * 0.1}px`, [width]);
+
+  const mapWidth = useMemo(() => `${width * 0.9}px`, [width]);
+
+  const mapHeight = useMemo(() => `${height * 0.9}px`, [height]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -160,9 +168,9 @@ export function WorldMap(): JSX.Element {
         }}
       />
 
-      <TopMenu />
+      <TopMenu height={menuHeight} />
 
-      <div style={{ height: `${height * 0.9}px`, width: `${width * 0.9}px` }}>
+      <div style={{ height: mapHeight, width: mapWidth }}>
         <MapContainer
           doubleClickZoom={false}
           scrollWheelZoom
@@ -242,11 +250,10 @@ export function WorldMap(): JSX.Element {
       </div>
       <SideMenu
         style={{
-          top: `${height * 0.1}px`,
-          height: `${height * 0.9}px`,
-          width: `${width * 0.1}px`,
+          top: menuHeight,
+          height: mapHeight,
+          width: menuWidth,
         }}
-        ref={sideMenuRef}
       >
         <SideMenuItem
           onClick={() => {
