@@ -1,22 +1,17 @@
 import { FC, useCallback, useContext, useEffect, useState } from "react";
-import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
 import Card from "react-bootstrap/esm/Card";
 import Col from "react-bootstrap/esm/Col";
-import Container from "react-bootstrap/esm/Container";
 import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
 import { VehicleType } from "Services/GameState/dbTypes";
 import { GameStateContext } from "Services/GameState/gameState";
-import { SelectedTradeRouteContext } from "../screens/worldMap/selectedTradeRouteContext";
 import { run as holderRun } from "holderjs";
 import Button from "react-bootstrap/esm/Button";
 import CardGroup from "react-bootstrap/esm/CardGroup";
 import Nav from "react-bootstrap/esm/Nav";
-import { Figure } from "react-bootstrap";
 import Placeholder from "../components/placeholder";
 
 export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
-  ID,
   desc,
   name,
   price,
@@ -29,7 +24,7 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
           <div
             style={{
               justifyContent: "center",
-              aspectRatio: 1
+              aspectRatio: 1,
             }}
           >
             <Placeholder width="100%" height="100%" />
@@ -57,7 +52,7 @@ export const OrderPage: FC<{ ID: string }> = ({ ID }) => {
     gameState
       .getVehicleType(ID)
       .then((result) => setVehicleDescription(result[0]));
-  }, []);
+  }, [ID, gameState]);
   useEffect(() => {
     holderRun();
   });
@@ -66,7 +61,7 @@ export const OrderPage: FC<{ ID: string }> = ({ ID }) => {
     return <></>;
   }
 
-  const { desc, name, price, type } = vehicleDescription;
+  const { desc, name, price } = vehicleDescription;
 
   return (
     <Row className="no-gutters">
@@ -106,7 +101,7 @@ export const VehicleBuyModal = ({
 
   useEffect(() => {
     gameState.getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
-  }, [selectedVehicleType]);
+  }, [selectedVehicleType, gameState]);
 
   useEffect(() => {
     holderRun();

@@ -15,7 +15,7 @@ const Container = styled.div<{ height?: string; width?: string }>`
   }
 `;
 
-export default function ({
+export default function Placeholder({
   height,
   width,
 }: PropsWithChildren<{ height?: string; width?: string }>) {

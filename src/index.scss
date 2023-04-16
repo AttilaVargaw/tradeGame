@@ -1,27 +1,28 @@
 @import "~bootstrap/scss/bootstrap";
 
-html, body {
-    font-family: sans-serif;
-    user-select: none;
-    height: 100%;
+html,
+body {
+  font-family: sans-serif;
+  user-select: none;
+  height: 100%;
 }
 
 h2 {
-    padding-top: 0.8em;
+  padding-top: 0.8em;
 }
 
 h3 {
-    padding-top: .5em;
-    padding-bottom: .5em
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 }
 
 .row {
-    padding-top: .2em;
-    padding-bottom: .2em
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
 }
 
 .popover-arrow {
-    display: none !important;
+  display: none !important;
 }
 
 /*input {

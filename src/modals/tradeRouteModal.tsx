@@ -8,24 +8,24 @@ import { TradeRouteProps } from "Services/GameState/dbTypes";
 import { GameStateContext } from "Services/GameState/gameState";
 import { SelectedTradeRouteContext } from "../screens/worldMap/selectedTradeRouteContext";
 
-export default ({
+export default function TradeRouteModal({
   isOpen,
   onRequestClose,
 }: {
   isOpen: boolean;
   onRequestClose?: () => void;
-}): JSX.Element => {
-  const routeID = useContext(SelectedTradeRouteContext)!;
+}): JSX.Element {
+  const routeID = useContext(SelectedTradeRouteContext);
   const gameState = useContext(GameStateContext);
 
   const [routeData, setRouteData] = useState<TradeRouteProps>();
 
   useEffect(() => {
-    console.log(routeID)
+    console.log(routeID);
     if (routeID) {
       gameState.getTradeRoute(routeID).then(setRouteData);
     }
-  }, [routeID]);
+  }, [routeID, gameState]);
 
   if (routeData) {
     return (
@@ -59,4 +59,4 @@ export default ({
   } else {
     return <></>;
   }
-};
+}

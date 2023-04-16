@@ -6,7 +6,6 @@ import { BehaviorSubject } from "rxjs";
 
 import { create, insert, select } from "../simpleQueryBuilder";
 import {
-  CityAttr,
   TradeRouteProps,
   City,
   CityPopulationClass,
@@ -19,10 +18,8 @@ import {
   PopulationData,
   ResourceChange,
   WarehouseItem,
-  TradeRoute,
   CityPositionProperty,
   TradeRouteAttributes,
-  CityTypes,
   TradeRouteInsertAttributes,
   DBEvent,
   ConvoyAttr,
@@ -183,9 +180,9 @@ const init = async () => {
   dbObservable.next({ type: DBEvents.initialized });
 };
 
-const addVehicle = () => {};
+// const addVehicle = () => {};
 
-const getVehicleTypes = (type: string = "air") => {
+const getVehicleTypes = (type = "air") => {
   return db.select<VehicleType[]>(
     select<VehicleTypeAttr>(["name", "desc", "ID", "price"], "VehicleTypes", [
       { A: "VehicleTypes", AAttr: "type", value: type },

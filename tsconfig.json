@@ -5,11 +5,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
-    "lib": [
-      "ESNext",
-      "dom",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "dom", "DOM.Iterable"],
     "incremental": true,
     "esModuleInterop": true,
     "sourceMap": true,
@@ -27,9 +23,7 @@
       "Components/*": ["./src/components/*"]
     }
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "exclude": [
     "build",
     "scripts",
@@ -39,8 +33,5 @@
     "jest",
     "src/setupTests.ts"
   ],
-  "types": [
-    "typePatches",
-    "node"
-  ],
+  "types": ["typePatches", "node"]
 }
