@@ -10,6 +10,7 @@ import { PopulationClass, PopulationData } from "Services/GameState/dbTypes";
 import { GameStateContext } from "Services/GameState/gameState";
 import debugModeContext from "../debugModeContext";
 import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
+import { Input } from "../components/input";
 
 export default function CityPopulation() {
   const [notExistingClasses, setNotExistingClasses] = useState<
@@ -24,23 +25,25 @@ export default function CityPopulation() {
   const [classes, setClasses] = useState<PopulationData[]>([]);
   const [fullPopulation, setFullPopulation] = useState<number>(0);
 
-  const cityID = useContext(SelectedCityContext)!;
+  const cityID = useContext(SelectedCityContext);
   const gameState = useContext(GameStateContext);
   const debugMode = useContext(debugModeContext);
 
   useEffect(() => {
-    gameState.getNotExistingCityClasses(cityID).then((classes) => {
-      setNotExistingClasses(classes);
+    if (cityID) {
+      gameState.getNotExistingCityClasses(cityID).then((classes) => {
+        setNotExistingClasses(classes);
 
-      if (classes.length > 0) {
-        setNewCityClass({ city: cityID, populationClass: classes[0].ID });
-      }
-    });
+        if (classes.length > 0) {
+          setNewCityClass({ city: cityID, populationClass: classes[0].ID });
+        }
+      });
 
-    gameState.getCity(cityID).then(({ classes, fullPopulation }) => {
-      setClasses(classes);
-      setFullPopulation(fullPopulation);
-    });
+      gameState.getCity(cityID).then(({ classes, fullPopulation }) => {
+        setClasses(classes);
+        setFullPopulation(fullPopulation);
+      });
+    }
   }, [reload, cityID, gameState]);
 
   const setPopulation = useCallback(
@@ -85,8 +88,7 @@ export default function CityPopulation() {
               <h3>{name}</h3>
             </Row>
             {debugMode ? (
-              <Form.Control
-                style={{ paddingTop: ".5em", paddingBottom: ".5em" }}
+              <Input
                 min={0}
                 type="number"
                 value={num}

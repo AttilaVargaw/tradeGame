@@ -10,7 +10,7 @@ import debugModeContext from "../debugModeContext";
 import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
 
 export default function CityIndustry() {
-  const cityID = useContext(SelectedCityContext)!;
+  const cityID = useContext(SelectedCityContext);
   const debugMode = useContext(debugModeContext);
 
   const [newBuilding, setNewBuilding] = useState<string>("");
@@ -28,11 +28,13 @@ export default function CityIndustry() {
   const gameState = useContext(GameStateContext);
 
   useEffect(() => {
-    gameState
-      .getCityIndustrialResourceChanges(cityID)
-      .then(setAggregatedInputOutput);
-    gameState.getAllIndustrialBuildings().then(setAllIndustrialBuildings);
-    gameState.getCityIndustrialBuildings(cityID).then(setIndustrialBuildings);
+    if (cityID) {
+      gameState
+        .getCityIndustrialResourceChanges(cityID)
+        .then(setAggregatedInputOutput);
+      gameState.getAllIndustrialBuildings().then(setAllIndustrialBuildings);
+      gameState.getCityIndustrialBuildings(cityID).then(setIndustrialBuildings);
+    }
   }, [reload, gameState, cityID]);
 
   const setNewBuildingDropdown = useCallback(
@@ -43,8 +45,10 @@ export default function CityIndustry() {
   );
 
   const addNewBuilding = useCallback(async () => {
-    await gameState.addIndustrialBuildings(1, newBuilding, cityID);
-    setReload(!reload);
+    if (cityID) {
+      await gameState.addIndustrialBuildings(1, newBuilding, cityID);
+      setReload(!reload);
+    }
   }, [newBuilding, cityID, gameState, reload]);
 
   const setBuildingNumber = useCallback(

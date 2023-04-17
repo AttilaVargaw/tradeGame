@@ -9,7 +9,7 @@ import React, {
 import CityDataModal from "../../modals/cityDataModal";
 import { SelectedCityContext } from "./selectedCityContext";
 import { GameStateContext } from "Services/GameState/gameState";
-import SideMenu, { SideMenuItem } from "./sideMenu";
+import SideMenu, { ButtonLikeDisplay } from "./sideMenu";
 import { CRS, LeafletMouseEventHandlerFn, Map as LeafletMap } from "leaflet";
 import { RouteLayer } from "./routeLayer";
 import { CityPositionProperty } from "Services/GameState/dbTypes";
@@ -21,6 +21,7 @@ import { VehicleBuyModal } from "../../modals/vehicleBuyModal";
 import { TopMenu } from "../../components/topMenu";
 import { Circle, ImageOverlay, MapContainer, Tooltip } from "react-leaflet";
 import { useWindowSize } from "../../components/hooks/useWIndowSize";
+import styled from "styled-components";
 
 export const CityColors: { [key: string]: string } = {
   Mine: "black",
@@ -148,11 +149,26 @@ export function WorldMap(): JSX.Element {
 
   const menuHeight = useMemo(() => `${height * 0.1}px`, [height]);
 
-  const menuWidth = useMemo(() => `${width * 0.1}px`, [width]);
+  const menuWidth = useMemo(() => `${width * 0.15}px`, [width]);
 
   const mapWidth = useMemo(() => `${width * 0.9}px`, [width]);
 
   const mapHeight = useMemo(() => `${height * 0.9}px`, [height]);
+
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
+
+  useEffect(() => {
+    const timeout = setInterval(() => {
+      const time = new Date(
+        new Date().setFullYear(1899, 1, 1) - new Date(2020).valueOf()
+      );
+      setTime(time.toLocaleTimeString());
+      setDate(time.toLocaleDateString());
+    }, 1000);
+
+    return () => clearInterval(timeout);
+  }, []);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -177,11 +193,11 @@ export function WorldMap(): JSX.Element {
         }}
       />
 
-      <TopMenu height={menuHeight} />
+      {/*<TopMenu height={menuHeight} />*/}
 
       <div
         onContextMenu={onContextMenu}
-        style={{ height: mapHeight, width: mapWidth }}
+        style={{ height: height, width: width }}
       >
         <MapContainer
           doubleClickZoom={false}
@@ -262,23 +278,25 @@ export function WorldMap(): JSX.Element {
       </div>
       <SideMenu
         style={{
-          top: menuHeight,
-          height: mapHeight,
+          top: 0,
+          height: height,
           width: menuWidth,
         }}
       >
-        <SideMenuItem
-          onClick={() => {
-            setShowConvoyModal(true);
-          }}
-          label="Convoys"
-        />
-        <SideMenuItem
+        <ButtonLikeDisplay black>
+          {date} {time}
+        </ButtonLikeDisplay>
+        <ButtonLikeDisplay black>5556.22ℳ</ButtonLikeDisplay>
+        <ButtonLikeDisplay onClick={() => setShowConvoyModal(true)}>
+          Convoys
+        </ButtonLikeDisplay>
+        <ButtonLikeDisplay
           onClick={() => {
             setShowVehicleBuyModal(true);
           }}
-          label="New Vehicle"
-        />
+        >
+          New Vehicle
+        </ButtonLikeDisplay>
       </SideMenu>
     </div>
   );

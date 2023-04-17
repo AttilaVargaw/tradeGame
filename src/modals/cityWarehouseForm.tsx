@@ -25,7 +25,7 @@ export default function CityWarehouseForm() {
     addCityWarehouseItem,
   } = useContext(GameStateContext);
 
-  const cityID = useContext(SelectedCityContext)!;
+  const cityID = useContext(SelectedCityContext);
 
   const [add, setAdd] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
@@ -36,15 +36,20 @@ export default function CityWarehouseForm() {
   const [warehouse, setWarehouse] = useState<WarehouseItem[]>([]);
 
   useEffect(() => {
-    getNotAvailableItems(cityID).then((items) => {
-      setItems(items);
-      setNewItem({ ID: items.length > 0 ? items[0].ID : undefined, number: 0 });
-    });
-    getCityWarehouse(cityID).then(setWarehouse);
+    if (cityID) {
+      getNotAvailableItems(cityID).then((items) => {
+        setItems(items);
+        setNewItem({
+          ID: items.length > 0 ? items[0].ID : undefined,
+          number: 0,
+        });
+      });
+      getCityWarehouse(cityID).then(setWarehouse);
+    }
   }, [cityID, getCityWarehouse, getNotAvailableItems]);
 
   const addItem = useCallback(async () => {
-    if (newItem.ID) {
+    if (newItem.ID && cityID) {
       await addCityWarehouseItem(newItem.ID, newItem.number, cityID);
 
       await Promise.all([
@@ -88,8 +93,10 @@ export default function CityWarehouseForm() {
       async ({
         currentTarget: { value },
       }: React.ChangeEvent<HTMLInputElement>) => {
-        await updateCityWarehouseItem(Number(value), ID);
-        await getCityWarehouse(cityID).then(setWarehouse);
+        if (cityID) {
+          await updateCityWarehouseItem(Number(value), ID);
+          await getCityWarehouse(cityID).then(setWarehouse);
+        }
       },
     [cityID, updateCityWarehouseItem, getCityWarehouse]
   );

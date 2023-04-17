@@ -1,4 +1,25 @@
 import { useEffect, useState } from "react";
+import styled from "styled-components";
+
+const DateDisplay = styled.div`
+  background: black;
+  border-radius: 1em;
+  padding: 0.5em;
+  padding-inline: 2em;
+  font-family: "seven-segment";
+  border: 1px solid;
+  margin: 1em;
+`;
+
+const Body = styled.div<{ height: string }>`
+  background: #111;
+  display: flex;
+  flex-direction: row;
+  height: ${({ height }) => height};
+  border: 1px solid black;
+  background: var(0, 0, 0, 0);
+  z-index: 1000;
+`;
 
 export function TopMenu({ height }: { height: string }) {
   const [time, setTime] = useState("");
@@ -17,14 +38,7 @@ export function TopMenu({ height }: { height: string }) {
   }, []);
 
   return (
-    <div
-      style={{
-        background: "white",
-        display: "flex",
-        flexDirection: "row",
-        height,
-      }}
-    >
+    <Body height={height}>
       <div
         style={{
           display: "flex",
@@ -34,11 +48,11 @@ export function TopMenu({ height }: { height: string }) {
           margin: "1em",
         }}
       >
-        <div>
+        <DateDisplay className="glow">
           {date} {time}
-        </div>
-        <div>{5556.22} ℳ</div>
+        </DateDisplay>
+        <DateDisplay className="glow">{5556.22} ℳ</DateDisplay>
       </div>
-    </div>
+    </Body>
   );
 }

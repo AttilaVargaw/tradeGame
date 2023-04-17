@@ -25,7 +25,7 @@ export default function CityDataModal({
   isOpen: boolean;
   onRequestClose?: () => void;
 }): JSX.Element | null {
-  const cityID = useContext(SelectedCityContext)!;
+  const cityID = useContext(SelectedCityContext);
   const gameState = useContext(GameStateContext);
 
   const [cityData, setCityData] = useState<City>();

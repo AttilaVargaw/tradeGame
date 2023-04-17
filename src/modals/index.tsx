@@ -1,4 +1,3 @@
-import { Context } from "react";
 import { createContext } from "react";
 
 export enum ModalIDs {
@@ -11,4 +10,4 @@ export type CurrentModalType = {
 
 export const CurrentModalSetter = createContext({} as CurrentModalType);
 
-export const Modals = () => {};
+// export const Modals = () => {};

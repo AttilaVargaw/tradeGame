@@ -37,7 +37,7 @@ export const ConvoyModal = ({
   isOpen: boolean;
   onRequestClose?: () => void;
 }) => {
-  const routeID = useContext(SelectedTradeRouteContext)!;
+  const routeID = useContext(SelectedTradeRouteContext);
   const gameState = useContext(GameStateContext);
 
   const [convoysData, setConvoyData] = useState<Convoy[]>([]);

@@ -246,23 +246,28 @@ const getVehiclesOfConvoy = (ID: number | null) => {
     select({
       attributes: [[Tables.Convoy, ["name", "ID"]]],
       table: Tables.Convoy,
-      // join: [{ A: Tables.Vehicle, equation: { A: "" } }],
+      join: [
+        {
+          A: Tables.Vehicle,
+          equation: { A: [Tables.Vehicle, "ID"], B: [Tables.Convoy, ""] },
+        },
+      ],
     })
   );
 };
 
+export type TradeRouteView = {
+  name: string;
+  ID: number;
+  cityAID: number;
+  cityBID: number;
+  cityAName: string;
+  cityBName: string;
+};
+
 const getTradeRoute = async (ID: number) => {
   const { cityAID, cityBID, name } = (
-    await db.select<
-      {
-        name: string;
-        ID: number;
-        cityAID: number;
-        cityBID: number;
-        cityAName: string;
-        cityBName: string;
-      }[]
-    >(
+    await db.select<TradeRouteView[]>(
       select({
         attributes: [
           ["cityB", ["ID", "name"]],
@@ -302,21 +307,21 @@ const getTradeRoute = async (ID: number) => {
   } as TradeRouteProps;
 };
 
+export type TradeRouteAsGeoJSONView = {
+  cityAPosX: number;
+  cityBPosX: number;
+  cityAPosY: number;
+  cityBPosY: number;
+  name: string;
+  ID: number;
+  cityAID: number;
+  cityBID: number;
+  cityAName: string;
+  cityBName: string;
+};
+
 const getTradeRoutesAsGeoJson = async () => {
-  const tradeRoutes = await db.select<
-    {
-      cityAPosX: number;
-      cityBPosX: number;
-      cityAPosY: number;
-      cityBPosY: number;
-      name: string;
-      ID: number;
-      cityAID: number;
-      cityBID: number;
-      cityAName: string;
-      cityBName: string;
-    }[]
-  >(
+  const tradeRoutes = await db.select<TradeRouteAsGeoJSONView[]>(
     select({
       table: Tables.TradeRoutes,
       attributes: [
@@ -425,8 +430,6 @@ const getCitiesAsGeoJson = async () => {
 };
 
 const getCity = async (ID: number): Promise<City> => {
-  console.log(getQuery("getCity"), [ID]);
-
   const [cityData, classes, warehouse] = await Promise.all([
     db.select<City[]>(getQuery("getCity"), [ID]),
     getPopulation(ID),
@@ -485,19 +488,15 @@ const addCityClass = (cityID: number, cityClassID: number) => {
 };
 
 const updateCityWarehouseItem = (number: number, ID: number) => {
-  return db.execute(
-    `
-        update CityWarehouse set number = $1 where ID = $2
-    `,
-    [number, ID]
-  );
+  return db.execute(`update CityWarehouse set number = $1 where ID = $2`, [
+    number,
+    ID,
+  ]);
 };
 
 const addCityWarehouseItem = (item: number, number: number, cityID: number) => {
   return db.execute(
-    `
-    insert into CityWarehouse (city, item, number) values ($1, $2, $3)
-`,
+    `insert into CityWarehouse (city, item, number) values ($1, $2, $3)`,
     [cityID, item, number]
   );
 };
@@ -518,12 +517,10 @@ const getCityDailyConsumption = (ID: number, classID: number) => {
 };
 
 const setPopulation = (ID: number, num: number) => {
-  return db.execute(
-    `
-        update CityPopulationClass set num = $1 where ID = $2;
-    `,
-    [num, ID]
-  );
+  return db.execute(`update CityPopulationClass set num = $1 where ID = $2;`, [
+    num,
+    ID,
+  ]);
 };
 
 const getPopulation = (ID: number) => {
@@ -541,13 +538,11 @@ const getPopulation = (ID: number) => {
 
 const getCityWarehouse = (CityID: number) => {
   return db.select<WarehouseItem[]>(
-    `
-            select I.nameKey, I.descriptionKey, CW.number, CW.ID, I.ID as item
+    `select I.nameKey, I.descriptionKey, CW.number, CW.ID, I.ID as item
                 from City as C
                 inner join CityWarehouse as CW on CW.city = C.ID
                 inner join Item as I on I.ID = CW.item
-                where C.ID = $1
-        `,
+                where C.ID = $1`,
     [CityID]
   );
 };
@@ -555,10 +550,8 @@ const getCityWarehouse = (CityID: number) => {
 // ?
 const getNotAvailableItems = async (cityID: number) => {
   const [items, warehouse] = await Promise.all([
-    db.select<Item[]>(`
-    select I.nameKey, I.descriptionKey, I.ID
-        from Item as I
-    `),
+    db.select<Item[]>(`select I.nameKey, I.descriptionKey, I.ID
+        from Item as I`),
     db.select<WarehouseItem[]>(
       `
         select I.nameKey, I.descriptionKey, CW.number, I.ID
@@ -582,8 +575,7 @@ const getNotAvailableItems = async (cityID: number) => {
 
 const getCityIndustryData = (ID: number) => {
   return db.select<IndustryData[]>(
-    `
-        select IB.ID as buildingId, IB.nameKey as industrialBuildingNameKey, IBS.num as buildingNum
+    `select IB.ID as buildingId, IB.nameKey as industrialBuildingNameKey, IBS.num as buildingNum
             from IndustrialBuildingDailyRequirement as IBR
             inner join IndustrialBuilding as IB on IBR.ID = IB.ID 
             inner join IndustrialBuildings as IBS on IB.ID = IBS.city
@@ -599,8 +591,7 @@ const getCityIndustryData = (ID: number) => {
 const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
   return (
     await db.select<(ResourceChange & { buildingNum: number })[]>(
-      `
-    select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
+      `select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
         from IndustrialBuildingDailyRequirement as IBR
         inner join IndustrialBuilding as IB on IBR.ID = IB.ID 
         inner join IndustrialBuildings as IBS on IB.ID = IBS.IndustrialBuilding
@@ -619,8 +610,7 @@ const getCityIndustrialResourceChanges = async (ID: number) => {
   const aggregated = await db.select<
     (ResourceChange & { buildingNum: number })[]
   >(
-    `
-        select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
+    `select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
             from IndustrialBuildingDailyRequirement as IBR
             inner join IndustrialBuilding as IB on IBR.industrialBuilding = IB.ID 
             inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
@@ -652,8 +642,7 @@ const getCityIndustrialResourceChanges = async (ID: number) => {
 
 const getCityIndustrialBuildings = async (ID: number) => {
   const industrialBuildings = await db.select<IndustrialBuilding[]>(
-    `
-    select IBS.ID, IBS.num as buildingNum, IB.nameKey
+    `select IBS.ID, IBS.num as buildingNum, IB.nameKey
         from IndustrialBuilding as IB
         inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
         inner join City as C on C.ID = IBS.city
@@ -675,9 +664,9 @@ const getCityIndustrialBuildings = async (ID: number) => {
 };
 
 const getAllIndustrialBuildings = () => {
-  return db.select<IndustrialBuilding[]>(`
-    select IB.ID, IB.nameKey from IndustrialBuilding as IB
-    `);
+  return db.select<IndustrialBuilding[]>(
+    `select IB.ID, IB.nameKey from IndustrialBuilding as IB`
+  );
 };
 
 const addIndustrialBuildings = (

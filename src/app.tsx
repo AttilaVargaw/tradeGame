@@ -4,7 +4,6 @@ import { GameState, GameStateContext } from "Services/GameState/gameState";
 import { message } from "@tauri-apps/api/dialog";
 import DebugModeContext from "./debugModeContext";
 import { ContextMenu } from "./components/ContextMenu";
-import { run as holderRun } from "holderjs";
 
 export default function App(): JSX.Element {
   const [gameLoaded, setGameLoaded] = useState(false);
@@ -16,10 +15,6 @@ export default function App(): JSX.Element {
       })
       .catch((err) => message(`A problem has happened ${JSON.stringify(err)}`));
   }, []);
-
-  useEffect(() => {
-    holderRun();
-  });
 
   return (
     <GameStateContext.Provider value={GameState}>
