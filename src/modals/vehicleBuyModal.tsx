@@ -25,7 +25,7 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
             style={{
               justifyContent: "center",
               aspectRatio: 1,
-              paddingBottom: "1em"
+              paddingBottom: "1em",
             }}
           >
             <Placeholder width="100%" height="100%" />
@@ -44,7 +44,10 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
   );
 };
 
-export const OrderPage: FC<{ ID: string }> = ({ ID }) => {
+export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
+  ID,
+  onBack,
+}) => {
   const gameState = useContext(GameStateContext);
 
   const [vehicleDescription, setVehicleDescription] = useState<VehicleType>();
@@ -58,6 +61,10 @@ export const OrderPage: FC<{ ID: string }> = ({ ID }) => {
     holderRun();
   });
 
+  const onOrder = useCallback(() => {
+    // gameState.addV
+  }, []);
+
   if (!vehicleDescription) {
     return <></>;
   }
@@ -67,7 +74,9 @@ export const OrderPage: FC<{ ID: string }> = ({ ID }) => {
   return (
     <Row className="no-gutters">
       <Col>
-        <Card.Img src={`holder.js/40x40?auto=yes`} />
+        <div style={{ aspectRatio: 1 }}>
+          <Placeholder width="100%" height="100%" />
+        </div>
       </Col>
       <Col>
         <Card className="h-100">
@@ -77,7 +86,12 @@ export const OrderPage: FC<{ ID: string }> = ({ ID }) => {
             <Card.Text>{desc}</Card.Text>
           </Card.Body>
           <Card.Footer className="d-grid gap-2">
-            <Button variant="primary">Order</Button>
+            <Button onClick={onOrder} variant="primary">
+              Order
+            </Button>
+            <Button onClick={onBack} variant="primary">
+              Cancel
+            </Button>
           </Card.Footer>
         </Card>
       </Col>
@@ -98,7 +112,7 @@ export const VehicleBuyModal = ({
     []
   );
   const [selectedVehicleType, setSelectedVehicleType] = useState("air");
-  const [currentVehicle, setCurrentVehicle] = useState("");
+  const [currentVehicle, setCurrentVehicle] = useState<number | null>(null);
 
   useEffect(() => {
     gameState.getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
@@ -116,7 +130,7 @@ export const VehicleBuyModal = ({
   );
 
   const onOrderClick = useCallback(
-    (ID: string) => () => {
+    (ID: number) => () => {
       setCurrentVehicle(ID);
     },
     []
@@ -125,18 +139,18 @@ export const VehicleBuyModal = ({
   return (
     <Modal show={isOpen} onHide={onRequestClose} size="xl">
       <Modal.Header closeButton>
-        {currentVehicle !== "" && (
+        {currentVehicle && (
           <Button
             size="lg"
             variant="light"
-            onClick={() => setCurrentVehicle("")}
+            onClick={() => setCurrentVehicle(null)}
           >
             &lt;
           </Button>
         )}
         <Modal.Title>Order a new vehicle</Modal.Title>
       </Modal.Header>
-      {currentVehicle === "" && (
+      {!currentVehicle && (
         <Modal.Body style={{ height: "80vh" }} className="overflow-auto">
           <Card>
             <Card.Header>
@@ -176,9 +190,12 @@ export const VehicleBuyModal = ({
           </Card>
         </Modal.Body>
       )}
-      {currentVehicle !== "" && (
+      {!!currentVehicle && (
         <Modal.Body style={{ height: "80vh" }} className="overflow-auto">
-          <OrderPage ID={currentVehicle} />
+          <OrderPage
+            onBack={() => setCurrentVehicle(null)}
+            ID={currentVehicle}
+          />
         </Modal.Body>
       )}
     </Modal>

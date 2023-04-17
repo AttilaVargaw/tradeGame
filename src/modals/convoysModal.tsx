@@ -17,7 +17,7 @@ export const ConvoyItem = ({
   name,
   onClick,
 }: {
-  id: string;
+  id: number;
   onClick?: () => void;
   name: string;
   icon?: string;

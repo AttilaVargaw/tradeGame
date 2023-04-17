@@ -16,9 +16,10 @@ export default function CityPopulation() {
     PopulationClass[]
   >([]);
   const [newCityClass, setNewCityClass] = useState<{
-    city: string;
-    populationClass: string;
-  }>({ city: "", populationClass: "" });
+    city?: number;
+    populationClass?: number;
+  }>({ city: undefined, populationClass: undefined });
+
   const [reload, setReload] = useState(false);
   const [classes, setClasses] = useState<PopulationData[]>([]);
   const [fullPopulation, setFullPopulation] = useState<number>(0);
@@ -43,7 +44,7 @@ export default function CityPopulation() {
   }, [reload, cityID, gameState]);
 
   const setPopulation = useCallback(
-    (ID: string) =>
+    (ID: number) =>
       async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         await gameState.setPopulation(ID, Number.parseInt(value));
         setReload(!reload);
@@ -52,10 +53,11 @@ export default function CityPopulation() {
   );
 
   const setNewClass = useCallback(
-    ({
-      target: { value: populationClass },
-    }: React.ChangeEvent<HTMLSelectElement>) => {
-      setNewCityClass((old) => ({ ...old, populationClass }));
+    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) => {
+      setNewCityClass((old) => ({
+        ...old,
+        populationClass: Number.parseInt(value),
+      }));
       setReload(!reload);
     },
     [reload]
@@ -63,9 +65,10 @@ export default function CityPopulation() {
 
   const addNewClass = useCallback(async () => {
     const { city, populationClass } = newCityClass;
-
-    await gameState.addCityClass(city, populationClass);
-    setReload(!reload);
+    if (city && populationClass) {
+      await gameState.addCityClass(city, populationClass);
+      setReload(!reload);
+    }
   }, [gameState, newCityClass, reload]);
 
   const multiplyCeil = useMemo(

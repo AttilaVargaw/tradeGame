@@ -1,5 +1,5 @@
 import { select } from "../simpleQueryBuilder";
-import { CityAttr, CityTypes } from "./dbTypes";
+import { Tables } from "./dbTypes";
 
 export type QueryTypes = "getCities" | "getCity";
 
@@ -12,39 +12,33 @@ export function getQuery(type: "getCities" | "getCity"): string {
         {
           queries.set(
             type,
-            select<CityAttr, CityTypes>(
-              [
-                "City.ID",
-                { row: "name", table: "City" },
-                "posX",
-                "posY",
-                { row: "name", table: "CityTypes", as: "type" },
+            select({
+              attributes: [
+                [Tables.City, ["ID", "name", "posX", "posY"]],
+                [Tables.CityTypes, [["name", "type"]]],
               ],
-              "City",
-              [],
-              [
+              table: Tables.City,
+              join: [
                 {
-                  A: "CityTypes",
+                  A: Tables.CityTypes,
                   equation: {
-                    A: "City",
-                    AAttr: "type",
-                    B: "CityTypes",
-                    BAttr: "ID",
+                    A: ["City", "type"],
+                    B: ["CityTypes", "ID"],
                   },
                 },
-              ]
-            )
+              ],
+            })
           );
         }
         break;
       case "getCity": {
         queries.set(
           type,
-          select<CityAttr, CityAttr>(
-            ["ID", "name", "posX", "posY", "type"],
-            "City",
-            [{ A: "City", AAttr: "ID", operator: "=", value: "?" }]
-          )
+          select({
+            attributes: [[Tables.City, ["ID", "name", "posX", "posY", "type"]]],
+            table: Tables.City,
+            where: [{ A: [Tables.City, "ID"], operator: "=", value: "?" }],
+          })
         );
         break;
       }

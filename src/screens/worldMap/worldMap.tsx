@@ -35,11 +35,16 @@ export const CityColors: { [key: string]: string } = {
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
 
-  const [currentCity, setCurrentCity] = useState<string>("");
-  const [currentTradeRoute, setCurrentTradeRoute] = useState<string>("");
+  const [currentCity, setCurrentCity] = useState<number | null>(null);
+  const [currentTradeRoute, setCurrentTradeRoute] = useState<number | null>(
+    null
+  );
   const [citiesGeoJson, setCitiesGeoJson] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
-  const [selectedCities, setSelectedCities] = useState<string[]>(["", ""]);
+  const [selectedCities, setSelectedCities] = useState<(number | null)[]>([
+    null,
+    null,
+  ]);
   const [showConvoyModal, setShowConvoyModal] = useState(false);
   const [showVehicleBuyModal, setShowVehicleBuyModal] = useState(false);
 
@@ -49,8 +54,12 @@ export function WorldMap(): JSX.Element {
 
   useEffect(() => {
     const onClick = () => {
-      gameState.addTradeRoute(selectedCities);
-      setContextMenuPosition(null);
+      const [cityA, cityB] = selectedCities;
+
+      if (cityA && cityB) {
+        gameState.addTradeRoute(selectedCities);
+        setContextMenuPosition(null);
+      }
     };
 
     return addToContextMenu({ disabled: false, labelKey: "addRoute", onClick });
@@ -95,18 +104,21 @@ export function WorldMap(): JSX.Element {
   }, []);
 
   const onDoubleClick = useCallback(
-    (city: string): LeafletMouseEventHandlerFn =>
+    (city: number): LeafletMouseEventHandlerFn =>
       () => {
-        setCurrentCity(
-          citiesGeoJson?.features.find(({ properties: { ID } }) => ID === city)
-            ?.properties.ID || ""
-        );
+        const cityID: number | undefined = citiesGeoJson?.features.find(
+          ({ properties: { ID } }) => ID === city
+        )?.properties.ID;
+
+        if (cityID) {
+          setCurrentCity(cityID);
+        }
       },
     [citiesGeoJson]
   );
 
   const onCityClick = useCallback(
-    (ID: string): LeafletMouseEventHandlerFn =>
+    (ID: number): LeafletMouseEventHandlerFn =>
       () => {
         setSelectedCities((s) => [s[1], ID]);
       },
@@ -148,7 +160,7 @@ export function WorldMap(): JSX.Element {
         <SelectedCityContext.Provider value={currentCity}>
           <CityDataModal
             isOpen={!!currentCity}
-            onRequestClose={() => setCurrentCity("")}
+            onRequestClose={() => setCurrentCity(null)}
           />
         </SelectedCityContext.Provider>
       )}
@@ -242,7 +254,7 @@ export function WorldMap(): JSX.Element {
           <SelectedTradeRouteContext.Provider value={currentTradeRoute}>
             <RouteLayer onRouteClick={setCurrentTradeRoute} />
             <TradeRouteModal
-              onRequestClose={() => setCurrentTradeRoute("")}
+              onRequestClose={() => setCurrentTradeRoute(null)}
               isOpen={!!currentTradeRoute}
             />
           </SelectedTradeRouteContext.Provider>

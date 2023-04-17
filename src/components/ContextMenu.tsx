@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/esm/Button";
 import Popover from "react-bootstrap/esm/Popover";
 import {
@@ -42,27 +42,25 @@ export const ContextMenu: FC = () => {
   }, [contextMenuPositionState]);
 
   return (
-    <>
-      <Popover
-        ref={popoverRef}
-        hidden={!contextMenuPositionState}
-        placement="right"
-        id="popover-contained"
-        style={{
-          position: "absolute",
-          top: contextMenuPositionState ? contextMenuPositionState[1] : 0,
-          left: contextMenuPositionState ? contextMenuPositionState[0] : 0,
-        }}
-      >
-        <Popover.Header as="h3">Popover right</Popover.Header>
-        <Popover.Body>
-          {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
-            <Button key={labelKey} onClick={onClick} disabled={disabled}>
-              {labelKey}
-            </Button>
-          ))}
-        </Popover.Body>
-      </Popover>
-    </>
+    <Popover
+      ref={popoverRef}
+      hidden={!contextMenuPositionState}
+      placement="right"
+      id="popover-contained"
+      style={{
+        position: "absolute",
+        top: contextMenuPositionState ? contextMenuPositionState[1] : 0,
+        left: contextMenuPositionState ? contextMenuPositionState[0] : 0,
+      }}
+    >
+      <Popover.Header as="h3">Popover right</Popover.Header>
+      <Popover.Body>
+        {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
+          <Button key={labelKey} onClick={onClick} disabled={disabled}>
+            {labelKey}
+          </Button>
+        ))}
+      </Popover.Body>
+    </Popover>
   );
 };

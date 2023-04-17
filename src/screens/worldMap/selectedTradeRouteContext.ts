@@ -1,5 +1,3 @@
 import { createContext } from "react";
 
-export const SelectedTradeRouteContext = createContext<string | undefined>(
-  undefined
-);
+export const SelectedTradeRouteContext = createContext<number | null>(null);

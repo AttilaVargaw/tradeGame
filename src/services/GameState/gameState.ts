@@ -19,14 +19,9 @@ import {
   ResourceChange,
   WarehouseItem,
   CityPositionProperty,
-  TradeRouteAttributes,
-  TradeRouteInsertAttributes,
   DBEvent,
-  ConvoyAttr,
-  VehicleAttr,
-  VehicleTypeAttr,
-  VehicleTypeInsertAttributes,
   VehicleType,
+  Tables,
 } from "./dbTypes";
 import { getQuery } from "./queryManager";
 import groupBy from "lodash-es/groupBy";
@@ -38,22 +33,16 @@ const dbObservable = new BehaviorSubject<DBEvent>({ type: DBEvents.NOP });
 const init = async () => {
   db = await Database.load("file::memory:");
 
-  console.log(
-    select<VehicleTypeAttr>(["name", "desc", "ID", "price"], "VehicleTypes", [
-      { A: "VehicleTypes", AAttr: "type", value: "air" },
-    ])
-  );
-
   await Promise.all([
     db.execute(
-      create("TradeRoutes", [
+      create(Tables.TradeRoutes, [
         { name: "CityA", type: "INTEGER", references: "City" },
         { name: "CityB", type: "INTEGER", references: "City" },
         { name: "name", type: "TEXT" },
       ])
     ),
     db.execute(
-      create("VehicleTypes", [
+      create(Tables.VehicleTypes, [
         { name: "name", type: "TEXT" },
         { name: "desc", type: "TEXT" },
         { name: "price", type: "REAL" },
@@ -61,102 +50,135 @@ const init = async () => {
       ])
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "An elegant and fast flying machine. It is fast, but very fragile at the same time.",
-        name: "Light helicopter",
-        price: 500000,
-        type: "air",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "An elegant and fast flying machine. It is fast, but very fragile at the same time.",
+          name: "Light helicopter",
+          price: 500000,
+          type: "air",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "A medium sized flying machine. It is relatively fast, but very fragile at the same time.",
-        name: "Medium helicopter",
-        price: 1500000,
-        type: "air",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "A medium sized flying machine. It is relatively fast, but very fragile at the same time.",
+          name: "Medium helicopter",
+          price: 1500000,
+          type: "air",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "A massive and strong flying machine. It is relatively fast, but very fragile at the same time.",
-        name: "Heavy cargo helicopter",
-        price: 4500000,
-        type: "air",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "A massive and strong flying machine. It is relatively fast, but very fragile at the same time.",
+          name: "Heavy cargo helicopter",
+          price: 4500000,
+          type: "air",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "A light truck.",
-        name: "Light truck",
-        price: 5000,
-        type: "wheeled",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "A light truck.",
+          name: "Light truck",
+          price: 5000,
+          type: "wheeled",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "A heavyweight truck.",
-        name: "Heavy truck",
-        price: 10000,
-        type: "wheeled",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "A heavyweight truck.",
+          name: "Heavy truck",
+          price: 10000,
+          type: "wheeled",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "Light tracked hauler.",
-        name: "Light tracked hauler",
-        price: 10000,
-        type: "tracked",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "Light tracked hauler.",
+          name: "Light tracked hauler",
+          price: 10000,
+          type: "tracked",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "Medium tracked hauler",
-        name: "Medium tracked hauler",
-        price: 10000,
-        type: "tracked",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "Medium tracked hauler",
+          name: "Medium tracked hauler",
+          price: 10000,
+          type: "tracked",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "Heavy tracked hauler",
-        name: "Heavy tracked hauler",
-        price: 10000,
-        type: "tracked",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "Heavy tracked hauler",
+          name: "Heavy tracked hauler",
+          price: 10000,
+          type: "tracked",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "Light tracked escort",
-        name: "Medium tracked escort",
-        price: 10000,
-        type: "tracked",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "Light tracked escort",
+          name: "Medium tracked escort",
+          price: 10000,
+          type: "tracked",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "Medium tracked escort",
-        name: "Medium tracked escort",
-        price: 10000,
-        type: "tracked",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "Medium tracked escort",
+          name: "Medium tracked escort",
+          price: 10000,
+          type: "tracked",
+        },
       })
     ),
     db.execute(
-      insert<VehicleTypeInsertAttributes>("VehicleTypes", {
-        desc: "Heavy tracked escort",
-        name: "Heavy truck",
-        price: 10000,
-        type: "tracked",
+      insert({
+        table: Tables.VehicleTypes,
+        attributes: {
+          desc: "Heavy tracked escort",
+          name: "Heavy truck",
+          price: 10000,
+          type: "tracked",
+        },
       })
     ),
     db.execute(
-      create("Convoy", [
+      create(Tables.Convoy, [
         { name: "name", type: "TEXT" },
         { name: "posY", type: "REAL" },
         { name: "posX", type: "REAL" },
       ])
     ),
     db.execute(
-      create("Vehicle", [
+      create(Tables.Vehicle, [
         { name: "name", type: "TEXT" },
         {
           name: "type",
@@ -180,84 +202,96 @@ const init = async () => {
   dbObservable.next({ type: DBEvents.initialized });
 };
 
-// const addVehicle = () => {};
+const addVehicle = async () => {
+  /*const data = await db.execute(
+    insert("Vehicle", {  })
+  );
 
-const getVehicleTypes = (type = "air") => {
+  dbObservable.next({ type: DBEvents.tradeRouteUpdate, data });*/
+};
+
+const getVehicleTypes = (type: string) => {
   return db.select<VehicleType[]>(
-    select<VehicleTypeAttr>(["name", "desc", "ID", "price"], "VehicleTypes", [
-      { A: "VehicleTypes", AAttr: "type", value: type },
-    ])
+    select({
+      table: Tables.VehicleTypes,
+      attributes: [
+        [Tables.VehicleTypes, ["price", "ID", "desc", "name", "type"]],
+      ],
+      where: [{ A: [Tables.VehicleTypes, "type"], value: type }],
+    })
   );
 };
 
-const getVehicleType = (ID: string) => {
+const getVehicleType = (ID: number) => {
   return db.select<VehicleType[]>(
-    select<VehicleTypeAttr>(["name", "desc", "ID", "price"], "VehicleTypes", [
-      { A: "VehicleTypes", AAttr: "ID", value: ID },
-    ])
+    select({
+      attributes: [[Tables.VehicleTypes, ["name", "desc", "ID", "price"]]],
+      table: Tables.VehicleTypes,
+      where: [{ A: [Tables.VehicleTypes, "ID"], value: ID }],
+    })
   );
 };
 
 const getConvoys = () => {
-  return db.select(select<ConvoyAttr>(["name", "ID"], "Convoy"));
-};
-
-const getVehiclesOfConvoy = (ID: string | null) => {
   return db.select(
-    select<VehicleAttr[]>(["name", "type", "ID"], "Convoy", [
-      { A: "Vehicle", AAttr: "convoy", value: ID },
-    ])
+    select({
+      attributes: [[Tables.Convoy, ["name", "ID"]]],
+      table: Tables.Convoy,
+    })
   );
 };
 
-const getTradeRoute = async (ID: string) => {
+const getVehiclesOfConvoy = (ID: number | null) => {
+  return db.select(
+    select({
+      attributes: [[Tables.Convoy, ["name", "ID"]]],
+      table: Tables.Convoy,
+      // join: [{ A: Tables.Vehicle, equation: { A: "" } }],
+    })
+  );
+};
+
+const getTradeRoute = async (ID: number) => {
   const { cityAID, cityBID, name } = (
     await db.select<
       {
         name: string;
-        ID: string;
-        cityAID: string;
-        cityBID: string;
+        ID: number;
+        cityAID: number;
+        cityBID: number;
         cityAName: string;
         cityBName: string;
       }[]
     >(
-      select<TradeRouteAttributes>(
-        [
-          "cityB.ID as cityBID",
-          "cityA.ID as cityAID",
-          "cityA.name as cityAName",
-          "cityB.name as cityBName",
-          "TradeRoutes.name as name",
-          "TradeRoutes.ID",
+      select({
+        attributes: [
+          ["cityB", ["ID", "name"]],
+          ["cityA", ["ID", "name"]],
+          [Tables.TradeRoutes, ["name", "ID"]],
         ],
-        "TradeRoutes",
-        [{ A: "TradeRoutes", AAttr: "ID", value: ID }],
-        [
+        table: Tables.TradeRoutes,
+        where: [{ A: [Tables.TradeRoutes, "ID"], value: ID }],
+        join: [
           {
-            A: "City",
+            A: Tables.City,
             equation: {
-              A: "CityA",
-              AAttr: "ID",
-              B: "TradeRoutes",
-              BAttr: "cityA",
+              A: ["CityA", "ID"],
+              B: [Tables.TradeRoutes, "cityA"],
               operator: "=",
             },
             as: "CityA",
           },
           {
-            A: "City",
+            A: Tables.City,
             equation: {
-              A: "CityB",
-              AAttr: "ID",
-              B: "TradeRoutes",
-              BAttr: "cityB",
+              A: ["CityB", "ID"],
+              B: [Tables.TradeRoutes, "cityB"],
               operator: "=",
             },
             as: "CityB",
           },
-        ]
-      ).replace("cityA,", "cityA")
+        ],
+      }).replace("cityA,", "cityA")
     )
   )[0];
 
@@ -276,53 +310,57 @@ const getTradeRoutesAsGeoJson = async () => {
       cityAPosY: number;
       cityBPosY: number;
       name: string;
-      ID: string;
-      cityAID: string;
-      cityBID: string;
+      ID: number;
+      cityAID: number;
+      cityBID: number;
       cityAName: string;
       cityBName: string;
     }[]
   >(
-    select<TradeRouteAttributes>(
-      [
-        "cityB.ID as cityBID",
-        "cityA.ID as cityAID",
-        "cityA.name as cityAName",
-        "cityB.name as cityAName",
-        "cityA.posX as cityAPosX",
-        "cityB.posX as cityBPosX",
-        "cityA.posY as cityAPosY",
-        "cityB.posY as cityBPosY",
-        "TradeRoutes.name",
-        "TradeRoutes.ID",
+    select({
+      table: Tables.TradeRoutes,
+      attributes: [
+        [
+          "CityA",
+          [
+            ["ID", "cityAID"],
+            ["name", "cityAName"],
+            ["posX", "cityAPosX"],
+            ["posY", "cityAPosY"],
+          ],
+        ],
+        [
+          "CityB",
+          [
+            ["ID", "cityBID"],
+            ["name", "cityBName"],
+            ["posX", "cityBPosX"],
+            ["posY", "cityBPosY"],
+          ],
+        ],
+        [Tables.TradeRoutes, ["name", "ID"]],
       ],
-      "TradeRoutes",
-      undefined,
-      [
+      join: [
         {
-          A: "City",
+          A: Tables.City,
           equation: {
-            A: "CityA",
-            AAttr: "ID",
-            B: "TradeRoutes",
-            BAttr: "cityA",
+            A: ["CityA", "ID"],
+            B: [Tables.TradeRoutes, "cityA"],
             operator: "=",
           },
           as: "CityA",
         },
         {
-          A: "City",
+          A: Tables.City,
           equation: {
-            A: "CityB",
-            AAttr: "ID",
-            B: "TradeRoutes",
-            BAttr: "cityB",
+            A: ["CityB", "ID"],
+            B: [Tables.TradeRoutes, "cityB"],
             operator: "=",
           },
           as: "CityB",
         },
-      ]
-    ).replace("cityA,", "cityA")
+      ],
+    }).replace("cityA,", "cityA")
   );
 
   return tradeRoutes.reduce(
@@ -355,20 +393,19 @@ const getTradeRoutesAsGeoJson = async () => {
   );
 };
 
-const addTradeRoute = async (cities: string[]) => {
-  const [start, end] = await Promise.all(cities.map(getCity));
+const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
+  if (cityA && cityB) {
+    const [start, end] = await Promise.all([cityA, cityB].map(getCity));
 
-  console.log(start, end);
+    const data = await db.execute(
+      insert({
+        table: Tables.TradeRoutes,
+        attributes: { cityA, cityB, name: `${start.name}, ${end.name} route` },
+      })
+    );
 
-  const data = await db.execute(
-    insert<TradeRouteInsertAttributes>("TradeRoutes", {
-      cityA: cities[0],
-      cityB: cities[1],
-      name: `${start.name}, ${end.name} route`,
-    })
-  );
-
-  dbObservable.next({ type: DBEvents.tradeRouteUpdate, data });
+    dbObservable.next({ type: DBEvents.tradeRouteUpdate, data });
+  }
 };
 
 const getCitiesAsGeoJson = async () => {
@@ -387,7 +424,7 @@ const getCitiesAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 };
 
-const getCity = async (ID: string): Promise<City> => {
+const getCity = async (ID: number): Promise<City> => {
   console.log(getQuery("getCity"), [ID]);
 
   const [cityData, classes, warehouse] = await Promise.all([
@@ -417,7 +454,7 @@ const getCity = async (ID: string): Promise<City> => {
   };
 };
 
-const getNotExistingCityClasses = async (cityID: string) => {
+const getNotExistingCityClasses = async (cityID: number) => {
   const [cityPopulationClasses, populationClasses] = await Promise.all([
     db.select<CityPopulationClass[]>(
       `
@@ -438,7 +475,7 @@ const getNotExistingCityClasses = async (cityID: string) => {
   );
 };
 
-const addCityClass = (cityID: string, cityClassID: string) => {
+const addCityClass = (cityID: number, cityClassID: number) => {
   return db.execute(
     `
         insert into CityPopulationClass (num, populationClass, city) values (0, $1, $2)
@@ -447,7 +484,7 @@ const addCityClass = (cityID: string, cityClassID: string) => {
   );
 };
 
-const updateCityWarehouseItem = (number: number, ID: string) => {
+const updateCityWarehouseItem = (number: number, ID: number) => {
   return db.execute(
     `
         update CityWarehouse set number = $1 where ID = $2
@@ -456,7 +493,7 @@ const updateCityWarehouseItem = (number: number, ID: string) => {
   );
 };
 
-const addCityWarehouseItem = (item: string, number: number, cityID: string) => {
+const addCityWarehouseItem = (item: number, number: number, cityID: number) => {
   return db.execute(
     `
     insert into CityWarehouse (city, item, number) values ($1, $2, $3)
@@ -465,7 +502,7 @@ const addCityWarehouseItem = (item: string, number: number, cityID: string) => {
   );
 };
 
-const getCityDailyConsumption = (ID: string, classID: string) => {
+const getCityDailyConsumption = (ID: number, classID: number) => {
   return db.select<DailyRequirement[]>(
     `
         select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey
@@ -480,7 +517,7 @@ const getCityDailyConsumption = (ID: string, classID: string) => {
   );
 };
 
-const setPopulation = (ID: string, num: number) => {
+const setPopulation = (ID: number, num: number) => {
   return db.execute(
     `
         update CityPopulationClass set num = $1 where ID = $2;
@@ -489,7 +526,7 @@ const setPopulation = (ID: string, num: number) => {
   );
 };
 
-const getPopulation = (ID: string) => {
+const getPopulation = (ID: number) => {
   return db.select<PopulationData[]>(
     `
         select num, PopulationClass.name, PopulationClass.ID
@@ -502,7 +539,7 @@ const getPopulation = (ID: string) => {
   );
 };
 
-const getCityWarehouse = (CityID: string) => {
+const getCityWarehouse = (CityID: number) => {
   return db.select<WarehouseItem[]>(
     `
             select I.nameKey, I.descriptionKey, CW.number, CW.ID, I.ID as item
@@ -516,7 +553,7 @@ const getCityWarehouse = (CityID: string) => {
 };
 
 // ?
-const getNotAvailableItems = async (cityID: string) => {
+const getNotAvailableItems = async (cityID: number) => {
   const [items, warehouse] = await Promise.all([
     db.select<Item[]>(`
     select I.nameKey, I.descriptionKey, I.ID
@@ -543,7 +580,7 @@ const getNotAvailableItems = async (cityID: string) => {
     }));
 };
 
-const getCityIndustryData = (ID: string) => {
+const getCityIndustryData = (ID: number) => {
   return db.select<IndustryData[]>(
     `
         select IB.ID as buildingId, IB.nameKey as industrialBuildingNameKey, IBS.num as buildingNum
@@ -559,7 +596,7 @@ const getCityIndustryData = (ID: string) => {
 };
 
 // majd ezt befejezni
-const getCityIndustrialBuildingResourceChanges = async (ID: string) => {
+const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
   return (
     await db.select<(ResourceChange & { buildingNum: number })[]>(
       `
@@ -578,7 +615,7 @@ const getCityIndustrialBuildingResourceChanges = async (ID: string) => {
   });
 };
 
-const getCityIndustrialResourceChanges = async (ID: string) => {
+const getCityIndustrialResourceChanges = async (ID: number) => {
   const aggregated = await db.select<
     (ResourceChange & { buildingNum: number })[]
   >(
@@ -598,7 +635,7 @@ const getCityIndustrialResourceChanges = async (ID: string) => {
     ([key, coll]) => {
       const { descriptionKey, ID, num, buildingNum } = coll[0] as {
         descriptionKey: string;
-        ID: string;
+        ID: number;
         num: number;
         buildingNum: number;
       };
@@ -613,7 +650,7 @@ const getCityIndustrialResourceChanges = async (ID: string) => {
   );
 };
 
-const getCityIndustrialBuildings = async (ID: string) => {
+const getCityIndustrialBuildings = async (ID: number) => {
   const industrialBuildings = await db.select<IndustrialBuilding[]>(
     `
     select IBS.ID, IBS.num as buildingNum, IB.nameKey
@@ -646,7 +683,7 @@ const getAllIndustrialBuildings = () => {
 const addIndustrialBuildings = (
   num: number,
   industrialBuilding: string,
-  city: string
+  city: number
 ) => {
   return db.select<IndustrialBuilding[]>(
     `
@@ -660,7 +697,7 @@ const initialized = () => {
   return typeof db !== "undefined";
 };
 
-const setIndustrialBuildingNumber = (ID: string, num: number) => {
+const setIndustrialBuildingNumber = (ID: number, num: number) => {
   return db.execute(
     `
         update IndustrialBuildings set num = $1 where ID = $2;

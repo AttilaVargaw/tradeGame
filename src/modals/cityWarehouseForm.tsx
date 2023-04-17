@@ -29,8 +29,8 @@ export default function CityWarehouseForm() {
 
   const [add, setAdd] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
-  const [newItem, setNewItem] = useState<{ ID: string; number: number }>({
-    ID: "",
+  const [newItem, setNewItem] = useState<{ ID?: number; number: number }>({
+    ID: undefined,
     number: 0,
   });
   const [warehouse, setWarehouse] = useState<WarehouseItem[]>([]);
@@ -38,27 +38,29 @@ export default function CityWarehouseForm() {
   useEffect(() => {
     getNotAvailableItems(cityID).then((items) => {
       setItems(items);
-      setNewItem({ ID: items.length > 0 ? items[0].ID : "", number: 0 });
+      setNewItem({ ID: items.length > 0 ? items[0].ID : undefined, number: 0 });
     });
     getCityWarehouse(cityID).then(setWarehouse);
   }, [cityID, getCityWarehouse, getNotAvailableItems]);
 
   const addItem = useCallback(async () => {
-    await addCityWarehouseItem(newItem.ID, newItem.number, cityID);
+    if (newItem.ID) {
+      await addCityWarehouseItem(newItem.ID, newItem.number, cityID);
 
-    await Promise.all([
-      await getNotAvailableItems(cityID),
-      await getCityWarehouse(cityID),
-    ]).then(([notAmiableItems, cityWarehouse]) => {
-      setItems(notAmiableItems);
-      setWarehouse(cityWarehouse);
-      setNewItem({
-        ID: notAmiableItems.length > 0 ? notAmiableItems[0].ID : "",
-        number: 0,
+      await Promise.all([
+        await getNotAvailableItems(cityID),
+        await getCityWarehouse(cityID),
+      ]).then(([notAmiableItems, cityWarehouse]) => {
+        setItems(notAmiableItems);
+        setWarehouse(cityWarehouse);
+        setNewItem({
+          ID: notAmiableItems.length > 0 ? notAmiableItems[0].ID : undefined,
+          number: 0,
+        });
       });
-    });
 
-    setAdd(false);
+      setAdd(false);
+    }
   }, [
     newItem,
     addCityWarehouseItem,
@@ -76,13 +78,13 @@ export default function CityWarehouseForm() {
 
   const selectNewItem = useCallback<ChangeEventHandler<HTMLSelectElement>>(
     ({ currentTarget: { value: ID } }) => {
-      setNewItem((old) => ({ ...old, ID }));
+      setNewItem((old) => ({ ...old, ID: Number.parseInt(ID) }));
     },
     []
   );
 
   const updateItemNumber = useCallback(
-    (ID: string) =>
+    (ID: number) =>
       async ({
         currentTarget: { value },
       }: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +146,7 @@ export default function CityWarehouseForm() {
           <Col sm="2">
             <Button
               style={{ width: "100%" }}
-              disabled={newItem.ID.length === 0 || newItem.number === 0}
+              disabled={!!newItem.ID || newItem.number === 0}
               onClick={addItem}
             >
               Add

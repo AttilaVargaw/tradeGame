@@ -10,10 +10,10 @@ import {
 import { DBEvents, TradeRouteProps } from "Services/GameState/dbTypes";
 import { GameStateContext } from "Services/GameState/gameState";
 import { GeoJSON as LeafletGeoJSON, tooltip } from "leaflet";
-import { useMap, GeoJSON } from "react-leaflet";
+import { GeoJSON } from "react-leaflet";
 
 export type RouteLayerProps = {
-  onRouteClick: (ID: string) => void;
+  onRouteClick: (ID: number) => void;
 };
 
 export const RouteLayer: FC<RouteLayerProps> = ({ onRouteClick }) => {
@@ -25,7 +25,7 @@ export const RouteLayer: FC<RouteLayerProps> = ({ onRouteClick }) => {
     useState<GeoJSON.FeatureCollection<GeoJSON.LineString, TradeRouteProps>>();
 
   const routeClick = useCallback(
-    (ID: string) => () => {
+    (ID: number) => () => {
       onRouteClick(ID);
     },
     [onRouteClick]

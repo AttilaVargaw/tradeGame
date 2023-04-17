@@ -1,3 +1,3 @@
 import { createContext } from "react";
 
-export const SelectedCityContext = createContext<string | undefined>(undefined);
+export const SelectedCityContext = createContext<number | null>(null);

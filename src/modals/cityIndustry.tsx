@@ -48,7 +48,7 @@ export default function CityIndustry() {
   }, [newBuilding, cityID, gameState, reload]);
 
   const setBuildingNumber = useCallback(
-    (ID: string) =>
+    (ID: number) =>
       async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         await gameState.setIndustrialBuildingNumber(ID, Number.parseInt(value));
         setReload(!reload);
