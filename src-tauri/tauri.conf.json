@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "",
-    "beforeDevCommand": "cross-env BROWSER=none yarn dev",
+    "beforeBuildCommand": "pnpm run build",
+    "beforeDevCommand": "cross-env BROWSER=none pnpm run dev",
     "devPath": "http://localhost:9000",
     "distDir": "../dist"
   },
