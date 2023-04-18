@@ -7,8 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { DBEvents, TradeRouteProps } from "Services/GameState/dbTypes";
-import { GameStateContext } from "Services/GameState/gameState";
+import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
 import { GeoJSON as LeafletGeoJSON, tooltip } from "leaflet";
 import { GeoJSON } from "react-leaflet";
 

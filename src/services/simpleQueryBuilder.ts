@@ -1,6 +1,7 @@
 import {
   CityAttr,
   ConvoyAttr,
+  ConvoyInsertData,
   Tables,
   TradeRouteAttr,
   TradeRouteInsertData,
@@ -19,6 +20,19 @@ type Attr = {
   referencesOn?: string;
   notNullable?: boolean | null;
 };
+
+function InputToString(input: string | number | null) {
+  switch (typeof input) {
+    case "string":
+      return `"${input}"`;
+    case "number":
+      return `${input}`;
+    case "undefined":
+      return `NULL`;
+    case "object":
+      return `NULL`;
+  }
+}
 
 function attrToCreateQuery({
   name,
@@ -47,14 +61,14 @@ export function create(tableName: Tables, attr: Attr[], drop = true) {
 }
 
 type JoinEquitation = {
-  A: [Tables | string, string];
-  B: [Tables | string, string];
+  A: [Tables | string, string | number | null];
+  B: [Tables | string, string | number | null];
   operator?: "=" | ">" | "<" | "<>";
 };
 
 type WhereEquitation = {
   A: [Tables, string];
-  operator?: "=" | ">" | "<" | "<>";
+  operator?: "=" | ">" | "<" | "<>" | " is " | " is not ";
   value: string | number | null;
 };
 
@@ -132,12 +146,17 @@ export type Join = {
 };
 
 //@TODO
-export function update(
-  updateRows: string[],
-  table: Tables,
-  where?: WhereEquitation[],
-  join?: Join[]
-) {
+export function update({
+  table,
+  updateRows,
+  join,
+  where,
+}: {
+  updateRows: [string, string, string | number | null][];
+  table: Tables;
+  where?: WhereEquitation[];
+  join?: Join[];
+}) {
   return `UPDATE ${table}${
     join
       ? join
@@ -147,7 +166,11 @@ export function update(
           )
           .join(",")
       : ""
-  }${
+  }
+  SET ${updateRows
+    .map(([table, attr, value]) => `${table}.${attr} = ${InputToString(value)}`)
+    .join(",")}
+  ${
     where?.length || 0 > 0
       ? ` WHERE ${where?.map(whereEquationToString).join(",")}`
       : ""
@@ -186,10 +209,16 @@ export type VehicleTypeInsertEvent = {
   attributes: VehicleTypeInsertData;
 };
 
+export type ConvoyInsertEvent = {
+  table: Tables.Convoy;
+  attributes: ConvoyInsertData;
+};
+
 export type InsertEvent =
   | VehicleInsertEvent
   | TradeRouteInsertEvent
-  | VehicleTypeInsertEvent;
+  | VehicleTypeInsertEvent
+  | ConvoyInsertEvent;
 
 export function insert({ table, attributes }: InsertEvent) {
   return `insert into ${table} (${Object.keys(attributes).join(

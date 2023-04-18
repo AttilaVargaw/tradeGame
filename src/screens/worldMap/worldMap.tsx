@@ -8,20 +8,22 @@ import React, {
 } from "react";
 import CityDataModal from "../../modals/cityDataModal";
 import { SelectedCityContext } from "./selectedCityContext";
-import { GameStateContext } from "Services/GameState/gameState";
-import SideMenu, { ButtonLikeDisplay } from "./sideMenu";
+import { GameStateContext } from "@Services/GameState/gameState";
+import SideMenu from "./sideMenu";
 import { CRS, LeafletMouseEventHandlerFn, Map as LeafletMap } from "leaflet";
 import { RouteLayer } from "./routeLayer";
-import { CityPositionProperty } from "Services/GameState/dbTypes";
-import { addToContextMenu, setContextMenuPosition } from "Services/contextMenu";
+import { CityPositionProperty } from "@Services/GameState/dbTypes";
+import {
+  addToContextMenu,
+  setContextMenuPosition,
+} from "@Services/contextMenu";
 import { SelectedTradeRouteContext } from "./selectedTradeRouteContext";
 import TradeRouteModal from "../../modals/tradeRouteModal";
 import { ConvoyModal } from "../../modals/convoysModal";
 import { VehicleBuyModal } from "../../modals/vehicleBuyModal";
-import { TopMenu } from "../../components/topMenu";
 import { Circle, ImageOverlay, MapContainer, Tooltip } from "react-leaflet";
 import { useWindowSize } from "../../components/hooks/useWIndowSize";
-import styled from "styled-components";
+import { Button } from "@Components/button";
 
 export const CityColors: { [key: string]: string } = {
   Mine: "black",
@@ -32,6 +34,8 @@ export const CityColors: { [key: string]: string } = {
   ResearchStation: "grey",
   RandomEncounter: "gold",
 };
+
+const dT = 1000 * 60;
 
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
@@ -149,7 +153,7 @@ export function WorldMap(): JSX.Element {
 
   const menuHeight = useMemo(() => `${height * 0.1}px`, [height]);
 
-  const menuWidth = useMemo(() => `${width * 0.15}px`, [width]);
+  const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
 
   const mapWidth = useMemo(() => `${width * 0.9}px`, [width]);
 
@@ -157,18 +161,22 @@ export function WorldMap(): JSX.Element {
 
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
+  const [tick, setTick] = useState(new Date().setFullYear(1899, 1, 1));
 
   useEffect(() => {
     const timeout = setInterval(() => {
-      const time = new Date(
-        new Date().setFullYear(1899, 1, 1) - new Date(2020).valueOf()
+      setTick(() => tick + dT);
+      setTime(
+        new Date(tick + dT).toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       );
-      setTime(time.toLocaleTimeString());
-      setDate(time.toLocaleDateString());
+      setDate(new Date(tick + dT).toLocaleDateString());
     }, 1000);
 
     return () => clearInterval(timeout);
-  }, []);
+  }, [tick]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -283,20 +291,18 @@ export function WorldMap(): JSX.Element {
           width: menuWidth,
         }}
       >
-        <ButtonLikeDisplay black>
+        <Button black>
           {date} {time}
-        </ButtonLikeDisplay>
-        <ButtonLikeDisplay black>5556.22ℳ</ButtonLikeDisplay>
-        <ButtonLikeDisplay onClick={() => setShowConvoyModal(true)}>
-          Convoys
-        </ButtonLikeDisplay>
-        <ButtonLikeDisplay
+        </Button>
+        <Button black>5556.22 ℳ</Button>
+        <Button onClick={() => setShowConvoyModal(true)}>Convoys</Button>
+        <Button
           onClick={() => {
             setShowVehicleBuyModal(true);
           }}
         >
           New Vehicle
-        </ButtonLikeDisplay>
+        </Button>
       </SideMenu>
     </div>
   );

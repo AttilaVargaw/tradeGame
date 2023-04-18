@@ -69,7 +69,8 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".svg"],
     alias: {
-      Services: path.resolve(__dirname, "./src/services"),
+      "@Services": path.resolve(__dirname, "./src/services"),
+      "@Components": path.resolve(__dirname, "./src/components"),
     },
   },
   devServer: {

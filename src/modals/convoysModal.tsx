@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { FormGroup } from "react-bootstrap";
 import Button from "react-bootstrap/esm/Button";
 import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
 import Col from "react-bootstrap/esm/Col";
@@ -7,9 +6,12 @@ import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
 import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
-import { Convoy, Vehicle } from "Services/GameState/dbTypes";
-import { GameStateContext } from "Services/GameState/gameState";
+import { Convoy, Vehicle } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
 import { SelectedTradeRouteContext } from "../screens/worldMap/selectedTradeRouteContext";
+import FormGroup from "react-bootstrap/esm/FormGroup";
+import { Input, Select } from "@Components/input";
+import { Label } from "@Components/label";
 
 export const ConvoyItem = ({
   icon,
@@ -46,9 +48,12 @@ export const ConvoyModal = ({
   >([]);
 
   useEffect(() => {
-    gameState.getConvoys().then(setConvoyData);
-    gameState.getVehiclesOfConvoy(null).then(setAvailableCommandVehicles);
-  }, [gameState]);
+    if (isOpen) {
+      gameState.getConvoys().then(setConvoyData);
+      gameState.getConvoylessVehicles().then(setAvailableCommandVehicles);
+      gameState.getConvoylessVehicles().then(console.log);
+    }
+  }, [gameState, isOpen]);
 
   const [newConvoyData, setNewConvoyData] = useState<{
     name: string;
@@ -72,12 +77,13 @@ export const ConvoyModal = ({
 
   return (
     <Modal show={isOpen} onHide={onRequestClose} size="xl">
-      <Modal.Header closeButton>
-        <Modal.Title>Convoys</Modal.Title>
+      <Modal.Header>
+        <Label type="led" style={{ width: "100%" }}>
+          Convoys
+        </Label>
       </Modal.Header>
       <Modal.Body style={{ height: "80vh" }}>
         <Container>
-          <Row>Convoys</Row>
           {convoysData.map(({ ID, name, type }) => (
             <ConvoyItem key={ID} id={ID} name={name} />
           ))}
@@ -93,7 +99,7 @@ export const ConvoyModal = ({
             <Form.Label>Create a new convoy</Form.Label>
             <FormGroup className="mb-3">
               <Form.Label>Name</Form.Label>
-              <Form.Control
+              <Input
                 min={0}
                 value={newConvoyData.name}
                 type={"input"}
@@ -101,14 +107,14 @@ export const ConvoyModal = ({
               />
             </FormGroup>
             <FormGroup className="mb-3">
-              <Form.Label column>Select the command vehicle</Form.Label>
-              <Form.Select onChange={setCommandVehicle}>
+              <Label type="painted">Command vehicle</Label>
+              <Select onChange={setCommandVehicle}>
                 {availableCommandVehicles.map(({ ID, name }) => (
                   <option key={ID} value={ID}>
                     {name}
                   </option>
                 ))}
-              </Form.Select>
+              </Select>
             </FormGroup>
             <Button>Create</Button>
           </Form>

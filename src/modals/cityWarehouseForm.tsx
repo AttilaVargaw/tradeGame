@@ -11,8 +11,8 @@ import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
 import Row from "react-bootstrap/esm/Row";
-import { Item, WarehouseItem } from "Services/GameState/dbTypes";
-import { GameStateContext } from "Services/GameState/gameState";
+import { Item, WarehouseItem } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../debugModeContext";
 import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
 

@@ -3,13 +3,12 @@ import Card from "react-bootstrap/esm/Card";
 import Col from "react-bootstrap/esm/Col";
 import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
-import { VehicleType } from "Services/GameState/dbTypes";
-import { GameStateContext } from "Services/GameState/gameState";
-import { run as holderRun } from "holderjs";
+import { VehicleType } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
 import Button from "react-bootstrap/esm/Button";
 import CardGroup from "react-bootstrap/esm/CardGroup";
 import Nav from "react-bootstrap/esm/Nav";
-import Placeholder from "../components/placeholder";
+import Placeholder from "@Components/placeholder";
 
 export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
   desc,
@@ -57,13 +56,10 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
       .getVehicleType(ID)
       .then((result) => setVehicleDescription(result[0]));
   }, [ID, gameState]);
-  useEffect(() => {
-    holderRun();
-  });
 
   const onOrder = useCallback(() => {
-    // gameState.addV
-  }, []);
+    gameState.addVehicle(ID).then(console.log);
+  }, [gameState, ID]);
 
   if (!vehicleDescription) {
     return <></>;
@@ -117,10 +113,6 @@ export const VehicleBuyModal = ({
   useEffect(() => {
     gameState.getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
   }, [selectedVehicleType, gameState]);
-
-  useEffect(() => {
-    holderRun();
-  });
 
   const setVehicleType = useCallback(
     (type: string) => () => {

@@ -1,16 +1,17 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import Button from "react-bootstrap/esm/Button";
 import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
 import OverlayTrigger from "react-bootstrap/esm/OverlayTrigger";
 import Row from "react-bootstrap/esm/Row";
 import Tooltip from "react-bootstrap/esm/Tooltip";
-import { PopulationClass, PopulationData } from "Services/GameState/dbTypes";
-import { GameStateContext } from "Services/GameState/gameState";
+import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../debugModeContext";
 import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
-import { Input } from "../components/input";
+import { Input, Select } from "@Components/input";
+import { Button } from "@Components/button";
+import { Label } from "@Components/label";
 
 export default function CityPopulation() {
   const [notExistingClasses, setNotExistingClasses] = useState<
@@ -85,7 +86,7 @@ export default function CityPopulation() {
         {classes.map(({ name, num, ID }) => (
           <Col lg key={ID}>
             <Row>
-              <h3>{name}</h3>
+              <Label type="painted">{name}</Label>
             </Row>
             {debugMode ? (
               <Input
@@ -102,17 +103,17 @@ export default function CityPopulation() {
         {debugMode && notExistingClasses.length > 0 && (
           <Col lg>
             <Row>
-              <h3>New class</h3>
+              <Label type="painted">New class</Label>
             </Row>
             <Form.Group as={Row}>
               <Col sm="8">
-                <Form.Select onChange={setNewClass}>
+                <Select onChange={setNewClass}>
                   {notExistingClasses.map(({ ID, name }) => (
                     <option key={ID} value={ID}>
                       {name}
                     </option>
                   ))}
-                </Form.Select>
+                </Select>
               </Col>
               <Col sm="2">
                 <Button onClick={addNewClass}>Add</Button>
@@ -123,55 +124,45 @@ export default function CityPopulation() {
       </Row>
       <Row>
         <Col lg>
-          <strong>Total population is </strong>{" "}
-          <span>{fullPopulation} people</span>
+          <span style={{ display: "flex", justifyContent: "space-around" }}>
+            <Label type="painted">Total population</Label>
+            <Label type="led">{fullPopulation}</Label>
+          </span>
         </Col>
       </Row>
       <Row>
-        <h2>Guild personnel</h2>
+        <Label type="painted">Guild personnel</Label>
       </Row>
       <Row>
         <Col lg>
-          <h3>Sailor</h3>
-          <p>{0}</p>
+          <Label type="painted">Master</Label>
+          <Label type="led">{0}</Label>
         </Col>
         <Col lg>
-          <h3>Officer</h3>
-          <p>{0}</p>
+          <Label type="painted">Mechanist</Label>
+          <Label type="led">{0}</Label>
         </Col>
         <Col lg>
-          <h3>Engineer</h3>
-          <p>{0}</p>
+          <Label type="painted">Researcher</Label>
+          <Label type="led">{0}</Label>
         </Col>
         <Col lg>
-          <h3>WO</h3>
-          <p>{0}</p>
+          <Label type="painted">Guard</Label>
+          <Label type="led">{0}</Label>
         </Col>
         <Col lg>
-          <h3>Researcher</h3>
-          <p>{0}</p>
-        </Col>
-        <Col lg>
-          <h3>Guard</h3>
-          <p>{0}</p>
-        </Col>
-        <Col lg>
-          <h3>NCO</h3>
-          <p>{0}</p>
-        </Col>
-        <Col lg>
-          <h3>Cadet</h3>
-          <p>{0}</p>
+          <Label type="painted">Cadet</Label>
+          <Label type="led">{0}</Label>
         </Col>
       </Row>
       <Row>
-        <h3>Daily requirements</h3>
+        <Label type="painted">Daily requirements</Label>
       </Row>
       <Row>
         {classes.map(({ dailyRequirement, name, ID, num: citizenNum }) => (
           <Col lg key={`class-${ID}`}>
             {" "}
-            <h3>{name}</h3>{" "}
+            <Label type="painted">{name}</Label>
             {dailyRequirement.map(
               ({
                 nameKey,
@@ -186,11 +177,13 @@ export default function CityPopulation() {
                         <Tooltip id="tooltip-disabled">Tooltip!</Tooltip>
                       }
                     >
-                      <strong>{nameKey}</strong>
+                      <Label type="painted">{nameKey}</Label>
                     </OverlayTrigger>
                   </Col>
                   <Col>
-                    <span>{multiplyCeil(dailyRequirement, citizenNum)}</span>
+                    <Label type="led">
+                      {multiplyCeil(dailyRequirement, citizenNum)}
+                    </Label>
                   </Col>
                 </Row>
               )

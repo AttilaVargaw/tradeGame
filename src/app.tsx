@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { WorldMap } from "./screens/worldMap/worldMap";
-import { GameState, GameStateContext } from "Services/GameState/gameState";
+import { GameState, GameStateContext } from "@Services/GameState/gameState";
 import { message } from "@tauri-apps/api/dialog";
 import DebugModeContext from "./debugModeContext";
 import { ContextMenu } from "./components/ContextMenu";

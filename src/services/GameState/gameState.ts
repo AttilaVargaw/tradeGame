@@ -1,10 +1,9 @@
-import Database from "tauri-plugin-sql-api";
 import { createContext } from "react";
 import { creatorSQL } from "../creatorSQL";
 
 import { BehaviorSubject } from "rxjs";
 
-import { create, insert, select } from "../simpleQueryBuilder";
+import { create, insert, select, update } from "../simpleQueryBuilder";
 import {
   TradeRouteProps,
   City,
@@ -22,16 +21,22 @@ import {
   DBEvent,
   VehicleType,
   Tables,
+  TradeRoute,
+  Convoy,
+  Vehicle,
 } from "./dbTypes";
 import { getQuery } from "./queryManager";
 import groupBy from "lodash-es/groupBy";
+import Database from "tauri-plugin-sql-api";
 
 let db: Database;
 
 const dbObservable = new BehaviorSubject<DBEvent>({ type: DBEvents.NOP });
 
 const init = async () => {
-  db = await Database.load("file::memory:");
+  db = await Database.load("sqlite:tradegame.db");
+
+  await db.execute("PRAGMA foreign_keys=OFF");
 
   await Promise.all([
     db.execute(
@@ -199,15 +204,67 @@ const init = async () => {
   ]);
 
   await db.execute(creatorSQL);
+
+  await db.execute("PRAGMA foreign_keys=ON");
+
   dbObservable.next({ type: DBEvents.initialized });
 };
 
-const addVehicle = async () => {
-  /*const data = await db.execute(
-    insert("Vehicle", {  })
+function makeid(length: number) {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
+function GenerateConvoyName() {
+  return `${makeid(2)}-${makeid(2)}`;
+}
+
+async function CreateConvoy(name: string) {
+  const data = await db.execute(
+    insert({
+      table: Tables.Convoy,
+      attributes: { name, type: "" },
+    })
   );
 
-  dbObservable.next({ type: DBEvents.tradeRouteUpdate, data });*/
+  dbObservable.next({ type: DBEvents.newVehicleBought, data });
+}
+
+function GenerateVehicleName() {
+  return `${makeid(3)}-${makeid(3)}`;
+}
+
+const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
+  const data = await db.execute(
+    update({
+      table: Tables.Vehicle,
+      where: [{ A: [Tables.Vehicle, "ID"], value: VehicleID }],
+      updateRows: [[Tables.Vehicle, "convoy", convoyID]],
+    })
+  );
+
+  dbObservable.next({ type: DBEvents.newVehicleBought, data });
+};
+
+const addVehicle = async (type: number) => {
+  console.log(type);
+
+  const data = await db.execute(
+    insert({
+      table: Tables.Vehicle,
+      attributes: { name: GenerateVehicleName(), posX: 0, posY: 0, type },
+    })
+  );
+
+  dbObservable.next({ type: DBEvents.newVehicleBought, data });
 };
 
 const getVehicleTypes = (type: string) => {
@@ -233,7 +290,7 @@ const getVehicleType = (ID: number) => {
 };
 
 const getConvoys = () => {
-  return db.select(
+  return db.select<Convoy[]>(
     select({
       attributes: [[Tables.Convoy, ["name", "ID"]]],
       table: Tables.Convoy,
@@ -242,16 +299,35 @@ const getConvoys = () => {
 };
 
 const getVehiclesOfConvoy = (ID: number | null) => {
-  return db.select(
+  return db.select<Vehicle[]>(
     select({
-      attributes: [[Tables.Convoy, ["name", "ID"]]],
-      table: Tables.Convoy,
+      attributes: [[Tables.Vehicle, ["name", "ID"]]],
+      table: Tables.Vehicle,
       join: [
         {
-          A: Tables.Vehicle,
-          equation: { A: [Tables.Vehicle, "ID"], B: [Tables.Convoy, ""] },
+          A: Tables.Convoy,
+          equation: { A: [Tables.Convoy, "ID"], B: [Tables.Vehicle, "convoy"] },
         },
       ],
+      where: [{ A: [Tables.Vehicle, "convoy"], value: ID }],
+    })
+  );
+};
+
+const getConvoylessVehicles = () => {
+  console.log(
+    select({
+      attributes: [[Tables.Vehicle, ["name", "ID"]]],
+      table: Tables.Vehicle,
+      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
+    })
+  );
+
+  return db.select<Vehicle[]>(
+    select({
+      attributes: [[Tables.Vehicle, ["name", "ID"]]],
+      table: Tables.Vehicle,
+      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
     })
   );
 };
@@ -442,8 +518,6 @@ const getCity = async (ID: number): Promise<City> => {
         (e.dailyRequirement = await getCityDailyConsumption(ID, e.ID))
     )
   );
-
-  console.log("city data", cityData);
 
   return {
     ...cityData[0],
@@ -723,6 +797,10 @@ export const GameState = {
   getVehiclesOfConvoy,
   getVehicleTypes,
   getVehicleType,
+  addVehicle,
+  getConvoylessVehicles,
+  addVehicleToConvoy,
+  CreateConvoy,
 };
 
 export const GameStateContext = createContext(GameState);

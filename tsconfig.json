@@ -18,9 +18,9 @@
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
-      "Services/*": ["./src/services/*"],
-      "Screens/*": ["./src/sreens/*"],
-      "Components/*": ["./src/components/*"]
+      "@Services/*": ["./src/services/*"],
+      "@Screens/*": ["./src/sreens/*"],
+      "@Components/*": ["./src/components/*"]
     }
   },
   "include": ["src"],

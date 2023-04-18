@@ -4,8 +4,8 @@ import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
-import { TradeRouteProps } from "Services/GameState/dbTypes";
-import { GameStateContext } from "Services/GameState/gameState";
+import { TradeRouteProps } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
 import { SelectedTradeRouteContext } from "../screens/worldMap/selectedTradeRouteContext";
 
 export default function TradeRouteModal({

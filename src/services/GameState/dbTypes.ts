@@ -95,6 +95,7 @@ export enum DBEvents {
   tradeRouteUpdate,
   cityWarehouseUpdate,
   cityPopulationUpdate,
+  newVehicleBought,
 }
 
 export type DBEvent = {
@@ -118,6 +119,7 @@ export type Vehicle = {
   name: string;
   type: string;
   ID: number;
+  convoy: number;
 };
 
 export type VehicleType = {
@@ -159,7 +161,7 @@ export enum Tables {
 
 export type VehicleInsertData = {
   name: string;
-  type: string;
+  type: number;
   posX: number;
   posY: number;
 };
@@ -174,6 +176,11 @@ export type VehicleTypeInsertData = {
   name: string;
   desc: string;
   price: number;
+  type: string;
+};
+
+export type ConvoyInsertData = {
+  name: string;
   type: string;
 };
 

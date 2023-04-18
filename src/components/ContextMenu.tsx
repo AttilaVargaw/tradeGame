@@ -5,7 +5,7 @@ import {
   contextMenuObservable,
   ContextMenuItemProps,
   contextMenuPositionObservable,
-} from "Services/contextMenu";
+} from "@Services/contextMenu";
 
 export const ContextMenu: FC = () => {
   const [contextMenuItems, setContextMenuItems] = useState<
