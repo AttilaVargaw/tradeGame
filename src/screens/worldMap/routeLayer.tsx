@@ -11,24 +11,30 @@ import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { GeoJSON as LeafletGeoJSON, tooltip } from "leaflet";
 import { GeoJSON } from "react-leaflet";
+import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
 export type RouteLayerProps = {
-  onRouteClick: (ID: number) => void;
+  // onRouteClick: (ID: number) => void;
 };
 
-export const RouteLayer: FC<RouteLayerProps> = ({ onRouteClick }) => {
+export const RouteLayer: FC<RouteLayerProps> = () => {
   // const map = useMap();
   const layerRef = useRef<LeafletGeoJSON>(null);
   const gameState = useContext(GameStateContext);
+
+  const [, setSelectedTradeRoute] = useSelectedRouteAtom();
+  const [, setCurrentModal] = useCurrentModal();
 
   const [tradeRoutes, setTradeRoutes] =
     useState<GeoJSON.FeatureCollection<GeoJSON.LineString, TradeRouteProps>>();
 
   const routeClick = useCallback(
     (ID: number) => () => {
-      onRouteClick(ID);
+      setSelectedTradeRoute(ID);
+      setCurrentModal("tradeRoute");
     },
-    [onRouteClick]
+    [setSelectedTradeRoute, setCurrentModal]
   );
 
   const tradeRouteStyle = useMemo(

@@ -1,3 +1,5 @@
+import { ResourceChange } from "./tables/common";
+
 export type CityPopulationClass = {
   num: number;
   ID: number;
@@ -28,24 +30,11 @@ export type PopulationData = {
   dailyRequirement: DailyRequirement[];
 };
 
-export type ResourceChange = {
-  ID: number;
-  item: string;
-  num: number;
-  nameKey: string;
-  descriptionKey: string;
-};
-
 export type IndustrialBuilding = {
   buildingNum: number;
   nameKey: string;
   ID: number;
   inputOutputData: ResourceChange[];
-};
-
-export type IndustryData = {
-  industrialBuildings: IndustrialBuilding[];
-  aggregatedInputOutput: ResourceChange[];
 };
 
 export type WarehouseItem = {
@@ -55,19 +44,6 @@ export type WarehouseItem = {
   nameKey: string;
   dailyRequirement: number;
   itemID: number;
-};
-
-export type City = {
-  classes: PopulationData[];
-  ID: number;
-  posX: number;
-  posY: number;
-  type: string;
-  industrialBuildings: [];
-  name: string;
-  fullPopulation: number;
-  industry: IndustryData;
-  warehouse: WarehouseItem[];
 };
 
 export type PopulationClass = {
@@ -130,35 +106,6 @@ export type VehicleType = {
   type: string;
 };
 
-export type ConvoyAttr = "name" | "ID";
-
-export type VehicleTypeAttr = "name" | "desc" | "price" | "ID" | "type";
-
-export type CityAttr = "ID" | "posX" | "posY" | "type" | "name";
-
-export type VehicleAttr = "name" | "type" | "posX" | "posY" | "convoy" | "ID";
-
-export type TradeRouteAttr = "cityA" | "cityB" | "name" | "ID";
-
-export enum Tables {
-  VehicleData = "VehicleData",
-  Convoy = "Convoy",
-  Vehicle = "Vehicle",
-  VehicleTypes = "VehicleTypes",
-  TradeRoutes = "TradeRoutes",
-  CityTypes = "CityTypes",
-  Translations = "Translations",
-  ClassDailyRequirement = "ClassDailyRequirement",
-  City = "City",
-  IndustrialBuildingDailyRequirement = "IndustrialBuildingDailyRequirement",
-  IndustrialBuilding = "IndustrialBuilding",
-  PopulationClass = "PopulationClass",
-  CityWarehouse = "CityWarehouse",
-  Item = "Item",
-  CityPopulationClass = "CityPopulationClass",
-  IndustrialBuildings = "IndustrialBuildings",
-}
-
 export type VehicleInsertData = {
   name: string;
   type: number;
@@ -172,16 +119,7 @@ export type TradeRouteInsertData = {
   name: string;
 };
 
-export type VehicleTypeInsertData = {
-  name: string;
-  desc: string;
-  price: number;
-  type: string;
-};
-
 export type ConvoyInsertData = {
   name: string;
   type: string;
 };
-
-export type CityTypes = "name";

@@ -19,6 +19,9 @@ dependencies:
   eslint-plugin-react:
     specifier: ^7.32.2
     version: 7.32.2(eslint@8.38.0)
+  jotai:
+    specifier: ^2.0.4
+    version: 2.0.4(react@18.2.0)
   leaflet:
     specifier: ^1.9.3
     version: 1.9.3
@@ -57,7 +60,7 @@ dependencies:
     version: 5.3.9(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)
   tauri-plugin-sql-api:
     specifier: github:tauri-apps/tauri-plugin-sql
-    version: github.com/tauri-apps/tauri-plugin-sql/1638a2520ece4570b26c16e344597b295ac77bed
+    version: github.com/tauri-apps/tauri-plugin-sql/62b21ef24303d80e9905f57b2b6d27efc8677c23
 
 devDependencies:
   '@tauri-apps/api':
@@ -1891,8 +1894,8 @@ packages:
   /dns-equal@1.0.0:
     resolution: {integrity: sha512-z+paD6YUQsk+AbGCEM4PrOXSss5gd66QfcVBFTKR/HpFL9jCqikS94HYwKww6fQyO7IxrIIyUu+g0Ka9tUS2Cg==}
 
-  /dns-packet@5.5.0:
-    resolution: {integrity: sha512-USawdAUzRkV6xrqTjiAEp6M9YagZEzWcSUaZTcIFAiyQWW1SoI6KyId8y2+/71wbgHKQAKd+iupLv4YvEwYWvA==}
+  /dns-packet@5.6.0:
+    resolution: {integrity: sha512-rza3UH1LwdHh9qyPXp8lkwpjSNk/AMD3dPytUoRoqnypDUhY0xvbdmVhWOfxO68frEfV9BU8V12Ez7ZsHGZpCQ==}
     engines: {node: '>=6'}
     dependencies:
       '@leichtgewicht/ip-codec': 2.0.4
@@ -2275,7 +2278,6 @@ packages:
       resolve: 2.0.0-next.4
       semver: 6.3.0
       string.prototype.matchall: 4.0.8
-    dev: false
 
   /eslint-scope@5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
@@ -2812,7 +2814,7 @@ packages:
       he: 1.2.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.16.9
+      terser: 5.17.0
     dev: true
 
   /html-minifier-terser@7.2.0:
@@ -2826,7 +2828,7 @@ packages:
       entities: 4.5.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.16.9
+      terser: 5.17.0
     dev: true
 
   /html-webpack-plugin@5.5.1(webpack@5.79.0):
@@ -3242,6 +3244,18 @@ packages:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
+  /jotai@2.0.4(react@18.2.0):
+    resolution: {integrity: sha512-XkR1Jtm4a2iKV/7fdB3rNHjJz8FkkDMVczqiAok7lt8W4F69l/ZQkPGWSEV+hJOJXRn27k6XYKOoKEQIwBuAMA==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
+    dev: false
+
   /js-sdsl@4.4.0:
     resolution: {integrity: sha512-FfVSdx6pJ41Oa+CF7RDaFmTnCaFhua+SNYQX74riGOpl96x+2jQCqEfQ2bnXu/5DPCqlRuiqyvTJM0Qjz26IVg==}
 
@@ -3573,7 +3587,7 @@ packages:
     resolution: {integrity: sha512-2eznPJP8z2BFLX50tf0LuODrpINqP1RVIm/CObbTcBRITQgmC/TjcREF1NeTBzIcR5XO/ukWo+YHOjBbFwIupg==}
     hasBin: true
     dependencies:
-      dns-packet: 5.5.0
+      dns-packet: 5.6.0
       thunky: 1.1.0
 
   /nanoid@3.3.6:
@@ -4785,11 +4799,11 @@ packages:
       jest-worker: 27.5.1
       schema-utils: 3.1.2
       serialize-javascript: 6.0.1
-      terser: 5.16.9
+      terser: 5.17.0
       webpack: 5.79.0(webpack-cli@5.0.1)
 
-  /terser@5.16.9:
-    resolution: {integrity: sha512-HPa/FdTB9XGI2H1/keLFZHxl6WNvAI4YalHGtDQTlMnJcoqSab1UwL4l1hGEhs6/GmLHBZIg/YgB++jcbzoOEg==}
+  /terser@5.17.0:
+    resolution: {integrity: sha512-3die3+pYW4mta4xF6K8Wtf7id8+oYyfqtAhjwzqY01+CfDSDMx/VA1Sp8sXWs5AVNIoAKoUfmp/gnPqRjBxuDA==}
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
@@ -5301,8 +5315,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  github.com/tauri-apps/tauri-plugin-sql/1638a2520ece4570b26c16e344597b295ac77bed:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-sql/tar.gz/1638a2520ece4570b26c16e344597b295ac77bed}
+  github.com/tauri-apps/tauri-plugin-sql/62b21ef24303d80e9905f57b2b6d27efc8677c23:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-sql/tar.gz/62b21ef24303d80e9905f57b2b6d27efc8677c23}
     name: tauri-plugin-sql-api
     version: 0.0.0
     dependencies:

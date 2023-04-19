@@ -2,6 +2,15 @@
 
 @import url("https://fonts.cdnfonts.com/css/seven-segment");
 
+* {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari, Chrome, Opera, Samsung */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Edge, IE */
+  user-select: none; /* Modern browsers */
+}
+
 .modal-content {
   background: darkgray;
   border: 1px solid #111;

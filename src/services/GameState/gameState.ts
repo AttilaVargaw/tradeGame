@@ -3,40 +3,80 @@ import { creatorSQL } from "../creatorSQL";
 
 import { BehaviorSubject } from "rxjs";
 
-import { create, insert, select, update } from "../simpleQueryBuilder";
+import {
+  InsertEvent,
+  create,
+  insert,
+  select,
+  update,
+} from "../simpleQueryBuilder";
 import {
   TradeRouteProps,
-  City,
-  CityPopulationClass,
   DailyRequirement,
   DBEvents,
   IndustrialBuilding,
-  IndustryData,
   Item,
-  PopulationClass,
   PopulationData,
-  ResourceChange,
   WarehouseItem,
   CityPositionProperty,
   DBEvent,
   VehicleType,
-  Tables,
-  TradeRoute,
   Convoy,
   Vehicle,
 } from "./dbTypes";
 import { getQuery } from "./queryManager";
 import groupBy from "lodash-es/groupBy";
 import Database from "tauri-plugin-sql-api";
+import { makeid } from "@Services/utils";
+import vehicleTypes from "./tables/vehicleTypes";
+import { ResourceChange, TableData, Tables } from "./tables/common";
+import City, { CityEntity, IndustryData } from "./tables/City";
+import CityTypes from "./tables/CityTypes";
+import ClassDailyRequirements from "./tables/ClassDailyRequirement";
+import PopulationClasses, { PopulationClass } from "./tables/PopulationClass";
+import CityPopulationClass, {
+  CityPopulationClassData,
+} from "./tables/CityPopulationClass";
 
 let db: Database;
 
 const dbObservable = new BehaviorSubject<DBEvent>({ type: DBEvents.NOP });
 
+async function CreateAndFillTable<T>({
+  createData,
+  name,
+  initData,
+}: TableData<T>) {
+  await db
+    .execute(create(name, createData))
+    .then(console.log)
+    .catch((e) => console.error(e, name, createData));
+
+  if (initData) {
+    return Promise.all(
+      initData.map((attributes) => {
+        return db
+          .execute(insert({ table: name, attributes } as InsertEvent))
+          .then(() => console.log(name, attributes))
+          .catch((e) => console.error(e, name, attributes));
+      })
+    );
+  } else {
+    return Promise.resolve();
+  }
+}
+
 const init = async () => {
   db = await Database.load("sqlite:tradegame.db");
 
-  await db.execute("PRAGMA foreign_keys=OFF");
+  await db.execute("PRAGMA foreign_keys=OFF;");
+
+  await CreateAndFillTable(CityTypes);
+  await CreateAndFillTable(ClassDailyRequirements);
+  await CreateAndFillTable(PopulationClasses);
+  await CreateAndFillTable(vehicleTypes);
+  await CreateAndFillTable(City);
+  await CreateAndFillTable(CityPopulationClass);
 
   await Promise.all([
     db.execute(
@@ -45,135 +85,6 @@ const init = async () => {
         { name: "CityB", type: "INTEGER", references: "City" },
         { name: "name", type: "TEXT" },
       ])
-    ),
-    db.execute(
-      create(Tables.VehicleTypes, [
-        { name: "name", type: "TEXT" },
-        { name: "desc", type: "TEXT" },
-        { name: "price", type: "REAL" },
-        { name: "type", type: "TEXT" },
-      ])
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "An elegant and fast flying machine. It is fast, but very fragile at the same time.",
-          name: "Light helicopter",
-          price: 500000,
-          type: "air",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "A medium sized flying machine. It is relatively fast, but very fragile at the same time.",
-          name: "Medium helicopter",
-          price: 1500000,
-          type: "air",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "A massive and strong flying machine. It is relatively fast, but very fragile at the same time.",
-          name: "Heavy cargo helicopter",
-          price: 4500000,
-          type: "air",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "A light truck.",
-          name: "Light truck",
-          price: 5000,
-          type: "wheeled",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "A heavyweight truck.",
-          name: "Heavy truck",
-          price: 10000,
-          type: "wheeled",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "Light tracked hauler.",
-          name: "Light tracked hauler",
-          price: 10000,
-          type: "tracked",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "Medium tracked hauler",
-          name: "Medium tracked hauler",
-          price: 10000,
-          type: "tracked",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "Heavy tracked hauler",
-          name: "Heavy tracked hauler",
-          price: 10000,
-          type: "tracked",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "Light tracked escort",
-          name: "Medium tracked escort",
-          price: 10000,
-          type: "tracked",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "Medium tracked escort",
-          name: "Medium tracked escort",
-          price: 10000,
-          type: "tracked",
-        },
-      })
-    ),
-    db.execute(
-      insert({
-        table: Tables.VehicleTypes,
-        attributes: {
-          desc: "Heavy tracked escort",
-          name: "Heavy truck",
-          price: 10000,
-          type: "tracked",
-        },
-      })
     ),
     db.execute(
       create(Tables.Convoy, [
@@ -205,27 +116,10 @@ const init = async () => {
 
   await db.execute(creatorSQL);
 
-  await db.execute("PRAGMA foreign_keys=ON");
+  await db.execute("PRAGMA foreign_keys=OFF;");
 
   dbObservable.next({ type: DBEvents.initialized });
 };
-
-function makeid(length: number) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-}
-
-function GenerateConvoyName() {
-  return `${makeid(2)}-${makeid(2)}`;
-}
 
 async function CreateConvoy(name: string) {
   const data = await db.execute(
@@ -255,8 +149,6 @@ const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
 };
 
 const addVehicle = async (type: number) => {
-  console.log(type);
-
   const data = await db.execute(
     insert({
       table: Tables.Vehicle,
@@ -490,7 +382,8 @@ const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
 };
 
 const getCitiesAsGeoJson = async () => {
-  const citiesData = await db.select<City[]>(getQuery("getCities"));
+  console.log(getQuery("getCities"));
+  const citiesData = await db.select<CityEntity[]>(getQuery("getCities"));
 
   return {
     type: "FeatureCollection",
@@ -505,9 +398,31 @@ const getCitiesAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 };
 
-const getCity = async (ID: number): Promise<City> => {
+const getCityIndustrialBuildings = async (ID: number) => {
+  const industrialBuildings = await db.select<IndustrialBuilding[]>(
+    `select IBS.ID, IBS.num as buildingNum, IB.nameKey
+        from IndustrialBuilding as IB
+        inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
+        inner join City as C on C.ID = IBS.city
+        where C.ID = $1`,
+    [ID]
+  );
+
+  await Promise.all(
+    industrialBuildings.map(async (e) => {
+      const inputOutputData = await getCityIndustrialBuildingResourceChanges(
+        e.ID
+      );
+      e.inputOutputData = inputOutputData;
+    })
+  );
+
+  return industrialBuildings;
+};
+
+const getCity = async (ID: number): Promise<CityEntity> => {
   const [cityData, classes, warehouse] = await Promise.all([
-    db.select<City[]>(getQuery("getCity"), [ID]),
+    db.select<CityEntity[]>(getQuery("getCity"), [ID]),
     getPopulation(ID),
     getCityWarehouse(ID),
   ]);
@@ -533,7 +448,7 @@ const getCity = async (ID: number): Promise<City> => {
 
 const getNotExistingCityClasses = async (cityID: number) => {
   const [cityPopulationClasses, populationClasses] = await Promise.all([
-    db.select<CityPopulationClass[]>(
+    db.select<CityPopulationClassData[]>(
       `
     select CPC.ID, CPC.populationClass
         from CityPopulationClass as CPC
@@ -541,10 +456,9 @@ const getNotExistingCityClasses = async (cityID: number) => {
     `,
       [cityID]
     ),
-    db.select<PopulationClass[]>(`
-        select PC.name, PC.ID
-            from PopulationClass as PC
-    `),
+    db.select<PopulationClass[]>(
+      `select PC.name, PC.ID from PopulationClass as PC`
+    ),
   ]);
 
   return populationClasses.filter((value) =>
@@ -554,9 +468,7 @@ const getNotExistingCityClasses = async (cityID: number) => {
 
 const addCityClass = (cityID: number, cityClassID: number) => {
   return db.execute(
-    `
-        insert into CityPopulationClass (num, populationClass, city) values (0, $1, $2)
-    `,
+    `insert into CityPopulationClass (num, populationClass, city) values (0, $1, $2)`,
     [cityClassID, cityID]
   );
 };
@@ -577,15 +489,13 @@ const addCityWarehouseItem = (item: number, number: number, cityID: number) => {
 
 const getCityDailyConsumption = (ID: number, classID: number) => {
   return db.select<DailyRequirement[]>(
-    `
-        select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey
+    `select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey
         from City as C
         inner join CityPopulationClass as CPC on C.ID = CPC.city
         inner join PopulationClass as PC on PC.ID = CPC.populationClass
         inner join ClassDailyRequirement as CDR on CDR.Class = PC.ID
         inner join Item as I on I.ID = CDR.item
-        where C.ID = $1 AND PC.ID = $2
-    `,
+        where C.ID = $1 AND PC.ID = $2`,
     [ID, classID]
   );
 };
@@ -599,13 +509,11 @@ const setPopulation = (ID: number, num: number) => {
 
 const getPopulation = (ID: number) => {
   return db.select<PopulationData[]>(
-    `
-        select num, PopulationClass.name, PopulationClass.ID
+    `select num, PopulationClass.name, PopulationClass.ID
             from City inner join CityPopulationClass on City.ID = CityPopulationClass.city 
             inner join PopulationClass on CityPopulationClass.populationClass = PopulationClass.ID
             where City.ID = $1 
-            group by PopulationClass.name
-    `,
+            group by PopulationClass.name`,
     [ID]
   );
 };
@@ -627,13 +535,11 @@ const getNotAvailableItems = async (cityID: number) => {
     db.select<Item[]>(`select I.nameKey, I.descriptionKey, I.ID
         from Item as I`),
     db.select<WarehouseItem[]>(
-      `
-        select I.nameKey, I.descriptionKey, CW.number, I.ID
+      `select I.nameKey, I.descriptionKey, CW.number, I.ID
         from City as C
         inner join CityWarehouse as CW on CW.city = C.ID
         inner join Item as I on I.ID = CW.item
-        where C.ID = $1
-    `,
+        where C.ID = $1`,
       [cityID]
     ),
   ]);
@@ -655,8 +561,7 @@ const getCityIndustryData = (ID: number) => {
             inner join IndustrialBuildings as IBS on IB.ID = IBS.city
             inner join City on City.ID = IBS.ID
             where City.ID = $1
-            group by IBR.item
-        `,
+            group by IBR.item`,
     [ID]
   );
 };
@@ -670,8 +575,7 @@ const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
         inner join IndustrialBuilding as IB on IBR.ID = IB.ID 
         inner join IndustrialBuildings as IBS on IB.ID = IBS.IndustrialBuilding
         inner join Item as I on IBR.item = I.ID
-        where IBS.ID = $1
-        `,
+        where IBS.ID = $1`,
       [ID]
     )
   ).map((r) => {
@@ -690,8 +594,7 @@ const getCityIndustrialResourceChanges = async (ID: number) => {
             inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
             inner join City as C on C.ID = IBS.city
             inner join Item as I on IBR.item = I.ID
-            where C.ID = ${ID}
-        `,
+            where C.ID = ${ID}`,
     [ID]
   );
 
@@ -714,29 +617,6 @@ const getCityIndustrialResourceChanges = async (ID: number) => {
   );
 };
 
-const getCityIndustrialBuildings = async (ID: number) => {
-  const industrialBuildings = await db.select<IndustrialBuilding[]>(
-    `select IBS.ID, IBS.num as buildingNum, IB.nameKey
-        from IndustrialBuilding as IB
-        inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
-        inner join City as C on C.ID = IBS.city
-        where C.ID = $1
-        `,
-    [ID]
-  );
-
-  await Promise.all(
-    industrialBuildings.map(async (e) => {
-      const inputOutputData = await getCityIndustrialBuildingResourceChanges(
-        e.ID
-      );
-      e.inputOutputData = inputOutputData;
-    })
-  );
-
-  return industrialBuildings;
-};
-
 const getAllIndustrialBuildings = () => {
   return db.select<IndustrialBuilding[]>(
     `select IB.ID, IB.nameKey from IndustrialBuilding as IB`
@@ -749,9 +629,7 @@ const addIndustrialBuildings = (
   city: number
 ) => {
   return db.select<IndustrialBuilding[]>(
-    `
-    insert into IndustrialBuildings (num, industrialBuilding, city) values ($1, $2, $3)
-    `,
+    `insert into IndustrialBuildings (num, industrialBuilding, city) values ($1, $2, $3)`,
     [num, industrialBuilding, city]
   );
 };
@@ -761,12 +639,10 @@ const initialized = () => {
 };
 
 const setIndustrialBuildingNumber = (ID: number, num: number) => {
-  return db.execute(
-    `
-        update IndustrialBuildings set num = $1 where ID = $2;
-    `,
-    [num, ID]
-  );
+  return db.execute(`update IndustrialBuildings set num = $1 where ID = $2;`, [
+    num,
+    ID,
+  ]);
 };
 
 export const GameState = {

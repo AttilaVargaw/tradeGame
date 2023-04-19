@@ -8,7 +8,6 @@ import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
 import { Convoy, Vehicle } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { SelectedTradeRouteContext } from "../screens/worldMap/selectedTradeRouteContext";
 import FormGroup from "react-bootstrap/esm/FormGroup";
 import { Input, Select } from "@Components/input";
 import { Label } from "@Components/label";
@@ -39,7 +38,6 @@ export const ConvoyModal = ({
   isOpen: boolean;
   onRequestClose?: () => void;
 }) => {
-  const routeID = useContext(SelectedTradeRouteContext);
   const gameState = useContext(GameStateContext);
 
   const [convoysData, setConvoyData] = useState<Convoy[]>([]);

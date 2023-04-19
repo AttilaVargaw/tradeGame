@@ -3,14 +3,14 @@ import Container from "react-bootstrap/esm/Container";
 import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
 import Col from "react-bootstrap/esm/Col";
 import Modal from "react-bootstrap/esm/Modal";
-import { City } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
 import CityIndustry from "./cityIndustry";
 import CityPopulation from "./cityPopulation";
 import CityWarehouseForm from "./cityWarehouseForm";
 import { Label } from "@Components/label";
 import { Button } from "@Components/button";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { CityEntity } from "@Services/GameState/tables/City";
 
 enum CityModalSubPages {
   popularity,
@@ -26,10 +26,10 @@ export default function CityDataModal({
   isOpen: boolean;
   onRequestClose?: () => void;
 }): JSX.Element | null {
-  const cityID = useContext(SelectedCityContext);
+  const [cityID] = useCurrentSelectedCity();
   const gameState = useContext(GameStateContext);
 
-  const [cityData, setCityData] = useState<City>();
+  const [cityData, setCityData] = useState<CityEntity>();
 
   const [selectedPage, setSelectedPage] = useState<CityModalSubPages>(
     CityModalSubPages.population

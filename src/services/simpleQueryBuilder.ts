@@ -1,17 +1,42 @@
 import {
+  ConvoyInsertData,
+  TradeRouteInsertData,
+  VehicleInsertData,
+} from "./GameState/dbTypes";
+import { CityData } from "./GameState/tables/City";
+import { JoinEquitation } from "./GameState/tables/JoinEquation";
+import { WhereEquitation } from "./GameState/tables/WhereEquation";
+import {
   CityAttr,
   ConvoyAttr,
-  ConvoyInsertData,
   Tables,
   TradeRouteAttr,
-  TradeRouteInsertData,
   VehicleAttr,
-  VehicleInsertData,
+} from "./GameState/tables/common";
+import {
   VehicleTypeAttr,
-  VehicleTypeInsertData,
-} from "./GameState/dbTypes";
+  VehicleTypeData,
+} from "./GameState/tables/vehicleTypes";
 
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
+
+export type SelectAttribute<ATTRIBUTES> = ([ATTRIBUTES, string] | ATTRIBUTES)[];
+
+export type SelectEvent = {
+  table: Tables;
+  attributes: [
+    Tables | string,
+    (
+      | SelectAttribute<VehicleAttr>
+      | SelectAttribute<VehicleTypeAttr>
+      | SelectAttribute<ConvoyAttr>
+      | SelectAttribute<CityAttr>
+      | SelectAttribute<TradeRouteAttr>
+    )
+  ][];
+  where?: WhereEquitation[];
+  join?: Join[];
+};
 
 type Attr = {
   name: string;
@@ -46,7 +71,11 @@ function attrToCreateQuery({
   }`;
 }
 
-export function create(tableName: Tables, attr: Attr[], drop = true) {
+export function create<TABLE = string>(
+  tableName: TABLE,
+  attr: Attr[],
+  drop = true
+) {
   attr.forEach((a) => {
     if (a.references && !a.referencesOn) {
       a.referencesOn = `ID`;
@@ -59,18 +88,6 @@ export function create(tableName: Tables, attr: Attr[], drop = true) {
     .map(attrToCreateQuery)
     .join(",")});`;
 }
-
-type JoinEquitation = {
-  A: [Tables | string, string | number | null];
-  B: [Tables | string, string | number | null];
-  operator?: "=" | ">" | "<" | "<>";
-};
-
-type WhereEquitation = {
-  A: [Tables, string];
-  operator?: "=" | ">" | "<" | "<>" | " is " | " is not ";
-  value: string | number | null;
-};
 
 function whereEquationToString({
   operator = "=",
@@ -93,24 +110,6 @@ function joinEquitationToString({
 }: JoinEquitation) {
   return `${A}.${AAttr}${operator}${B}.${BAttr}`;
 }
-
-export type SelectAttribute<ATTRIBUTES> = ([ATTRIBUTES, string] | ATTRIBUTES)[];
-
-export type SelectEvent = {
-  table: Tables;
-  attributes: [
-    Tables | string,
-    (
-      | SelectAttribute<VehicleAttr>
-      | SelectAttribute<VehicleTypeAttr>
-      | SelectAttribute<ConvoyAttr>
-      | SelectAttribute<CityAttr>
-      | SelectAttribute<TradeRouteAttr>
-    )
-  ][];
-  where?: WhereEquitation[];
-  join?: Join[];
-};
 
 export function select({ attributes, join, where, table }: SelectEvent) {
   return `SELECT ${attributes
@@ -139,9 +138,9 @@ export function select({ attributes, join, where, table }: SelectEvent) {
   };`;
 }
 
-export type Join = {
-  A: Tables;
-  equation: JoinEquitation;
+export type Join<TABLE = string> = {
+  A: TABLE;
+  equation: JoinEquitation<TABLE>;
   as?: string;
 };
 
@@ -177,47 +176,36 @@ export function update({
   };`;
 }
 
-/*export function insert<Attr1 extends string | number | symbol>(
-  table: Tables,
-  rows: { [property in Attr1]: string | number | null }
-) {
-  return `insert into ${table} (${Object.keys(rows).join(
-    ","
-  )}) values (${Object.values(rows)
-    .filter((e) => e !== undefined)
-    .map(
-      (e) =>
-        `${typeof e === "string" ? '"' : ""}${e}${
-          typeof e === "string" ? '"' : ""
-        }`
-    )
-    .join(",")})`;
-}*/
-
 export type VehicleInsertEvent = {
-  table: Tables.Vehicle;
+  table: "Vehicle";
   attributes: VehicleInsertData;
 };
 
 export type TradeRouteInsertEvent = {
-  table: Tables.TradeRoutes;
+  table: "TradeRoutes";
   attributes: TradeRouteInsertData;
 };
 
 export type VehicleTypeInsertEvent = {
-  table: Tables.VehicleTypes;
-  attributes: VehicleTypeInsertData;
+  table: "VehicleTypes";
+  attributes: VehicleTypeData;
 };
 
 export type ConvoyInsertEvent = {
-  table: Tables.Convoy;
+  table: "Convoy";
   attributes: ConvoyInsertData;
+};
+
+export type CityInsertEvent = {
+  table: "City";
+  attributes: CityData;
 };
 
 export type InsertEvent =
   | VehicleInsertEvent
   | TradeRouteInsertEvent
   | VehicleTypeInsertEvent
+  | CityInsertEvent
   | ConvoyInsertEvent;
 
 export function insert({ table, attributes }: InsertEvent) {

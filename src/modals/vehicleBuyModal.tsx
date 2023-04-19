@@ -9,6 +9,7 @@ import Button from "react-bootstrap/esm/Button";
 import CardGroup from "react-bootstrap/esm/CardGroup";
 import Nav from "react-bootstrap/esm/Nav";
 import Placeholder from "@Components/placeholder";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
 export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
   desc,
@@ -51,15 +52,18 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
 
   const [vehicleDescription, setVehicleDescription] = useState<VehicleType>();
 
+  const [, setCurrentModal] = useCurrentModal();
+
   useEffect(() => {
     gameState
       .getVehicleType(ID)
       .then((result) => setVehicleDescription(result[0]));
-  }, [ID, gameState]);
+  }, [ID, gameState, setCurrentModal]);
 
   const onOrder = useCallback(() => {
     gameState.addVehicle(ID).then(console.log);
-  }, [gameState, ID]);
+    setCurrentModal(null);
+  }, [gameState, ID, setCurrentModal]);
 
   if (!vehicleDescription) {
     return <></>;
@@ -109,6 +113,7 @@ export const VehicleBuyModal = ({
   );
   const [selectedVehicleType, setSelectedVehicleType] = useState("air");
   const [currentVehicle, setCurrentVehicle] = useState<number | null>(null);
+  const [, setCurrentModal] = useCurrentModal();
 
   useEffect(() => {
     gameState.getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
@@ -130,7 +135,7 @@ export const VehicleBuyModal = ({
 
   return (
     <Modal show={isOpen} onHide={onRequestClose} size="xl">
-      <Modal.Header closeButton>
+      <Modal.Header>
         {currentVehicle && (
           <Button
             size="lg"

@@ -4,16 +4,15 @@ import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
 import Row from "react-bootstrap/esm/Row";
-import {
-  IndustrialBuilding,
-  ResourceChange,
-} from "@Services/GameState/dbTypes";
+import { IndustrialBuilding } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import debugModeContext from "../debugModeContext";
-import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
+import debugModeContext from "../../debugModeContext";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { ResourceChange } from "@Services/GameState/tables/common";
 
 export default function CityIndustry() {
-  const cityID = useContext(SelectedCityContext);
+  const [cityID] = useCurrentSelectedCity();
+
   const debugMode = useContext(debugModeContext);
 
   const [newBuilding, setNewBuilding] = useState<string>("");

@@ -7,13 +7,15 @@ import Row from "react-bootstrap/esm/Row";
 import Tooltip from "react-bootstrap/esm/Tooltip";
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import debugModeContext from "../debugModeContext";
-import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
+import debugModeContext from "../../debugModeContext";
 import { Input, Select } from "@Components/input";
 import { Button } from "@Components/button";
 import { Label } from "@Components/label";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 export default function CityPopulation() {
+  const [cityID] = useCurrentSelectedCity();
+
   const [notExistingClasses, setNotExistingClasses] = useState<
     PopulationClass[]
   >([]);
@@ -26,7 +28,6 @@ export default function CityPopulation() {
   const [classes, setClasses] = useState<PopulationData[]>([]);
   const [fullPopulation, setFullPopulation] = useState<number>(0);
 
-  const cityID = useContext(SelectedCityContext);
   const gameState = useContext(GameStateContext);
   const debugMode = useContext(debugModeContext);
 

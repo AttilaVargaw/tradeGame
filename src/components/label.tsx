@@ -2,10 +2,12 @@ import styled, { css } from "styled-components";
 
 export type styles = "led" | "painted";
 
-export const Label = styled.div<{ type?: styles }>`
+export const Container = styled.div<{ type?: styles }>`
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-inline: 1em;
+  display: flex;
+  flex-direction: row;
 
   ${({ type }) => {
     if (type === "led")
@@ -38,3 +40,25 @@ export const Label = styled.div<{ type?: styles }>`
   text-align: center;
   font-size: 1.5em;
 `;
+
+export function Label({
+  children,
+  type,
+  ...props
+}: {
+  type?: styles;
+  style?: React.CSSProperties;
+  children: string | number;
+}) {
+  return (
+    <Container type={type} {...props}>
+      {type === "led"
+        ? [...children.toString()].map((c, i) => (
+            <div style={{ width: "0.6em" }} key={i}>
+              {c}
+            </div>
+          ))
+        : children}
+    </Container>
+  );
+}

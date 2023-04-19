@@ -6,8 +6,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import CityDataModal from "../../modals/cityDataModal";
-import { SelectedCityContext } from "./selectedCityContext";
 import { GameStateContext } from "@Services/GameState/gameState";
 import SideMenu from "./sideMenu";
 import { CRS, LeafletMouseEventHandlerFn, Map as LeafletMap } from "leaflet";
@@ -17,15 +15,15 @@ import {
   addToContextMenu,
   setContextMenuPosition,
 } from "@Services/contextMenu";
-import { SelectedTradeRouteContext } from "./selectedTradeRouteContext";
-import TradeRouteModal from "../../modals/tradeRouteModal";
-import { ConvoyModal } from "../../modals/convoysModal";
-import { VehicleBuyModal } from "../../modals/vehicleBuyModal";
+
 import { Circle, ImageOverlay, MapContainer, Tooltip } from "react-leaflet";
 import { useWindowSize } from "../../components/hooks/useWIndowSize";
-import { Button } from "@Components/button";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { ModalRouter } from "@Components/ModalRouter";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import styled from "styled-components";
 
-export const CityColors: { [key: string]: string } = {
+const CityColors: { [key: string]: string } = {
   Mine: "black",
   Metropolis: "blue",
   MiningTown: "red",
@@ -35,23 +33,25 @@ export const CityColors: { [key: string]: string } = {
   RandomEncounter: "gold",
 };
 
-const dT = 1000 * 60;
+const Container = styled.div`
+  display: "flex";
+  flex-direction: "column";
+`;
 
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
 
-  const [currentCity, setCurrentCity] = useState<number | null>(null);
-  const [currentTradeRoute, setCurrentTradeRoute] = useState<number | null>(
-    null
-  );
   const [citiesGeoJson, setCitiesGeoJson] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
+
   const [selectedCities, setSelectedCities] = useState<(number | null)[]>([
     null,
     null,
   ]);
-  const [showConvoyModal, setShowConvoyModal] = useState(false);
-  const [showVehicleBuyModal, setShowVehicleBuyModal] = useState(false);
+
+  const [, setCurrentModal] = useCurrentModal();
+
+  const [, setCurrentSelectedCity] = useCurrentSelectedCity();
 
   useEffect(() => {
     gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
@@ -111,15 +111,18 @@ export function WorldMap(): JSX.Element {
   const onDoubleClick = useCallback(
     (city: number): LeafletMouseEventHandlerFn =>
       () => {
-        const cityID: number | undefined = citiesGeoJson?.features.find(
-          ({ properties: { ID } }) => ID === city
-        )?.properties.ID;
+        if (citiesGeoJson) {
+          const cityID: number | undefined = citiesGeoJson?.features.find(
+            ({ properties: { ID } }) => ID === city
+          )?.properties.ID;
 
-        if (cityID) {
-          setCurrentCity(cityID);
+          if (cityID) {
+            setCurrentSelectedCity(cityID);
+            setCurrentModal("cityInfo");
+          }
         }
       },
-    [citiesGeoJson]
+    [setCurrentSelectedCity, citiesGeoJson, setCurrentModal]
   );
 
   const onCityClick = useCallback(
@@ -151,58 +154,10 @@ export function WorldMap(): JSX.Element {
     return () => window.removeEventListener("resize", eventHandler);
   }, []);
 
-  const menuHeight = useMemo(() => `${height * 0.1}px`, [height]);
-
   const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
 
-  const mapWidth = useMemo(() => `${width * 0.9}px`, [width]);
-
-  const mapHeight = useMemo(() => `${height * 0.9}px`, [height]);
-
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
-  const [tick, setTick] = useState(new Date().setFullYear(1899, 1, 1));
-
-  useEffect(() => {
-    const timeout = setInterval(() => {
-      setTick(() => tick + dT);
-      setTime(
-        new Date(tick + dT).toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-      setDate(new Date(tick + dT).toLocaleDateString());
-    }, 1000);
-
-    return () => clearInterval(timeout);
-  }, [tick]);
-
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      {currentCity && (
-        <SelectedCityContext.Provider value={currentCity}>
-          <CityDataModal
-            isOpen={!!currentCity}
-            onRequestClose={() => setCurrentCity(null)}
-          />
-        </SelectedCityContext.Provider>
-      )}
-      <ConvoyModal
-        isOpen={showConvoyModal}
-        onRequestClose={() => {
-          setShowConvoyModal(false);
-        }}
-      />
-      <VehicleBuyModal
-        isOpen={showVehicleBuyModal}
-        onRequestClose={() => {
-          setShowVehicleBuyModal(false);
-        }}
-      />
-
-      {/*<TopMenu height={menuHeight} />*/}
-
+    <Container>
       <div
         onContextMenu={onContextMenu}
         style={{ height: height, width: width }}
@@ -275,13 +230,7 @@ export function WorldMap(): JSX.Element {
                 }
               )}
           </ImageOverlay>
-          <SelectedTradeRouteContext.Provider value={currentTradeRoute}>
-            <RouteLayer onRouteClick={setCurrentTradeRoute} />
-            <TradeRouteModal
-              onRequestClose={() => setCurrentTradeRoute(null)}
-              isOpen={!!currentTradeRoute}
-            />
-          </SelectedTradeRouteContext.Provider>
+          <RouteLayer />
         </MapContainer>
       </div>
       <SideMenu
@@ -290,20 +239,8 @@ export function WorldMap(): JSX.Element {
           height: height,
           width: menuWidth,
         }}
-      >
-        <Button black>
-          {date} {time}
-        </Button>
-        <Button black>5556.22 ℳ</Button>
-        <Button onClick={() => setShowConvoyModal(true)}>Convoys</Button>
-        <Button
-          onClick={() => {
-            setShowVehicleBuyModal(true);
-          }}
-        >
-          New Vehicle
-        </Button>
-      </SideMenu>
-    </div>
+      />
+      <ModalRouter />
+    </Container>
   );
 }

@@ -13,8 +13,8 @@ import Form from "react-bootstrap/esm/Form";
 import Row from "react-bootstrap/esm/Row";
 import { Item, WarehouseItem } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import debugModeContext from "../debugModeContext";
-import { SelectedCityContext } from "../screens/worldMap/selectedCityContext";
+import debugModeContext from "../../debugModeContext";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 export default function CityWarehouseForm() {
   const debugMode = useContext(debugModeContext);
@@ -25,7 +25,7 @@ export default function CityWarehouseForm() {
     addCityWarehouseItem,
   } = useContext(GameStateContext);
 
-  const cityID = useContext(SelectedCityContext);
+  const [cityID] = useCurrentSelectedCity();
 
   const [add, setAdd] = useState(false);
   const [items, setItems] = useState<Item[]>([]);

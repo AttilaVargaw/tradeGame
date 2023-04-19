@@ -6,7 +6,7 @@ import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
 import { TradeRouteProps } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { SelectedTradeRouteContext } from "../screens/worldMap/selectedTradeRouteContext";
+import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 
 export default function TradeRouteModal({
   isOpen,
@@ -15,7 +15,8 @@ export default function TradeRouteModal({
   isOpen: boolean;
   onRequestClose?: () => void;
 }): JSX.Element {
-  const routeID = useContext(SelectedTradeRouteContext);
+  const [routeID] = useSelectedRouteAtom();
+
   const gameState = useContext(GameStateContext);
 
   const [routeData, setRouteData] = useState<TradeRouteProps>();
