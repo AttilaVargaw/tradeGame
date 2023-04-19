@@ -11,12 +11,14 @@ import { Label } from "@Components/label";
 import { Button } from "@Components/button";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { CityEntity } from "@Services/GameState/tables/City";
+import CityPersonel from "./cityPersonel";
 
 enum CityModalSubPages {
   popularity,
   population,
   industry,
   warehouse,
+  personel,
 }
 
 export default function CityDataModal({
@@ -49,7 +51,7 @@ export default function CityDataModal({
             {`< ${cityData.name} >`}
           </Label>
         </Modal.Header>
-        <Modal.Body style={{ height: "80vh" }}>
+        <Modal.Body style={{ height: "70vh" }}>
           {selectedPage === CityModalSubPages.population &&
             cityData.fullPopulation > 0 && <CityPopulation />}
           {selectedPage === CityModalSubPages.industry && cityData.industry && (
@@ -58,6 +60,7 @@ export default function CityDataModal({
           {selectedPage === CityModalSubPages.warehouse && (
             <CityWarehouseForm />
           )}
+          {selectedPage === CityModalSubPages.personel && <CityPersonel />}
         </Modal.Body>
         <Container>
           <ButtonGroup
@@ -81,6 +84,7 @@ export default function CityDataModal({
             <Button
               active={selectedPage === CityModalSubPages.popularity}
               onClick={() => setSelectedPage(CityModalSubPages.popularity)}
+              disabled
             >
               Relations
             </Button>
@@ -89,6 +93,12 @@ export default function CityDataModal({
               onClick={() => setSelectedPage(CityModalSubPages.industry)}
             >
               Industry
+            </Button>
+            <Button
+              active={selectedPage === CityModalSubPages.personel}
+              onClick={() => setSelectedPage(CityModalSubPages.personel)}
+            >
+              Personel
             </Button>
             {cityData.fullPopulation > 0 && (
               <Button

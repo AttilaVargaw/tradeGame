@@ -3,11 +3,12 @@ import styled, { css } from "styled-components";
 export type styles = "led" | "painted";
 
 export const Container = styled.div<{ type?: styles }>`
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  padding-inline: 1em;
+  padding: 0.5em;
   display: flex;
   flex-direction: row;
+  width: max-content;
+  height: min-content;
+  margin: 0.2em;
 
   ${({ type }) => {
     if (type === "led")
@@ -22,16 +23,17 @@ export const Container = styled.div<{ type?: styles }>`
 
         font-family: "Seven Segment";
         border-radius: 0.5em;
+        justify-content: end;
       `;
     else if (type === "painted")
       return css`
         font: bold 200px arial, sans-serif;
-        background-color: black;
-        color: transparent;
-        text-shadow: 2px 2px 3px rgba(255, 255, 255, 0.5);
-        -webkit-background-clip: text;
-        -moz-background-clip: text;
-        background-clip: text;
+        color: whitesmoke;
+        background: black;
+        -webkit-text-stroke: 1px grey;
+        border: 0.1em solid white;
+        justify-content: center;
+        // -webkit-text-fill-color: white;
       `;
 
     return "";

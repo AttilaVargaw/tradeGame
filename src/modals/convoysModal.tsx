@@ -80,7 +80,7 @@ export const ConvoyModal = ({
           Convoys
         </Label>
       </Modal.Header>
-      <Modal.Body style={{ height: "80vh" }}>
+      <Modal.Body>
         <Container>
           {convoysData.map(({ ID, name, type }) => (
             <ConvoyItem key={ID} id={ID} name={name} />

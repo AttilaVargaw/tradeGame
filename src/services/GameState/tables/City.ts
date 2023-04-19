@@ -38,7 +38,7 @@ export default {
     { name: "name", type: "TEXT" },
     {
       name: "industrialBuildings",
-      references: "industrialBuildings",
+      // references: "industrialBuildings",
       type: "INTEGER",
     },
   ],

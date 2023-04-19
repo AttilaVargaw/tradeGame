@@ -2,9 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
-import OverlayTrigger from "react-bootstrap/esm/OverlayTrigger";
 import Row from "react-bootstrap/esm/Row";
-import Tooltip from "react-bootstrap/esm/Tooltip";
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
@@ -132,31 +130,6 @@ export default function CityPopulation() {
         </Col>
       </Row>
       <Row>
-        <Label type="painted">Guild personnel</Label>
-      </Row>
-      <Row>
-        <Col lg>
-          <Label type="painted">Master</Label>
-          <Label type="led">{0}</Label>
-        </Col>
-        <Col lg>
-          <Label type="painted">Mechanist</Label>
-          <Label type="led">{0}</Label>
-        </Col>
-        <Col lg>
-          <Label type="painted">Researcher</Label>
-          <Label type="led">{0}</Label>
-        </Col>
-        <Col lg>
-          <Label type="painted">Guard</Label>
-          <Label type="led">{0}</Label>
-        </Col>
-        <Col lg>
-          <Label type="painted">Cadet</Label>
-          <Label type="led">{0}</Label>
-        </Col>
-      </Row>
-      <Row>
         <Label type="painted">Daily requirements</Label>
       </Row>
       <Row>
@@ -173,13 +146,7 @@ export default function CityPopulation() {
               }) => (
                 <Row key={`dailyRequirement-${dailyRequirementID}`}>
                   <Col>
-                    <OverlayTrigger
-                      overlay={
-                        <Tooltip id="tooltip-disabled">Tooltip!</Tooltip>
-                      }
-                    >
-                      <Label type="painted">{nameKey}</Label>
-                    </OverlayTrigger>
+                    <Label type="painted">{nameKey}</Label>
                   </Col>
                   <Col>
                     <Label type="led">
