@@ -128,8 +128,6 @@ async function CreateConvoy(name: string) {
       attributes: { name, type: "" },
     })
   );
-
-  dbObservable.next({ type: DBEvents.newVehicleBought, data });
 }
 
 function GenerateVehicleName() {
@@ -147,6 +145,17 @@ const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
 
   dbObservable.next({ type: DBEvents.newVehicleBought, data });
 };
+
+async function GetVehicleCount() {
+  return (
+    await db.select<{ "count(ID)": number }[]>(
+      select({
+        table: Tables.Vehicle,
+        attributes: [["", "count(ID)"]],
+      })
+    )
+  )[0]["count(ID)"];
+}
 
 const addVehicle = async (type: number) => {
   const data = await db.execute(
@@ -677,6 +686,7 @@ export const GameState = {
   getConvoylessVehicles,
   addVehicleToConvoy,
   CreateConvoy,
+  GetVehicleCount,
 };
 
 export const GameStateContext = createContext(GameState);

@@ -10,12 +10,19 @@ export const Button = styled.div<{
     cursor: pointer;
   }
 
+  box-sizing: border-box;
+  height: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
   :active {
     border-top: 0.5em solid #444;
     border-bottom: 0.5em solid #111;
     border-left: 0.5em solid #222;
     border-right: 0.5em solid #222;
     background: ${({ black }) => (black ? "#111" : "#555")};
+    font-size: 1.4em;
   }
 
   background: ${({ black }) => (black ? "#111" : "grey")};

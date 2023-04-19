@@ -1,7 +1,9 @@
 import { SevenDigitClock } from "@Components/SevenDigitClock";
 import { Button } from "@Components/button";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { useCallback } from "react";
+import { DBEvents } from "@Services/GameState/dbTypes";
+import { GameStateContext } from "@Services/GameState/gameState";
+import { useCallback, useContext, useEffect, useState } from "react";
 import styled, { CSSProperties } from "styled-components";
 
 const Container = styled.div`
@@ -15,6 +17,23 @@ const Container = styled.div`
   padding: 1em;
   z-index: 1000;
 `;
+
+function VehicleCountButton() {
+  const gameState = useContext(GameStateContext);
+
+  const [vehicleCount, setVehicleCount] = useState(0);
+
+  useEffect(() => {
+    gameState.dbObservable.subscribe((type) => {
+      if (type.type === DBEvents.newVehicleBought) {
+        gameState.GetVehicleCount().then(setVehicleCount);
+        gameState.GetVehicleCount().then(console.log);
+      }
+    });
+  }, [gameState]);
+
+  return <Button black>Vehicles {vehicleCount}</Button>;
+}
 
 function AccountingButton() {
   return <Button black>5556.22 ℳ</Button>;
@@ -35,6 +54,7 @@ export default function SideMenu({ style }: { style: CSSProperties }) {
     <Container style={style}>
       <SevenDigitClock />
       <AccountingButton />
+      <VehicleCountButton />
       <Button onClick={onConvoysClick}>Convoys</Button>
       <Button onClick={onVehiclesClick}>New Vehicle</Button>
     </Container>

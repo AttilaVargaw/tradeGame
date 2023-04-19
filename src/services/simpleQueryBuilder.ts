@@ -20,18 +20,26 @@ import {
 
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
 
-export type SelectAttribute<ATTRIBUTES> = ([ATTRIBUTES, string] | ATTRIBUTES)[];
+export type SelectAttribute<ATTRIBUTES> = (
+  | [ATTRIBUTES, string, string]
+  | [ATTRIBUTES, string]
+  | ATTRIBUTES
+  | string
+)[];
 
 export type SelectEvent = {
   table: Tables;
   attributes: [
     Tables | string,
     (
-      | SelectAttribute<VehicleAttr>
-      | SelectAttribute<VehicleTypeAttr>
-      | SelectAttribute<ConvoyAttr>
-      | SelectAttribute<CityAttr>
-      | SelectAttribute<TradeRouteAttr>
+      | (
+          | SelectAttribute<VehicleAttr>
+          | SelectAttribute<VehicleTypeAttr>
+          | SelectAttribute<ConvoyAttr>
+          | SelectAttribute<CityAttr>
+          | SelectAttribute<TradeRouteAttr>
+        )
+      | string
     )
   ][];
   where?: WhereEquitation[];
@@ -114,13 +122,17 @@ function joinEquitationToString({
 export function select({ attributes, join, where, table }: SelectEvent) {
   return `SELECT ${attributes
     .map(([tableName, attrs]) => {
-      return attrs.map((attr) =>
-        typeof attr === "string"
-          ? `${tableName}.${attr}`
-          : `${tableName ? `${tableName}.` : ""}${attr[0]}${
-              attr[1] ? ` as ${attr[1]}` : ""
-            }`
-      );
+      if (typeof attrs === "string") {
+        return attrs;
+      } else {
+        return attrs.map((attr) =>
+          typeof attr === "string"
+            ? `${tableName}.${attr}`
+            : `${tableName !== "" ? `${tableName}.` : ""}${attr[0]}${
+                attr[1] ? ` as ${attr[1]}` : ""
+              }`
+        );
+      }
     })
     .join(",")} from ${table}${
     join?.length || 0 > 0
