@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import Container from "react-bootstrap/esm/Container";
+
 import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
 import Col from "react-bootstrap/esm/Col";
-import Modal from "react-bootstrap/esm/Modal";
 import { GameStateContext } from "@Services/GameState/gameState";
 import CityIndustry from "./cityIndustry";
 import CityPopulation from "./cityPopulation";
@@ -12,6 +11,8 @@ import { Button } from "@Components/button";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { CityEntity } from "@Services/GameState/tables/City";
 import CityPersonel from "./cityPersonel";
+import styled from "styled-components";
+import Modal from "../Modal";
 
 enum CityModalSubPages {
   popularity,
@@ -21,13 +22,11 @@ enum CityModalSubPages {
   personel,
 }
 
-export default function CityDataModal({
-  isOpen,
-  onRequestClose,
-}: {
-  isOpen: boolean;
-  onRequestClose?: () => void;
-}): JSX.Element | null {
+const Container = styled.div`
+  width: 100%;
+`;
+
+export default function CityDataModal(): JSX.Element | null {
   const [cityID] = useCurrentSelectedCity();
   const gameState = useContext(GameStateContext);
 
@@ -45,34 +44,35 @@ export default function CityDataModal({
 
   if (cityData) {
     return (
-      <Modal show={isOpen} onHide={onRequestClose} size="xl">
-        <Modal.Header>
-          <Label type="led" style={{ width: "100%" }}>
-            {`< ${cityData.name} >`}
-          </Label>
-        </Modal.Header>
-        <Modal.Body style={{ height: "70vh" }}>
-          {selectedPage === CityModalSubPages.population &&
-            cityData.fullPopulation > 0 && <CityPopulation />}
-          {selectedPage === CityModalSubPages.industry && cityData.industry && (
-            <CityIndustry />
-          )}
-          {selectedPage === CityModalSubPages.warehouse && (
-            <CityWarehouseForm />
-          )}
-          {selectedPage === CityModalSubPages.personel && <CityPersonel />}
-        </Modal.Body>
-        <Container>
-          <ButtonGroup
-            as={Col}
+      <Modal
+        header={() => (
+          <div
+            style={{ paddingLeft: "2em", paddingRight: "2em", width: "100%" }}
+          >
+            <Label type="led">{`< ${cityData.name} >`}</Label>
+          </div>
+        )}
+        body={() => {
+          return (
+            <>
+              {selectedPage === CityModalSubPages.population &&
+                cityData.fullPopulation > 0 && <CityPopulation />}
+              {selectedPage === CityModalSubPages.industry &&
+                cityData.industry && <CityIndustry />}
+              {selectedPage === CityModalSubPages.warehouse && (
+                <CityWarehouseForm />
+              )}
+              {selectedPage === CityModalSubPages.personel && <CityPersonel />}
+            </>
+          );
+        }}
+        footer={() => (
+          <div
             style={{
               width: "100%",
-              position: "relative",
-              margin: "auto",
-              left: 0,
-              right: 0,
-              paddingTop: "1em",
-              paddingBottom: "1em",
+              margin: "1em",
+              display: "flex",
+              flexDirection: "row",
             }}
           >
             <Button
@@ -108,9 +108,9 @@ export default function CityDataModal({
                 Population
               </Button>
             )}
-          </ButtonGroup>
-        </Container>
-      </Modal>
+          </div>
+        )}
+      />
     );
   } else {
     return null;

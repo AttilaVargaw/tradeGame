@@ -15,6 +15,7 @@ export type DailyRequirement = {
   dailyRequirementID: number;
   dailyRequirement: number;
   descriptionKey: number;
+  translation: string;
 };
 
 export type Item = {

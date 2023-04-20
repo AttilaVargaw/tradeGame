@@ -105,7 +105,7 @@ export const creatorSQL = `
     INSERT INTO Item VALUES(4,10,20,'basicFood','basicFoodDesc');
     INSERT INTO Item VALUES(5,10,10,'mre','mre');
     INSERT INTO Item VALUES(6,10,10,'goodFood','goodFoodDesc');
-    INSERT INTO Item VALUES(7,10,10,'basicClothesDesc','basicClothesDesc');
+    INSERT INTO Item VALUES(7,10,10,'basicClothes','basicClothesDesc');
     INSERT INTO Item VALUES(8,10,10,'workClothes','workClothes');
     INSERT INTO Item VALUES(9,10,10,'gold','goldDesc');
     INSERT INTO Item VALUES(10,10,10,'silver','silverDesc');
@@ -120,6 +120,8 @@ export const creatorSQL = `
     INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss');
     INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun');
     INSERT INTO Item VALUES(21,10,10,'medicaments','medicaments');
+    INSERT INTO Item VALUES(22,10,10,'advMedicaments','advMedicaments');
+    INSERT INTO Item VALUES(23,10,10,'appliances','appliancesDesc');
 
     CREATE TABLE IndustrialBuildings (ID INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, IndustrialBuilding INTEGER, city INTEGER);
     INSERT INTO IndustrialBuildings VALUES(1,1,1,1);

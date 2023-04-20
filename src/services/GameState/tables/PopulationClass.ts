@@ -19,8 +19,8 @@ export default {
     {
       name: "Aristocracy",
     },
-    { name: "Mutants" },
     { name: "Wealthy" },
     { name: "Workers" },
+    { name: "Mutants" },
   ],
 } as TableData<PopulationClass>;

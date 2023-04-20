@@ -25,5 +25,7 @@ export default {
   initData: [
     { city: 1, num: 1000, populationClass: 1 },
     { city: 1, num: 15000, populationClass: 2 },
+    { city: 1, num: 4000, populationClass: 3 },
+    { city: 1, num: 20000, populationClass: 4 },
   ],
 } as TableData<CityPopulationClassData>;

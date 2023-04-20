@@ -1,12 +1,16 @@
 import Form from "react-bootstrap/esm/Form";
 import styled from "styled-components";
 
-export const Input = styled(Form.Control)`
+export const Input = styled.input`
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   color: lightgreen;
   background: #111;
-  font-size: 1.5em;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 0.5em;
+  margin: 0.2em;
+  text-align: end;
 
   :focus,
   :hover {
@@ -23,13 +27,15 @@ export const Input = styled(Form.Control)`
   font-family: "Seven Segment";
 `;
 
-export const Select = styled(Form.Select)`
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
+export const Select = styled.select`
+  padding: 0.5em;
   color: lightgreen;
   background: #111;
-  font-size: 1.5em;
-  border: 2px solid grey;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 0.5em;
+  margin: 0.2em;
+  text-align: end;
 
   :focus,
   :hover {

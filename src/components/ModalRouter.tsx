@@ -14,10 +14,7 @@ export function ModalRouter() {
 
   return (
     <>
-      <CityDataModal
-        isOpen={currentModal === "cityInfo"}
-        onRequestClose={closeModal}
-      />
+      {currentModal === "cityInfo" && <CityDataModal />}
       <ConvoyModal
         isOpen={currentModal === "convoys"}
         onRequestClose={closeModal}

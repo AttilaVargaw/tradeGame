@@ -528,12 +528,13 @@ const addCityWarehouseItem = (item: number, number: number, cityID: number) => {
 
 const getCityDailyConsumption = (ID: number, classID: number) => {
   return db.select<DailyRequirement[]>(
-    `select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey
+    `select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey, T.translation
         from City as C
         inner join CityPopulationClass as CPC on C.ID = CPC.city
         inner join PopulationClass as PC on PC.ID = CPC.populationClass
         inner join ClassDailyRequirement as CDR on CDR.Class = PC.ID
         inner join Item as I on I.ID = CDR.item
+        inner join Translations as T on I.nameKey = T.key
         where C.ID = $1 AND PC.ID = $2`,
     [ID, classID]
   );

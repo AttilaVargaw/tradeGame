@@ -6,7 +6,7 @@ export const Container = styled.div<{ type?: styles }>`
   padding: 0.5em;
   display: flex;
   flex-direction: row;
-  width: max-content;
+  width: 100%f;
   height: min-content;
   margin: 0.2em;
 
@@ -44,7 +44,7 @@ export const Container = styled.div<{ type?: styles }>`
   }}
 
   text-align: center;
-  font-size: 1.5em;
+  font-size: 1.2em;
 `;
 
 export function Label({

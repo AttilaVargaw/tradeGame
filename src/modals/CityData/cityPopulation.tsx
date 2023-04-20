@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEventHandler,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import Form from "react-bootstrap/esm/Form";
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
@@ -72,8 +79,8 @@ export default function CityPopulation() {
     [gameState, reload]
   );
 
-  const setNewClass = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) => {
+  const setNewClass = useCallback<ChangeEventHandler<HTMLSelectElement>>(
+    ({ target: { value } }) => {
       setNewCityClass((old) => ({
         ...old,
         populationClass: Number.parseInt(value),
@@ -83,13 +90,16 @@ export default function CityPopulation() {
     [reload]
   );
 
-  const addNewClass = useCallback(async () => {
-    const { city, populationClass } = newCityClass;
-    if (city && populationClass) {
-      await gameState.addCityClass(city, populationClass);
-      setReload(!reload);
-    }
-  }, [gameState, newCityClass, reload]);
+  const addNewClass = useCallback(
+    async function () {
+      const { city, populationClass } = newCityClass;
+      if (city && populationClass) {
+        await gameState.addCityClass(city, populationClass);
+        setReload(!reload);
+      }
+    },
+    [gameState, newCityClass, reload]
+  );
 
   const multiplyCeil = useMemo(
     () => (a: number, b: number) => Math.ceil(a * b),
@@ -102,7 +112,9 @@ export default function CityPopulation() {
         {classes.map(({ name, num, ID }) => (
           <Col key={ID}>
             <Row>
-              <Label type="painted">{name}</Label>
+              <Label style={{ width: "100%" }} type="painted">
+                {name}
+              </Label>
             </Row>
             {debugMode ? (
               <Input
@@ -117,7 +129,7 @@ export default function CityPopulation() {
           </Col>
         ))}
         <Col>
-          <Label type="painted">Total population</Label>
+          <Label type="painted">Total</Label>
           <Label type="led">{fullPopulation}</Label>
         </Col>
         {debugMode && notExistingClasses.length > 0 && (
@@ -148,21 +160,23 @@ export default function CityPopulation() {
       <Row>
         {classes.map(({ dailyRequirement, name, ID, num: citizenNum }) => (
           <Col key={`class-${ID}`}>
-            {" "}
             <Label type="painted">{name}</Label>
             {dailyRequirement.map(
               ({
                 nameKey,
                 dailyRequirementID,
                 dailyRequirement,
+                translation,
                 // descriptionKey,
               }) => (
                 <Row key={`dailyRequirement-${dailyRequirementID}`}>
                   <Col>
-                    <Label type="painted">{nameKey}</Label>
+                    <Label style={{ width: "100%" }} type="painted">
+                      {translation}
+                    </Label>
                   </Col>
                   <Col>
-                    <Label type="led">
+                    <Label style={{ width: "8em" }} type="led">
                       {multiplyCeil(dailyRequirement, citizenNum)}
                     </Label>
                   </Col>
