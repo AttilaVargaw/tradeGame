@@ -29,12 +29,13 @@ export const Select = styled(Form.Select)`
   color: lightgreen;
   background: #111;
   font-size: 1.5em;
+  border: 2px solid grey;
 
   :focus,
   :hover {
     color: greenyellow;
     cursor: pointer;
-    border-color: #111;
+    border-color: greenyellow;
     background: #111;
   }
 

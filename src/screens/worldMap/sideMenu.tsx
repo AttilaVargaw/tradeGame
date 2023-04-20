@@ -75,12 +75,17 @@ export default function SideMenu({ style }: { style: CSSProperties }) {
     setCurrentModal("buyVehicle");
   }, [setCurrentModal]);
 
+  const onEncyklopediaClick = useCallback(() => {
+    // setCurrentModal()
+  }, [setCurrentModal]);
+
   return (
     <Container style={style}>
       <SevenDigitClock />
       <AccountingButton />
       <VehicleCountButton onClick={onVehiclesClick} />
       <ConvoyCountButton onClick={onConvoysClick} />
+      <Button onClick={onEncyklopediaClick}>Encyclopedia</Button>
     </Container>
   );
 }

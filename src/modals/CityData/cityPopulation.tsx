@@ -1,8 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import Col from "react-bootstrap/esm/Col";
-import Container from "react-bootstrap/esm/Container";
+
 import Form from "react-bootstrap/esm/Form";
-import Row from "react-bootstrap/esm/Row";
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
@@ -10,6 +8,25 @@ import { Input, Select } from "@Components/input";
 import { Button } from "@Components/button";
 import { Label } from "@Components/label";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import styled from "styled-components";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const Row = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const Col = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+`;
 
 export default function CityPopulation() {
   const [cityID] = useCurrentSelectedCity();
@@ -83,7 +100,7 @@ export default function CityPopulation() {
     <Container style={{ margin: "16pt" }}>
       <Row>
         {classes.map(({ name, num, ID }) => (
-          <Col lg key={ID}>
+          <Col key={ID}>
             <Row>
               <Label type="painted">{name}</Label>
             </Row>
@@ -99,13 +116,17 @@ export default function CityPopulation() {
             )}
           </Col>
         ))}
+        <Col>
+          <Label type="painted">Total population</Label>
+          <Label type="led">{fullPopulation}</Label>
+        </Col>
         {debugMode && notExistingClasses.length > 0 && (
-          <Col lg>
+          <Col>
             <Row>
               <Label type="painted">New class</Label>
             </Row>
             <Form.Group as={Row}>
-              <Col sm="8">
+              <Col>
                 <Select onChange={setNewClass}>
                   {notExistingClasses.map(({ ID, name }) => (
                     <option key={ID} value={ID}>
@@ -114,7 +135,7 @@ export default function CityPopulation() {
                   ))}
                 </Select>
               </Col>
-              <Col sm="2">
+              <Col>
                 <Button onClick={addNewClass}>Add</Button>
               </Col>
             </Form.Group>
@@ -122,19 +143,11 @@ export default function CityPopulation() {
         )}
       </Row>
       <Row>
-        <Col lg>
-          <span style={{ display: "flex", justifyContent: "space-around" }}>
-            <Label type="painted">Total population</Label>
-            <Label type="led">{fullPopulation}</Label>
-          </span>
-        </Col>
-      </Row>
-      <Row>
         <Label type="painted">Daily requirements</Label>
       </Row>
       <Row>
         {classes.map(({ dailyRequirement, name, ID, num: citizenNum }) => (
-          <Col lg key={`class-${ID}`}>
+          <Col key={`class-${ID}`}>
             {" "}
             <Label type="painted">{name}</Label>
             {dailyRequirement.map(

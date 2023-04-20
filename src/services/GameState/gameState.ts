@@ -1,6 +1,8 @@
 import { createContext } from "react";
 import { creatorSQL } from "../creatorSQL";
 
+import { appLocalDataDir } from "@tauri-apps/api/path";
+
 import { BehaviorSubject } from "rxjs";
 
 import {
@@ -42,84 +44,96 @@ let db: Database;
 
 const dbObservable = new BehaviorSubject<DBEvent>({ type: DBEvents.NOP });
 
-async function CreateAndFillTable<T>({
-  createData,
-  name,
-  initData,
-}: TableData<T>) {
-  await db
-    .execute(create(name, createData))
-    .then(console.log)
-    .catch((e) => console.error(e, name, createData));
+function DropTableIfExist(tableName: string) {
+  return `drop table if exists ${tableName};`;
+}
 
+function FillTable<T>({ name, initData }: TableData<T>) {
   if (initData) {
-    return Promise.all(
-      initData.map((attributes) => {
-        return db
-          .execute(insert({ table: name, attributes } as InsertEvent))
-          .then(() => console.log(name, attributes))
-          .catch((e) => console.error(e, name, attributes));
-      })
-    );
-  } else {
-    return Promise.resolve();
+    return initData
+      .map((attributes) => insert({ table: name, attributes } as InsertEvent))
+      .join("");
   }
+  return "";
 }
 
 const init = async () => {
   db = await Database.load("sqlite:tradegame.db");
+  console.log(await appLocalDataDir());
 
-  await db.execute("PRAGMA foreign_keys=OFF;");
+  const creatorSQL1 =
+    "PRAGMA foreign_keys=OFF;" +
+    DropTableIfExist(CityTypes.name) +
+    DropTableIfExist(ClassDailyRequirements.name) +
+    DropTableIfExist(PopulationClasses.name) +
+    DropTableIfExist(vehicleTypes.name) +
+    DropTableIfExist(City.name) +
+    DropTableIfExist(CityPopulationClass.name) +
+    DropTableIfExist(Tables.TradeRoutes) +
+    DropTableIfExist(Tables.Convoy) +
+    DropTableIfExist(Tables.Vehicle);
+  const creatorSQL2 =
+    "BEGIN TRANSACTION;" +
+    create(CityTypes.name, CityTypes.createData) +
+    create(ClassDailyRequirements.name, ClassDailyRequirements.createData) +
+    create(PopulationClasses.name, PopulationClasses.createData) +
+    create(vehicleTypes.name, vehicleTypes.createData) +
+    create(City.name, City.createData) +
+    create(CityPopulationClass.name, CityPopulationClass.createData) +
+    create(Tables.TradeRoutes, [
+      { name: "CityA", type: "INTEGER" /*references: "City"*/ },
+      { name: "CityB", type: "INTEGER" /*references: "City"*/ },
+      { name: "name", type: "TEXT" },
+    ]) +
+    create(Tables.Convoy, [
+      { name: "name", type: "TEXT" },
+      { name: "posY", type: "REAL" },
+      { name: "posX", type: "REAL" },
+      { name: "type", type: "INTEGER" },
+    ]) +
+    create(Tables.Vehicle, [
+      { name: "name", type: "TEXT" },
+      {
+        name: "type",
+        type: "TEXT",
+        //references: "VehicleTypes",
+      },
+      { name: "posY", type: "REAL" },
+      { name: "posX", type: "REAL" },
+      {
+        name: "convoy",
+        type: "INTEGER",
+        //references: "Convoy",
+      },
+    ]) +
+    "COMMIT;";
 
-  await CreateAndFillTable(CityTypes);
-  await CreateAndFillTable(ClassDailyRequirements);
-  await CreateAndFillTable(PopulationClasses);
-  await CreateAndFillTable(vehicleTypes);
-  await CreateAndFillTable(City);
-  await CreateAndFillTable(CityPopulationClass);
+  const creatorSQL3 =
+    "BEGIN TRANSACTION;" +
+    FillTable(CityTypes) +
+    FillTable(ClassDailyRequirements) +
+    FillTable(PopulationClasses) +
+    FillTable(vehicleTypes) +
+    FillTable(City) +
+    FillTable(CityPopulationClass) +
+    "COMMIT;";
 
-  await Promise.all([
-    db.execute(
-      create(Tables.TradeRoutes, [
-        { name: "CityA", type: "INTEGER", references: "City" },
-        { name: "CityB", type: "INTEGER", references: "City" },
-        { name: "name", type: "TEXT" },
-      ])
-    ),
-    db.execute(
-      create(Tables.Convoy, [
-        { name: "name", type: "TEXT" },
-        { name: "posY", type: "REAL" },
-        { name: "posX", type: "REAL" },
-        { name: "type", type: "INTEGER" },
-      ])
-    ),
-    db.execute(
-      create(Tables.Vehicle, [
-        { name: "name", type: "TEXT" },
-        {
-          name: "type",
-          type: "TEXT",
-          references: "VehicleTypes",
-          referencesOn: "ID",
-        },
-        { name: "posY", type: "REAL" },
-        { name: "posX", type: "REAL" },
-        {
-          name: "convoy",
-          type: "INTEGER",
-          references: "Convoy",
-          referencesOn: "ID",
-        },
-      ])
-    ),
-  ]);
-
-  await db.execute(creatorSQL);
-
-  await db.execute("PRAGMA foreign_keys=OFF;");
+  console.log(FillTable(CityTypes));
 
   dbObservable.next({ type: DBEvents.initialized });
+
+  // console.log(creatorSQL3);
+
+  await db.execute(creatorSQL1);
+  console.log("creatorSQL1");
+
+  await db.execute(creatorSQL2);
+  console.log("creatorSQL2");
+
+  await db.execute(creatorSQL3);
+  console.log("creatorSQL3");
+
+  await db.execute(creatorSQL);
 };
 
 async function CreateConvoy(name: string) {
@@ -140,13 +154,6 @@ function GenerateVehicleName() {
 }
 
 const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
-  console.log(
-    update({
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "ID"], value: VehicleID }],
-      updateRows: [["convoy", convoyID]],
-    })
-  );
   const data = await db.execute(
     update({
       table: Tables.Vehicle,

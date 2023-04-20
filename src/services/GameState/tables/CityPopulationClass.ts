@@ -19,7 +19,7 @@ export default {
       name: "populationClass",
       type: "INTEGER",
     },
-    { name: "city", type: "INTEGER", references: "City" },
+    { name: "city", type: "INTEGER" /*references: "City"*/ },
   ],
   name: "CityPopulationClass",
   initData: [

@@ -1,12 +1,11 @@
 export const creatorSQL = `
-    PRAGMA foreign_keys=OFF;
     drop table if exists IndustrialBuilding;
     drop table if exists IndustrialBuildings;
     drop table if exists Item;
     drop table if exists Translations;
     drop table if exists IndustrialBuildingDailyRequirement;
     drop table if exists CityWarehouse;
-    PRAGMA foreign_keys=OFF;
+
     BEGIN TRANSACTION;
 
     CREATE TABLE Translations ("key" TEXT PRIMARY KEY, lang TEXT, translation TEXT);
@@ -85,21 +84,21 @@ export const creatorSQL = `
     INSERT INTO Translations VALUES('mysteriousArtifactsDesc','en','Some strange items. The scientific community is certainly interested in these.');
     INSERT INTO Translations VALUES('mysteriousMachineryDesc','en','Some strange, yet familiar machines. Can range from oil pumps to electronic converters. The scientific community is certainly interested in these.');
 
-    CREATE TABLE IndustrialBuildingDailyRequirement (ID INTEGER PRIMARY KEY AUTOINCREMENT, industrialBuilding REFERENCES IndustrialBuilding (ID), item REFERENCES Item (ID), num REAL);
+    CREATE TABLE IndustrialBuildingDailyRequirement (ID INTEGER PRIMARY KEY AUTOINCREMENT, industrialBuilding INTEGER, item INTEGER, num REAL);
     INSERT INTO IndustrialBuildingDailyRequirement VALUES(1,3,1,1000.0);
     INSERT INTO IndustrialBuildingDailyRequirement VALUES(2,1,17,-1000.0);
     INSERT INTO IndustrialBuildingDailyRequirement VALUES(3,3,1,1000.0);
 
-    CREATE TABLE IndustrialBuilding (ID INTEGER PRIMARY KEY, nameKey TEXT REFERENCES Translations ("key") UNIQUE, dailyOutput INTEGER REFERENCES DailyRequirement (ID) UNIQUE);
+    CREATE TABLE IndustrialBuilding (ID INTEGER PRIMARY KEY, nameKey TEXT, dailyOutput INTEGER);
     INSERT INTO IndustrialBuilding VALUES(1,'artificalFoodFactory',NULL);
     INSERT INTO IndustrialBuilding VALUES(2,'waterPurificator',NULL);
     INSERT INTO IndustrialBuilding VALUES(3,'hidrophonic farm',NULL);
 
-    CREATE TABLE CityWarehouse (ID INTEGER PRIMARY KEY AUTOINCREMENT, city REFERENCES City (ID), item REFERENCES Item (ID), number REAL, UNIQUE (city, item));
+    CREATE TABLE CityWarehouse (ID INTEGER PRIMARY KEY AUTOINCREMENT, city INTEGER, item INTEGER, number REAL, UNIQUE (city, item));
     INSERT INTO CityWarehouse VALUES(1,1,1,1005.0);
     INSERT INTO CityWarehouse VALUES(2,3,3,5.0);
 
-    CREATE TABLE Item (ID INTEGER PRIMARY KEY AUTOINCREMENT, startPrice INTEGER, endPrice INTEGER, nameKey TEXT REFERENCES Translations ("key"), descriptionKey TEXT REFERENCES Translations ("key"));
+    CREATE TABLE Item (ID INTEGER PRIMARY KEY AUTOINCREMENT, startPrice INTEGER, endPrice INTEGER, nameKey TEXT, descriptionKey TEXT);
     INSERT INTO Item VALUES(1,10,10,'water','waterDesc');
     INSERT INTO Item VALUES(2,10,10,'luxuryFood','luxuryFoodDesc');
     INSERT INTO Item VALUES(3,10,10,'luxClothes','luxClothesDesc');
@@ -122,18 +121,11 @@ export const creatorSQL = `
     INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun');
     INSERT INTO Item VALUES(21,10,10,'medicaments','medicaments');
 
-    CREATE TABLE IndustrialBuildings (ID INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, IndustrialBuilding INTEGER REFERENCES IndustrialBuilding, city REFERENCES City (ID));
+    CREATE TABLE IndustrialBuildings (ID INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, IndustrialBuilding INTEGER, city INTEGER);
     INSERT INTO IndustrialBuildings VALUES(1,1,1,1);
     INSERT INTO IndustrialBuildings VALUES(2,2,2,1);
     INSERT INTO IndustrialBuildings VALUES(3,1,3,1);
     
     DELETE FROM sqlite_sequence;
-    INSERT INTO sqlite_sequence VALUES('CityTypes',4);
-    INSERT INTO sqlite_sequence VALUES('ClassDailyRequirement',5);
-    INSERT INTO sqlite_sequence VALUES('City',11);
-    INSERT INTO sqlite_sequence VALUES('IndustrialBuildingDailyRequirement',3);
-    INSERT INTO sqlite_sequence VALUES('CityWarehouse',2);
-    INSERT INTO sqlite_sequence VALUES('Item',21);
-    INSERT INTO sqlite_sequence VALUES('IndustrialBuildings',3);
     COMMIT;
 `;

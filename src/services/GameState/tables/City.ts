@@ -34,7 +34,7 @@ export default {
   createData: [
     { name: "posX", type: "INTEGER" },
     { name: "posY", type: "INTEGER" },
-    { name: "type", type: "INTEGER", references: "CityTypes" },
+    { name: "type", type: "INTEGER" /*references: "CityTypes"*/ },
     { name: "name", type: "TEXT" },
     {
       name: "industrialBuildings",

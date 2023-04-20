@@ -231,5 +231,5 @@ export function insert({ table, attributes }: InsertEvent) {
           typeof e === "string" ? '"' : ""
         }`
     )
-    .join(",")})`;
+    .join(",")});`;
 }
