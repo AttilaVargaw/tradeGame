@@ -91,6 +91,7 @@ const init = async () => {
         { name: "name", type: "TEXT" },
         { name: "posY", type: "REAL" },
         { name: "posX", type: "REAL" },
+        { name: "type", type: "INTEGER" },
       ])
     ),
     db.execute(
@@ -125,9 +126,13 @@ async function CreateConvoy(name: string) {
   const data = await db.execute(
     insert({
       table: Tables.Convoy,
-      attributes: { name, type: "" },
+      attributes: { name, type: "", posX: 0, posY: 0 },
     })
   );
+
+  dbObservable.next({ type: DBEvents.newConvoyCreated, data });
+
+  return data.lastInsertId;
 }
 
 function GenerateVehicleName() {
@@ -135,15 +140,22 @@ function GenerateVehicleName() {
 }
 
 const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
+  console.log(
+    update({
+      table: Tables.Vehicle,
+      where: [{ A: [Tables.Vehicle, "ID"], value: VehicleID }],
+      updateRows: [["convoy", convoyID]],
+    })
+  );
   const data = await db.execute(
     update({
       table: Tables.Vehicle,
       where: [{ A: [Tables.Vehicle, "ID"], value: VehicleID }],
-      updateRows: [[Tables.Vehicle, "convoy", convoyID]],
+      updateRows: [["convoy", convoyID]],
     })
   );
 
-  dbObservable.next({ type: DBEvents.newVehicleBought, data });
+  dbObservable.next({ type: DBEvents.vehicleJoinedConvoy, data });
 };
 
 async function GetVehicleCount() {
@@ -151,6 +163,17 @@ async function GetVehicleCount() {
     await db.select<{ "count(ID)": number }[]>(
       select({
         table: Tables.Vehicle,
+        attributes: [["", "count(ID)"]],
+      })
+    )
+  )[0]["count(ID)"];
+}
+
+async function GetConvoiyCount() {
+  return (
+    await db.select<{ "count(ID)": number }[]>(
+      select({
+        table: Tables.Convoy,
         attributes: [["", "count(ID)"]],
       })
     )
@@ -687,6 +710,7 @@ export const GameState = {
   addVehicleToConvoy,
   CreateConvoy,
   GetVehicleCount,
+  GetConvoiyCount,
 };
 
 export const GameStateContext = createContext(GameState);

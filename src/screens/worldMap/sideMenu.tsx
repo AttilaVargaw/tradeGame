@@ -18,7 +18,7 @@ const Container = styled.div`
   z-index: 1000;
 `;
 
-function VehicleCountButton() {
+function VehicleCountButton({ onClick }: { onClick: () => void }) {
   const gameState = useContext(GameStateContext);
 
   const [vehicleCount, setVehicleCount] = useState(0);
@@ -27,12 +27,37 @@ function VehicleCountButton() {
     gameState.dbObservable.subscribe((type) => {
       if (type.type === DBEvents.newVehicleBought) {
         gameState.GetVehicleCount().then(setVehicleCount);
-        gameState.GetVehicleCount().then(console.log);
       }
     });
   }, [gameState]);
 
-  return <Button black>Vehicles {vehicleCount}</Button>;
+  return (
+    <Button black onClick={onClick}>
+      Vehicles: {vehicleCount}
+    </Button>
+  );
+}
+
+function ConvoyCountButton({ onClick }: { onClick: () => void }) {
+  const gameState = useContext(GameStateContext);
+
+  const [convoyCount, setConvoyCount] = useState(0);
+
+  useEffect(() => {
+    const subscribtion = gameState.dbObservable.subscribe((type) => {
+      if (type.type === DBEvents.newConvoyCreated) {
+        gameState.GetConvoiyCount().then(setConvoyCount);
+      }
+    });
+
+    return () => subscribtion.unsubscribe();
+  }, [gameState]);
+
+  return (
+    <Button black onClick={onClick}>
+      Convoys: {convoyCount}
+    </Button>
+  );
 }
 
 function AccountingButton() {
@@ -54,9 +79,8 @@ export default function SideMenu({ style }: { style: CSSProperties }) {
     <Container style={style}>
       <SevenDigitClock />
       <AccountingButton />
-      <VehicleCountButton />
-      <Button onClick={onConvoysClick}>Convoys</Button>
-      <Button onClick={onVehiclesClick}>New Vehicle</Button>
+      <VehicleCountButton onClick={onVehiclesClick} />
+      <ConvoyCountButton onClick={onConvoysClick} />
     </Container>
   );
 }

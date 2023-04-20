@@ -163,7 +163,7 @@ export function update({
   join,
   where,
 }: {
-  updateRows: [string, string, string | number | null][];
+  updateRows: [string, string | number | null][];
   table: Tables;
   where?: WhereEquitation[];
   join?: Join[];
@@ -179,7 +179,7 @@ export function update({
       : ""
   }
   SET ${updateRows
-    .map(([table, attr, value]) => `${table}.${attr} = ${InputToString(value)}`)
+    .map(([attr, value]) => `${attr} = ${InputToString(value)}`)
     .join(",")}
   ${
     where?.length || 0 > 0

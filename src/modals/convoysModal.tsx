@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import Button from "react-bootstrap/esm/Button";
 import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
 import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
@@ -11,6 +10,7 @@ import { GameStateContext } from "@Services/GameState/gameState";
 import FormGroup from "react-bootstrap/esm/FormGroup";
 import { Input, Select } from "@Components/input";
 import { Label } from "@Components/label";
+import { Button } from "@Components/button";
 
 export const ConvoyItem = ({
   icon,
@@ -48,15 +48,20 @@ export const ConvoyModal = ({
   useEffect(() => {
     if (isOpen) {
       gameState.getConvoys().then(setConvoyData);
-      gameState.getConvoylessVehicles().then(setAvailableCommandVehicles);
-      gameState.getConvoylessVehicles().then(console.log);
+      gameState.getConvoylessVehicles().then((commandVehicles) => {
+        setAvailableCommandVehicles(commandVehicles);
+        setNewConvoyData({
+          commandVehicle: commandVehicles[0].ID,
+          name: `Convoy ${commandVehicles[0].name}`,
+        });
+      });
     }
   }, [gameState, isOpen]);
 
   const [newConvoyData, setNewConvoyData] = useState<{
     name: string;
-    commandVehicle: string;
-  }>({ name: "", commandVehicle: "" });
+    commandVehicle: number | null;
+  }>({ name: "", commandVehicle: null });
 
   const setNewConvoyName = useCallback<
     React.ChangeEventHandler<HTMLInputElement>
@@ -68,10 +73,23 @@ export const ConvoyModal = ({
     ({
       target: { value: commandVehicle },
     }: React.ChangeEvent<HTMLSelectElement>) => {
-      setNewConvoyData((old) => ({ ...old, commandVehicle }));
+      setNewConvoyData((old) => ({
+        ...old,
+        commandVehicle: Number.parseInt(commandVehicle),
+      }));
     },
     []
   );
+
+  const onCreate = useCallback(() => {
+    const { commandVehicle } = newConvoyData;
+
+    if (commandVehicle) {
+      gameState.CreateConvoy(newConvoyData.name).then((id) => {
+        gameState.addVehicleToConvoy(id, commandVehicle);
+      });
+    }
+  }, [gameState, newConvoyData]);
 
   return (
     <Modal show={isOpen} onHide={onRequestClose} size="xl">
@@ -94,27 +112,23 @@ export const ConvoyModal = ({
         </Container>
         <Container>
           <Form>
-            <Form.Label>Create a new convoy</Form.Label>
-            <FormGroup className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Input
-                min={0}
-                value={newConvoyData.name}
-                type={"input"}
-                onChange={setNewConvoyName}
-              />
-            </FormGroup>
-            <FormGroup className="mb-3">
-              <Label type="painted">Command vehicle</Label>
-              <Select onChange={setCommandVehicle}>
-                {availableCommandVehicles.map(({ ID, name }) => (
-                  <option key={ID} value={ID}>
-                    {name}
-                  </option>
-                ))}
-              </Select>
-            </FormGroup>
-            <Button>Create</Button>
+            <Label type="painted">Name</Label>
+            <Input
+              min={0}
+              value={newConvoyData.name}
+              type={"input"}
+              onChange={setNewConvoyName}
+            />
+            <Label type="painted">Command vehicle</Label>
+            <Select onChange={setCommandVehicle}>
+              {availableCommandVehicles.map(({ ID, name }) => (
+                <option key={ID} value={ID}>
+                  {name}
+                </option>
+              ))}
+            </Select>
+
+            <Button onClick={onCreate}>Create</Button>
           </Form>
         </Container>
       </Modal.Body>

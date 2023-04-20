@@ -31,8 +31,12 @@ export const Container = styled.div<{ type?: styles }>`
         color: whitesmoke;
         background: black;
         -webkit-text-stroke: 1px grey;
-        border: 0.1em solid white;
+        border-left: 0.5em solid white;
+        border-right: 0.5em solid white;
+        border-bottom: 0.1em solid white;
+        border-top: 0.1em solid white;
         justify-content: center;
+        outline: 2px solid grey;
         // -webkit-text-fill-color: white;
       `;
 

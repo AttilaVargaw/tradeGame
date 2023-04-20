@@ -72,6 +72,8 @@ export enum DBEvents {
   cityWarehouseUpdate,
   cityPopulationUpdate,
   newVehicleBought,
+  newConvoyCreated,
+  vehicleJoinedConvoy,
 }
 
 export type DBEvent = {
@@ -122,4 +124,6 @@ export type TradeRouteInsertData = {
 export type ConvoyInsertData = {
   name: string;
   type: string;
+  posX: number;
+  posY: number;
 };
