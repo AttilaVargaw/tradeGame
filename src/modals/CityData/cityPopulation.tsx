@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 
-import Form from "react-bootstrap/esm/Form";
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
@@ -107,37 +106,43 @@ export default function CityPopulation() {
   );
 
   return (
-    <Container style={{ margin: "16pt" }}>
-      <Row>
-        {classes.map(({ name, num, ID }) => (
-          <Col key={ID}>
-            <Row>
-              <Label style={{ width: "100%" }} type="painted">
-                {name}
-              </Label>
-            </Row>
-            {debugMode ? (
-              <Input
-                min={0}
-                type="number"
-                value={num}
-                onChange={setPopulation(ID)}
-              />
-            ) : (
-              <p>{num || 0}</p>
-            )}
-          </Col>
-        ))}
-        <Col>
-          <Label type="painted">Total</Label>
-          <Label type="led">{fullPopulation}</Label>
-        </Col>
+    <Container>
+      <Label type="painted">Population</Label>
+      <div style={{ flexDirection: "row", display: "flex" }}>
+        <div
+          style={{
+            flexDirection: "row",
+            display: "flex",
+            flex: 1,
+            justifyContent: "space-between",
+          }}
+        >
+          {classes.map(({ name, num, ID }) => (
+            <div key={ID}>
+              <Label type="painted">{name}</Label>
+              {debugMode ? (
+                <Input
+                  min={0}
+                  type="number"
+                  value={num}
+                  onChange={setPopulation(ID)}
+                />
+              ) : (
+                <Label>{num || 0}</Label>
+              )}
+            </div>
+          ))}
+          <div>
+            <Label type="painted">Total</Label>
+            <Label type="led">{fullPopulation}</Label>
+          </div>
+        </div>
         {debugMode && notExistingClasses.length > 0 && (
-          <Col>
+          <div>
             <Row>
               <Label type="painted">New class</Label>
             </Row>
-            <Form.Group as={Row}>
+            <Row>
               <Col>
                 <Select onChange={setNewClass}>
                   {notExistingClasses.map(({ ID, name }) => (
@@ -150,34 +155,28 @@ export default function CityPopulation() {
               <Col>
                 <Button onClick={addNewClass}>Add</Button>
               </Col>
-            </Form.Group>
-          </Col>
+            </Row>
+          </div>
         )}
-      </Row>
-      <Row>
-        <Label type="painted">Daily requirements</Label>
-      </Row>
+      </div>
+      <Label type="painted">Daily requirements</Label>
       <Row>
         {classes.map(({ dailyRequirement, name, ID, num: citizenNum }) => (
-          <Col key={`class-${ID}`}>
+          <div key={ID}>
             <Label type="painted">{name}</Label>
             {dailyRequirement.map(
               ({ dailyRequirementID, dailyRequirement, translation }) => (
-                <Row key={`dailyRequirement-${dailyRequirementID}`}>
-                  <Col style={{ width: "100%" }}>
-                    <Label style={{ width: "100%" }} type="painted">
-                      {translation}
-                    </Label>
-                  </Col>
-                  <Col>
-                    <Label style={{ width: "8em" }} type="led">
-                      {multiplyCeil(dailyRequirement, citizenNum)}
-                    </Label>
-                  </Col>
+                <Row key={dailyRequirementID}>
+                  <Label style={{ width: "50%" }} type="painted">
+                    {translation}
+                  </Label>
+                  <Label style={{ width: "50%" }} type="led">
+                    {multiplyCeil(dailyRequirement, citizenNum)}
+                  </Label>
                 </Row>
               )
             )}
-          </Col>
+          </div>
         ))}
       </Row>
     </Container>

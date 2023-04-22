@@ -33,7 +33,9 @@ export default function VehicleModal() {
     <Modal
       header={() => (
         <div style={{ paddingLeft: "2em", paddingRight: "2em", width: "100%" }}>
-          <Label type="led">{`< Vehicles >`}</Label>
+          <Label type="led">{`< ${
+            selectedPage === 0 ? "Vehicle list" : "Orders"
+          } >`}</Label>
         </div>
       )}
       body={body}

@@ -27,7 +27,6 @@ import {
 import { getQuery } from "./queryManager";
 import groupBy from "lodash-es/groupBy";
 import Database from "tauri-plugin-sql-api";
-import { makeid } from "@Services/utils";
 import vehicleTypes from "./tables/vehicleTypes";
 import { ResourceChange, TableData, Tables } from "./tables/common";
 import City, { CityEntity, IndustryData } from "./tables/City";
@@ -123,10 +122,6 @@ async function CreateConvoy(name: string) {
   return data.lastInsertId;
 }
 
-function GenerateVehicleName() {
-  return `${makeid(3)}-${makeid(3)}`;
-}
-
 const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
   const data = await db.execute(
     update({
@@ -161,11 +156,11 @@ async function GetConvoiyCount() {
   )[0]["count(ID)"];
 }
 
-const addVehicle = async (type: number) => {
+const addVehicle = async (type: number, name: string) => {
   const data = await db.execute(
     insert({
       table: Tables.Vehicle,
-      attributes: { name: GenerateVehicleName(), posX: 0, posY: 0, type },
+      attributes: { name, posX: 0, posY: 0, type },
     })
   );
 

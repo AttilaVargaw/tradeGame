@@ -1,10 +1,12 @@
+import { PropsWithChildren } from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
   height: 100%;
+  width: 100%;
 `;
 
-const Link = styled.p`
+export const Link = styled.span`
   color: lightblue;
 
   :focus,
@@ -17,7 +19,7 @@ const Link = styled.p`
     0 0 2px darkblue, 0 0 2.5px darkblue, 0 0 3px darkblue, 0 0 3.5px darkblue;
 `;
 
-const Screen = styled.div`
+export const Screen = styled.div`
   color: lightgreen;
   background: #111;
   border: 2px solid grey;
@@ -30,20 +32,14 @@ const Screen = styled.div`
   border-radius: 0.5em;
   justify-content: end;
 
-  height: 100%;
-  width: 100%;
   padding: 1em;
   //font-family: Georgia, "Times New Roman", Times, serif;
 `;
 
-export function TerminalScreen() {
+export function TerminalScreen({ children }: PropsWithChildren) {
   return (
     <Container>
-      <Screen>
-        <h1>Test</h1>
-        <p>Text</p>
-        <Link>Link</Link>
-      </Screen>
+      <Screen style={{ height: "100%" }}>{children}</Screen>
     </Container>
   );
 }

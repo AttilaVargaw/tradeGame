@@ -5,10 +5,11 @@ import Row from "react-bootstrap/esm/Row";
 import { VehicleType } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import CardGroup from "react-bootstrap/esm/CardGroup";
-import Nav from "react-bootstrap/esm/Nav";
 import Placeholder from "@Components/placeholder";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { Button } from "@Components/button";
+import { makeid } from "@Services/utils";
+import { Screen } from "@Components/terminalScreen";
 
 export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
   desc,
@@ -29,9 +30,11 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
           >
             <Placeholder width="100%" height="100%" />
           </div>
-          <Card.Title>{name}</Card.Title>
-          <Card.Subtitle>{price.toFixed(2)} ℳ</Card.Subtitle>
-          <Card.Text>{desc}</Card.Text>
+          <Screen>
+            <h1>{name}</h1>
+            <h2>{price.toFixed(2)} ℳ</h2>
+            <p>{desc}</p>
+          </Screen>
         </Card.Body>
         <Card.Footer className="d-grid gap-2">
           <Button onClick={onClick}>Order</Button>
@@ -40,6 +43,10 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
     </Col>
   );
 };
+
+function GenerateVehicleName() {
+  return `${makeid(3)}-${makeid(3)}`;
+}
 
 export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
   ID,
@@ -58,9 +65,13 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
   }, [ID, gameState, setCurrentModal]);
 
   const onOrder = useCallback(() => {
-    gameState.addVehicle(ID).then(console.log);
-    setCurrentModal(null);
-  }, [gameState, ID, setCurrentModal]);
+    if (vehicleDescription) {
+      gameState
+        .addVehicle(ID, vehicleDescription.name + " " + GenerateVehicleName())
+        .then(console.log);
+      //setCurrentModal();
+    }
+  }, [gameState, ID, vehicleDescription]);
 
   if (!vehicleDescription) {
     return <></>;
@@ -124,28 +135,18 @@ export const VehicleBuyModal = () => {
       {currentVehicle && (
         <Button onClick={() => setCurrentVehicle(null)}>&lt;</Button>
       )}
-      <p> Order a new vehicle</p>
       {!currentVehicle && (
         <Card>
-          <Card.Header>
-            <Nav variant="tabs" defaultActiveKey="#air">
-              <Nav.Item>
-                <Nav.Link onClick={setVehicleType("air")} href="#air">
-                  Air vehicles
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link onClick={setVehicleType("wheeled")} href="#wheeled">
-                  Wheeled vehicles
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link onClick={setVehicleType("tracked")} href="#tracked">
-                  Tracked vehicles
-                </Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </Card.Header>
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <Button onClick={setVehicleType("air")}>Air vehicles</Button>
+            <Button onClick={setVehicleType("wheeled")}>
+              Wheeled vehicles
+            </Button>
+
+            <Button onClick={setVehicleType("tracked")}>
+              Tracked vehicles
+            </Button>
+          </div>
           <Card.Body>
             <CardGroup className="row row-cols-1 row-cols-md-4">
               {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (

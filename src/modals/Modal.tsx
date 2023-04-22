@@ -11,6 +11,7 @@ export const Container = styled.div`
   border-radius: 0.5em;
   background: darkgray;
   border: 1px solid #111;
+  padding: 1em;
 `;
 
 export const Body = styled.div`
