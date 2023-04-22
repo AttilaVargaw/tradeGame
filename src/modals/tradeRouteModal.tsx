@@ -8,13 +8,7 @@ import { TradeRouteProps } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 
-export default function TradeRouteModal({
-  isOpen,
-  onRequestClose,
-}: {
-  isOpen: boolean;
-  onRequestClose?: () => void;
-}): JSX.Element {
+export default function TradeRouteModal(): JSX.Element {
   const [routeID] = useSelectedRouteAtom();
 
   const gameState = useContext(GameStateContext);
@@ -29,7 +23,7 @@ export default function TradeRouteModal({
 
   if (routeData) {
     return (
-      <Modal show={isOpen} onHide={onRequestClose} size="xl">
+      <Modal show={true} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>{routeData.name}</Modal.Title>
         </Modal.Header>

@@ -72,11 +72,11 @@ export default function SideMenu({ style }: { style: CSSProperties }) {
   }, [setCurrentModal]);
 
   const onVehiclesClick = useCallback(() => {
-    setCurrentModal("buyVehicle");
+    setCurrentModal("vehicle");
   }, [setCurrentModal]);
 
   const onEncyklopediaClick = useCallback(() => {
-    // setCurrentModal()
+    setCurrentModal("encyclopedia");
   }, [setCurrentModal]);
 
   return (

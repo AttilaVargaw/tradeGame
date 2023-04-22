@@ -1,7 +1,3 @@
-import { CityTableName } from "./City";
-import { CityTypesTableName } from "./CityTypes";
-import { VehicleTypesName } from "./vehicleTypes";
-
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
 
 export type ResourceChange = {

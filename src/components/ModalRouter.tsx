@@ -1,32 +1,25 @@
 import TradeRouteModal from "../modals/tradeRouteModal";
 import CityDataModal from "../modals/CityData/cityDataModal";
 import { ConvoyModal } from "../modals/convoysModal";
-import { VehicleBuyModal } from "../modals/vehicleBuyModal";
 import { useCurrentModal } from "./hooks/useCurrentModal";
-import { useCallback } from "react";
+import VehicleModal from "../modals/Vehicle/vehicleModal";
+import { EncyclopediaModal } from "../modals/encyclopedia";
 
-export function ModalRouter() {
-  const [currentModal, setCurrentModal] = useCurrentModal();
+export function ModalRouter(): JSX.Element | null {
+  const [currentModal] = useCurrentModal();
 
-  const closeModal = useCallback(() => {
-    setCurrentModal(null);
-  }, [setCurrentModal]);
-
-  return (
-    <>
-      {currentModal === "cityInfo" && <CityDataModal />}
-      <ConvoyModal
-        isOpen={currentModal === "convoys"}
-        onRequestClose={closeModal}
-      />
-      <VehicleBuyModal
-        isOpen={currentModal === "buyVehicle"}
-        onRequestClose={closeModal}
-      />
-      <TradeRouteModal
-        isOpen={currentModal === "tradeRoute"}
-        onRequestClose={closeModal}
-      />
-    </>
-  );
+  switch (currentModal) {
+    case "cityInfo":
+      return <CityDataModal />;
+    case "convoys":
+      return <ConvoyModal />;
+    case "vehicle":
+      return <VehicleModal />;
+    case "tradeRoute":
+      return <TradeRouteModal />;
+    case "encyclopedia":
+      return <EncyclopediaModal />;
+    default:
+      return null;
+  }
 }

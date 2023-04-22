@@ -1,7 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 
-import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
-import Col from "react-bootstrap/esm/Col";
 import { GameStateContext } from "@Services/GameState/gameState";
 import CityIndustry from "./cityIndustry";
 import CityPopulation from "./cityPopulation";
@@ -11,7 +9,6 @@ import { Button } from "@Components/button";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { CityEntity } from "@Services/GameState/tables/City";
 import CityPersonel from "./cityPersonel";
-import styled from "styled-components";
 import Modal from "../Modal";
 
 enum CityModalSubPages {
@@ -21,10 +18,6 @@ enum CityModalSubPages {
   warehouse,
   personel,
 }
-
-const Container = styled.div`
-  width: 100%;
-`;
 
 export default function CityDataModal(): JSX.Element | null {
   const [cityID] = useCurrentSelectedCity();

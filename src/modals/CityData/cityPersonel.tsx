@@ -1,5 +1,3 @@
-import Col from "react-bootstrap/esm/Col";
-import Row from "react-bootstrap/esm/Row";
 import { Label } from "@Components/label";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import styled from "styled-components";

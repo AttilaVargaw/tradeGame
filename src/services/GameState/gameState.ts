@@ -23,8 +23,6 @@ import {
   CityPositionProperty,
   DBEvent,
   VehicleType,
-  Convoy,
-  Vehicle,
 } from "./dbTypes";
 import { getQuery } from "./queryManager";
 import groupBy from "lodash-es/groupBy";
@@ -39,6 +37,9 @@ import PopulationClasses, { PopulationClass } from "./tables/PopulationClass";
 import CityPopulationClass, {
   CityPopulationClassData,
 } from "./tables/CityPopulationClass";
+import TradeRoutes from "./tables/TradeRoutes";
+import Convoy, { ConvoyData } from "./tables/Convoy";
+import Vehicle, { VehicleData } from "./tables/Vehicle";
 
 let db: Database;
 
@@ -80,32 +81,9 @@ const init = async () => {
     create(vehicleTypes.name, vehicleTypes.createData) +
     create(City.name, City.createData) +
     create(CityPopulationClass.name, CityPopulationClass.createData) +
-    create(Tables.TradeRoutes, [
-      { name: "CityA", type: "INTEGER" /*references: "City"*/ },
-      { name: "CityB", type: "INTEGER" /*references: "City"*/ },
-      { name: "name", type: "TEXT" },
-    ]) +
-    create(Tables.Convoy, [
-      { name: "name", type: "TEXT" },
-      { name: "posY", type: "REAL" },
-      { name: "posX", type: "REAL" },
-      { name: "type", type: "INTEGER" },
-    ]) +
-    create(Tables.Vehicle, [
-      { name: "name", type: "TEXT" },
-      {
-        name: "type",
-        type: "TEXT",
-        //references: "VehicleTypes",
-      },
-      { name: "posY", type: "REAL" },
-      { name: "posX", type: "REAL" },
-      {
-        name: "convoy",
-        type: "INTEGER",
-        //references: "Convoy",
-      },
-    ]) +
+    create(TradeRoutes.name, TradeRoutes.createData) +
+    create(Convoy.name, Convoy.createData) +
+    create(Vehicle.name, Vehicle.createData) +
     "COMMIT;";
 
   const creatorSQL3 =
@@ -118,12 +96,6 @@ const init = async () => {
     FillTable(CityPopulationClass) +
     "COMMIT;";
 
-  console.log(FillTable(CityTypes));
-
-  dbObservable.next({ type: DBEvents.initialized });
-
-  // console.log(creatorSQL3);
-
   await db.execute(creatorSQL1);
   console.log("creatorSQL1");
 
@@ -134,6 +106,8 @@ const init = async () => {
   console.log("creatorSQL3");
 
   await db.execute(creatorSQL);
+
+  dbObservable.next({ type: DBEvents.initialized });
 };
 
 async function CreateConvoy(name: string) {
@@ -221,7 +195,7 @@ const getVehicleType = (ID: number) => {
 };
 
 const getConvoys = () => {
-  return db.select<Convoy[]>(
+  return db.select<ConvoyData[]>(
     select({
       attributes: [[Tables.Convoy, ["name", "ID"]]],
       table: Tables.Convoy,
@@ -229,8 +203,17 @@ const getConvoys = () => {
   );
 };
 
+const getVehicles = () => {
+  return db.select<VehicleData[]>(
+    select({
+      attributes: [[Tables.Vehicle, ["ID", "name", "posY", "posX", "convoy"]]],
+      table: Tables.Vehicle,
+    })
+  );
+};
+
 const getVehiclesOfConvoy = (ID: number | null) => {
-  return db.select<Vehicle[]>(
+  return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["name", "ID"]]],
       table: Tables.Vehicle,
@@ -254,7 +237,7 @@ const getConvoylessVehicles = () => {
     })
   );
 
-  return db.select<Vehicle[]>(
+  return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["name", "ID"]]],
       table: Tables.Vehicle,
@@ -719,6 +702,7 @@ export const GameState = {
   CreateConvoy,
   GetVehicleCount,
   GetConvoiyCount,
+  getVehicles,
 };
 
 export const GameStateContext = createContext(GameState);

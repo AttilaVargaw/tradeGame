@@ -28,10 +28,7 @@ export const ContextMenu: FC = () => {
 
   useEffect(() => {
     function OutsideEventListener(ev: MouseEvent) {
-      if (
-        !popoverRef.current?.contains(ev.target as Node) &&
-        contextMenuPositionState
-      ) {
+      if (!popoverRef.current?.contains(ev.target as Node)) {
         setContextMenuPositionState(null);
       }
     }

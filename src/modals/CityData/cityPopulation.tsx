@@ -162,15 +162,9 @@ export default function CityPopulation() {
           <Col key={`class-${ID}`}>
             <Label type="painted">{name}</Label>
             {dailyRequirement.map(
-              ({
-                nameKey,
-                dailyRequirementID,
-                dailyRequirement,
-                translation,
-                // descriptionKey,
-              }) => (
+              ({ dailyRequirementID, dailyRequirement, translation }) => (
                 <Row key={`dailyRequirement-${dailyRequirementID}`}>
-                  <Col>
+                  <Col style={{ width: "100%" }}>
                     <Label style={{ width: "100%" }} type="painted">
                       {translation}
                     </Label>

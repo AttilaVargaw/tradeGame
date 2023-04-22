@@ -1,15 +1,14 @@
 import { FC, useCallback, useContext, useEffect, useState } from "react";
 import Card from "react-bootstrap/esm/Card";
 import Col from "react-bootstrap/esm/Col";
-import Modal from "react-bootstrap/esm/Modal";
 import Row from "react-bootstrap/esm/Row";
 import { VehicleType } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import Button from "react-bootstrap/esm/Button";
 import CardGroup from "react-bootstrap/esm/CardGroup";
 import Nav from "react-bootstrap/esm/Nav";
 import Placeholder from "@Components/placeholder";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { Button } from "@Components/button";
 
 export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
   desc,
@@ -35,9 +34,7 @@ export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
           <Card.Text>{desc}</Card.Text>
         </Card.Body>
         <Card.Footer className="d-grid gap-2">
-          <Button onClick={onClick} variant="primary">
-            Order
-          </Button>
+          <Button onClick={onClick}>Order</Button>
         </Card.Footer>
       </Card>
     </Col>
@@ -86,12 +83,8 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
             <Card.Text>{desc}</Card.Text>
           </Card.Body>
           <Card.Footer className="d-grid gap-2">
-            <Button onClick={onOrder} variant="primary">
-              Order
-            </Button>
-            <Button onClick={onBack} variant="primary">
-              Cancel
-            </Button>
+            <Button onClick={onOrder}>Order</Button>
+            <Button onClick={onBack}>Back</Button>
           </Card.Footer>
         </Card>
       </Col>
@@ -99,13 +92,7 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
   );
 };
 
-export const VehicleBuyModal = ({
-  isOpen,
-  onRequestClose,
-}: {
-  isOpen: boolean;
-  onRequestClose?: () => void;
-}) => {
+export const VehicleBuyModal = () => {
   const gameState = useContext(GameStateContext);
 
   const [vehicleDescriptions, setVehicleDescriptions] = useState<VehicleType[]>(
@@ -113,7 +100,6 @@ export const VehicleBuyModal = ({
   );
   const [selectedVehicleType, setSelectedVehicleType] = useState("air");
   const [currentVehicle, setCurrentVehicle] = useState<number | null>(null);
-  const [, setCurrentModal] = useCurrentModal();
 
   useEffect(() => {
     gameState.getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
@@ -134,67 +120,52 @@ export const VehicleBuyModal = ({
   );
 
   return (
-    <Modal show={isOpen} onHide={onRequestClose} size="xl">
-      <Modal.Header>
-        {currentVehicle && (
-          <Button
-            size="lg"
-            variant="light"
-            onClick={() => setCurrentVehicle(null)}
-          >
-            &lt;
-          </Button>
-        )}
-        <Modal.Title>Order a new vehicle</Modal.Title>
-      </Modal.Header>
+    <>
+      {currentVehicle && (
+        <Button onClick={() => setCurrentVehicle(null)}>&lt;</Button>
+      )}
+      <p> Order a new vehicle</p>
       {!currentVehicle && (
-        <Modal.Body style={{ height: "80vh" }} className="overflow-auto">
-          <Card>
-            <Card.Header>
-              <Nav variant="tabs" defaultActiveKey="#air">
-                <Nav.Item>
-                  <Nav.Link onClick={setVehicleType("air")} href="#air">
-                    Air vehicles
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link onClick={setVehicleType("wheeled")} href="#wheeled">
-                    Wheeled vehicles
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link onClick={setVehicleType("tracked")} href="#tracked">
-                    Tracked vehicles
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-            </Card.Header>
-            <Card.Body>
-              <CardGroup className="row row-cols-1 row-cols-md-4">
-                {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (
-                  <BuyItem
-                    onClick={onOrderClick(ID)}
-                    type={type}
-                    key={ID}
-                    desc={desc}
-                    price={price}
-                    ID={ID}
-                    name={name}
-                  />
-                ))}
-              </CardGroup>
-            </Card.Body>
-          </Card>
-        </Modal.Body>
+        <Card>
+          <Card.Header>
+            <Nav variant="tabs" defaultActiveKey="#air">
+              <Nav.Item>
+                <Nav.Link onClick={setVehicleType("air")} href="#air">
+                  Air vehicles
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link onClick={setVehicleType("wheeled")} href="#wheeled">
+                  Wheeled vehicles
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link onClick={setVehicleType("tracked")} href="#tracked">
+                  Tracked vehicles
+                </Nav.Link>
+              </Nav.Item>
+            </Nav>
+          </Card.Header>
+          <Card.Body>
+            <CardGroup className="row row-cols-1 row-cols-md-4">
+              {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (
+                <BuyItem
+                  onClick={onOrderClick(ID)}
+                  type={type}
+                  key={ID}
+                  desc={desc}
+                  price={price}
+                  ID={ID}
+                  name={name}
+                />
+              ))}
+            </CardGroup>
+          </Card.Body>
+        </Card>
       )}
       {!!currentVehicle && (
-        <Modal.Body style={{ height: "80vh" }} className="overflow-auto">
-          <OrderPage
-            onBack={() => setCurrentVehicle(null)}
-            ID={currentVehicle}
-          />
-        </Modal.Body>
+        <OrderPage onBack={() => setCurrentVehicle(null)} ID={currentVehicle} />
       )}
-    </Modal>
+    </>
   );
 };

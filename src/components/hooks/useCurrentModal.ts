@@ -1,6 +1,6 @@
 import { atom, useAtom } from "jotai";
 
-export type Modal = "cityInfo" | "convoys" | "buyVehicle" | "tradeRoute" | null;
+export type Modal = "cityInfo" | "convoys" | "vehicle" | "tradeRoute" | "encyclopedia" | null;
 
 const currentModalAtom = atom<Modal>(null);
 

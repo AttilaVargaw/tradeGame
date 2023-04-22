@@ -88,19 +88,6 @@ export type CityPositionProperty = {
   ID: number;
 };
 
-export type Convoy = {
-  name: string;
-  type: string;
-  ID: number;
-};
-
-export type Vehicle = {
-  name: string;
-  type: string;
-  ID: number;
-  convoy: number;
-};
-
 export type VehicleType = {
   name: string;
   desc: string;

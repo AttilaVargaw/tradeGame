@@ -39,16 +39,16 @@ export default function Modal({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function ClickEvenListener(this: Window, { target }: MouseEvent) {
+    function ClickEvenListener(this: Window, event: MouseEvent) {
       if (
-        target &&
+        event.target &&
         containerRef.current &&
-        !(containerRef.current as Node).contains(target as Node)
+        !(containerRef.current as Node).contains(event.target as Node)
       ) {
         setCurrentModal(null);
       }
     }
-    window.addEventListener("click", ClickEvenListener);
+    window.addEventListener("click", ClickEvenListener, true);
 
     return () => window.removeEventListener("click", ClickEvenListener);
   }, [setCurrentModal]);
