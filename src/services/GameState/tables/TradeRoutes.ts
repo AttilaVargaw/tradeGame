@@ -1,4 +1,3 @@
-import { PopulationClass } from "../dbTypes";
 import { TableData } from "./common";
 
 export type TradeRoute = {

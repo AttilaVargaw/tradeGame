@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 import styled from "styled-components";
 
 export const Container = styled.div`
-  inset: 2em;
   z-index: 100000;
   position: absolute;
   display: flex;
@@ -11,11 +10,13 @@ export const Container = styled.div`
   border-radius: 0.5em;
   background: darkgray;
   border: 1px solid #111;
-  padding: 1em;
+  inset: 2em;
+  justify-content: space-between;
+  padding: 2em;
 `;
 
 export const Body = styled.div`
-  height: 100%;
+  height: 80vh;
   width: 100%;
 `;
 
@@ -56,9 +57,9 @@ export default function Modal({
 
   return (
     <Container ref={containerRef}>
-      <Header>{header()}</Header>
+      <Header style={{ alignSelf: "start" }}>{header()}</Header>
       <Body>{body()}</Body>
-      <Footer>{footer()}</Footer>
+      <Footer style={{ alignSelf: "end" }}>{footer()}</Footer>
     </Container>
   );
 }

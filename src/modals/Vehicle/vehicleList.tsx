@@ -15,9 +15,7 @@ export const VehicleListModal = () => {
   return (
     <TerminalScreen>
       {vehicles.map(({ name, ID }) => (
-        <div key={ID}>
-          <Link>{name}</Link>
-        </div>
+        <Link key={ID}>{name}</Link>
       ))}
     </TerminalScreen>
   );

@@ -1,3 +1,4 @@
+import React from "react";
 import { PropsWithChildren } from "react";
 import styled from "styled-components";
 
@@ -33,13 +34,31 @@ export const Screen = styled.div`
   justify-content: end;
 
   padding: 1em;
+  overflow-y: auto;
   //font-family: Georgia, "Times New Roman", Times, serif;
 `;
 
-export function TerminalScreen({ children }: PropsWithChildren) {
+export const TerminalScreen = React.forwardRef<
+  HTMLDivElement,
+  PropsWithChildren<{
+    dangerouslySetInnerHTML?: string;
+  }>
+>(({ children, dangerouslySetInnerHTML }, ref) => {
   return (
     <Container>
-      <Screen style={{ height: "100%" }}>{children}</Screen>
+      <Screen
+        ref={ref}
+        dangerouslySetInnerHTML={
+          dangerouslySetInnerHTML
+            ? { __html: dangerouslySetInnerHTML }
+            : undefined
+        }
+        style={{ height: "100%" }}
+      >
+        {children}
+      </Screen>
     </Container>
   );
-}
+});
+
+TerminalScreen.displayName = "TerminalScreen";

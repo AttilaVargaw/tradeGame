@@ -2,9 +2,11 @@ import { TableData } from "./common";
 
 export type VehicleData = {
   name: string;
-  type: string;
+  type: number;
   ID: number;
   convoy: number;
+  posY: number;
+  posX: number;
 };
 
 export default {
@@ -23,5 +25,8 @@ export default {
       type: "INTEGER",
       //references: "Convoy",
     },
+  ],
+  initData: [
+    { convoy: 1, name: "Test Vehicle", type: 3, posX: 1650, posY: 510 },
   ],
 } as TableData<VehicleData>;

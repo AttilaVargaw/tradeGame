@@ -1,16 +1,9 @@
 import { Label } from "@Components/label";
-import styled from "styled-components";
 import Modal from "../Modal";
 import { useCallback, useState } from "react";
 import { VehicleListModal } from "./vehicleList";
 import { VehicleBuyModal } from "./vehicleBuy";
 import { Button } from "@Components/button";
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
 
 enum VehicleModalSubPages {
   List,
@@ -32,11 +25,9 @@ export default function VehicleModal() {
   return (
     <Modal
       header={() => (
-        <div style={{ paddingLeft: "2em", paddingRight: "2em", width: "100%" }}>
-          <Label type="led">{`< ${
-            selectedPage === 0 ? "Vehicle list" : "Orders"
-          } >`}</Label>
-        </div>
+        <Label type="led">{`< ${
+          selectedPage === 0 ? "Vehicle list" : "Orders"
+        } >`}</Label>
       )}
       body={body}
       footer={() => (

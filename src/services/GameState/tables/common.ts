@@ -25,6 +25,7 @@ export enum Tables {
   Item = "Item",
   CityPopulationClass = "CityPopulationClass",
   IndustrialBuildings = "IndustrialBuildings",
+  Encyclopedia = "Encyclopedia"
 }
 
 type Attr = {

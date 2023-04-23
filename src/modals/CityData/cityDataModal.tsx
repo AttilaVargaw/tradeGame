@@ -39,9 +39,7 @@ export default function CityDataModal(): JSX.Element | null {
     return (
       <Modal
         header={() => (
-          <div
-            style={{ paddingLeft: "2em", paddingRight: "2em", width: "100%" }}
-          >
+          <div style={{ width: "100%" }}>
             <Label type="led">{`< ${cityData.name} >`}</Label>
           </div>
         )}

@@ -9,30 +9,45 @@ import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
 import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
-import Row from "react-bootstrap/esm/Row";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { Input, Select } from "@Components/input";
 import { Label } from "@Components/label";
 import { Button } from "@Components/button";
-import Modal from "./Modal";
+import Modal from "../Modal";
 import { VehicleData } from "@Services/GameState/tables/Vehicle";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
+import { Screen } from "@Components/terminalScreen";
+import { Link } from "@Components/terminalScreen";
+import { Row } from "@Components/grid";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { ConvoyInfo } from "./convoyInfo";
+
+/*enum ConvoyModalSubpages {
+  list,
+  info,
+}*/
 
 export const ConvoyItem = ({
   icon,
-  id,
   name,
-  onClick,
+  id,
 }: {
-  id: number;
-  onClick?: () => void;
   name: string;
   icon?: string;
+  id: number;
 }) => {
+  const [, setCurrentConvoy] = useCurrentConvoy();
+
+  const onClick = useCallback(() => {
+    setCurrentConvoy(id);
+  }, [setCurrentConvoy, id]);
+
   return (
-    <div onClick={onClick}>
-      {icon}
-      {name}
+    <div>
+      <Link onClick={onClick}>
+        {icon}
+        {name}
+      </Link>
     </div>
   );
 };
@@ -70,6 +85,7 @@ export const ConvoyModal = () => {
   const gameState = useContext(GameStateContext);
 
   const [convoysData, setConvoyData] = useState<ConvoyData[]>([]);
+  const [currentConvoy] = useCurrentConvoy();
   const [availableCommandVehicles, setAvailableCommandVehicles] = useState<
     VehicleData[]
   >([]);
@@ -127,52 +143,59 @@ export const ConvoyModal = () => {
     }
   }, [gameState, newConvoyData]);
 
-  const body = useCallback(
-    () => (
-      <>
-        <Container style={{ height: "50%" }}>
-          {convoysData.map(({ ID, name }) => (
-            <ConvoyItem key={ID} id={ID} name={name} />
-          ))}
-          <Form.Group
-            as={Row}
-            style={{ paddingTop: ".5em", paddingBottom: ".5em" }}
-          >
-            <Col sm="8" />
-          </Form.Group>
-        </Container>
-        <Container style={{ height: "50%" }}>
-          <Form>
-            <Label type="painted">Name</Label>
-            <Input
-              min={0}
-              value={newConvoyData.name}
-              type={"input"}
-              onChange={setNewConvoyName}
-            />
-            <Label type="painted">Command vehicle</Label>
-            <Select onSelect={setCommandVehicle}>
-              {availableCommandVehicles.map(({ ID, name }) => (
-                <option key={ID} value={ID}>
-                  {name}
-                </option>
-              ))}
-            </Select>
-
-            <Button onClick={onCreate}>Create</Button>
-          </Form>
-        </Container>
-      </>
-    ),
-    [
-      availableCommandVehicles,
-      onCreate,
-      setCommandVehicle,
-      setNewConvoyName,
-      convoysData,
-      newConvoyData.name,
-    ]
-  );
+  const body = useCallback(() => {
+    if (!currentConvoy) {
+      return (
+        <>
+          <Screen style={{ height: "50%" }}>
+            {convoysData.map(({ ID, name }) => (
+              <ConvoyItem id={ID} key={ID} name={name} />
+            ))}
+          </Screen>
+          <Container style={{ height: "50%" }}>
+            <Form>
+              <Row>
+                <Label style={{ flex: 1 }} type="painted">
+                  Name
+                </Label>
+                <Input
+                  style={{ flex: 1 }}
+                  min={0}
+                  value={newConvoyData.name}
+                  type={"input"}
+                  onChange={setNewConvoyName}
+                />
+              </Row>
+              <Row>
+                <Label style={{ flex: 1 }} type="painted">
+                  Command vehicle
+                </Label>
+                <Select style={{ flex: 1 }} onSelect={setCommandVehicle}>
+                  {availableCommandVehicles.map(({ ID, name }) => (
+                    <option key={ID} value={ID}>
+                      {name}
+                    </option>
+                  ))}
+                </Select>
+              </Row>
+              <Button onClick={onCreate}>Create</Button>
+            </Form>
+          </Container>
+        </>
+      );
+    } else {
+      console.log("convinfo", currentConvoy);
+      return <ConvoyInfo />;
+    }
+  }, [
+    currentConvoy,
+    convoysData,
+    newConvoyData.name,
+    setNewConvoyName,
+    setCommandVehicle,
+    availableCommandVehicles,
+    onCreate,
+  ]);
 
   return <Modal header={Header} body={body} footer={Footer} />;
 };

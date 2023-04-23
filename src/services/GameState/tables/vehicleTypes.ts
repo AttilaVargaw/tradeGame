@@ -33,7 +33,7 @@ export default {
       type: "air",
     },
     {
-      desc: "A massive and strong flying machine. It is relatively fast, but very fragile at the same time.",
+      desc: "A massive and strong flying machine. It is relatively fast.",
       name: "Heavy cargo helicopter",
       price: 4500000,
       type: "air",

@@ -29,6 +29,8 @@ function VehicleCountButton({ onClick }: { onClick: () => void }) {
         gameState.GetVehicleCount().then(setVehicleCount);
       }
     });
+
+    gameState.GetVehicleCount().then(setVehicleCount);
   }, [gameState]);
 
   return (
@@ -49,6 +51,8 @@ function ConvoyCountButton({ onClick }: { onClick: () => void }) {
         gameState.GetConvoiyCount().then(setConvoyCount);
       }
     });
+
+    gameState.GetConvoiyCount().then(setConvoyCount);
 
     return () => subscribtion.unsubscribe();
   }, [gameState]);

@@ -39,6 +39,7 @@ import CityPopulationClass, {
 import TradeRoutes from "./tables/TradeRoutes";
 import Convoy, { ConvoyData } from "./tables/Convoy";
 import Vehicle, { VehicleData } from "./tables/Vehicle";
+import Encyclopedia, { EncyclopediaData } from "./tables/Encyclopedia";
 
 let db: Database;
 
@@ -71,7 +72,8 @@ const init = async () => {
     DropTableIfExist(CityPopulationClass.name) +
     DropTableIfExist(Tables.TradeRoutes) +
     DropTableIfExist(Tables.Convoy) +
-    DropTableIfExist(Tables.Vehicle);
+    DropTableIfExist(Tables.Vehicle) +
+    DropTableIfExist(Encyclopedia.name);
   const creatorSQL2 =
     "BEGIN TRANSACTION;" +
     create(CityTypes.name, CityTypes.createData) +
@@ -83,6 +85,7 @@ const init = async () => {
     create(TradeRoutes.name, TradeRoutes.createData) +
     create(Convoy.name, Convoy.createData) +
     create(Vehicle.name, Vehicle.createData) +
+    create(Encyclopedia.name, Encyclopedia.createData) +
     "COMMIT;";
 
   const creatorSQL3 =
@@ -93,6 +96,9 @@ const init = async () => {
     FillTable(vehicleTypes) +
     FillTable(City) +
     FillTable(CityPopulationClass) +
+    FillTable(Encyclopedia) +
+    FillTable(Vehicle) +
+    FillTable(Convoy) +
     "COMMIT;";
 
   await db.execute(creatorSQL1);
@@ -143,6 +149,27 @@ async function GetVehicleCount() {
       })
     )
   )[0]["count(ID)"];
+}
+
+function GetEncyclopediaArticles(parent: number | null) {
+  return db.select<EncyclopediaData[]>(
+    select({
+      table: Tables.Encyclopedia,
+      attributes: [
+        [Tables.Encyclopedia, "ID"],
+        [Tables.Encyclopedia, "body"],
+        [Tables.Encyclopedia, "name"],
+        [Tables.Encyclopedia, "folder"],
+      ],
+      where: [
+        {
+          A: [Tables.Encyclopedia, "parent"],
+          value: parent,
+          operator: parent === null ? " is " : "=",
+        },
+      ],
+    })
+  );
 }
 
 async function GetConvoiyCount() {
@@ -196,6 +223,18 @@ const getConvoys = () => {
       table: Tables.Convoy,
     })
   );
+};
+
+const getConvoy = async (ID: number) => {
+  return (
+    await db.select<ConvoyData[]>(
+      select({
+        attributes: [[Tables.Convoy, ["name", "ID"]]],
+        table: Tables.Convoy,
+        where: [{ A: [Tables.Convoy, "ID"], value: ID }],
+      })
+    )
+  )[0];
 };
 
 const getVehicles = () => {
@@ -396,6 +435,61 @@ const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
 
     dbObservable.next({ type: DBEvents.tradeRouteUpdate, data });
   }
+};
+
+const getConvoysAsGeoJson = async () => {
+  const convoysData = await db.select<ConvoyData[]>(
+    select({
+      attributes: [
+        [Tables.Convoy, "posX"],
+        [Tables.Convoy, "posY"],
+        [Tables.Convoy, "ID"],
+        [Tables.Convoy, "type"],
+        [Tables.Convoy, "name"],
+      ],
+      table: Tables.Convoy,
+    })
+  );
+
+  return {
+    type: "FeatureCollection",
+    features: convoysData.map(({ posX, posY, name, ID }) => ({
+      type: "Feature",
+      geometry: {
+        coordinates: [posX, posY],
+        type: "Point",
+      },
+      properties: { name, type: "vehicle", ID },
+    })),
+  } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
+};
+
+const getVehiclesAsGeoJson = async () => {
+  const vehicleData = await db.select<VehicleData[]>(
+    select({
+      attributes: [
+        [Tables.Vehicle, "posX"],
+        [Tables.Vehicle, "posY"],
+        [Tables.Vehicle, "ID"],
+        [Tables.Vehicle, "type"],
+        [Tables.Vehicle, "name"],
+      ],
+      table: Tables.Vehicle,
+      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
+    })
+  );
+
+  return {
+    type: "FeatureCollection",
+    features: vehicleData.map(({ posX, posY, name, ID }) => ({
+      type: "Feature",
+      geometry: {
+        coordinates: [posX, posY],
+        type: "Point",
+      },
+      properties: { name, type: "vehicle", ID },
+    })),
+  } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 };
 
 const getCitiesAsGeoJson = async () => {
@@ -698,6 +792,10 @@ export const GameState = {
   GetVehicleCount,
   GetConvoiyCount,
   getVehicles,
+  GetEncyclopediaArticles,
+  getConvoy,
+  getVehiclesAsGeoJson,
+  getConvoysAsGeoJson,
 };
 
 export const GameStateContext = createContext(GameState);
