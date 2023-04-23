@@ -40,6 +40,7 @@ import TradeRoutes from "./tables/TradeRoutes";
 import Convoy, { ConvoyData } from "./tables/Convoy";
 import Vehicle, { VehicleData } from "./tables/Vehicle";
 import Encyclopedia, { EncyclopediaData } from "./tables/Encyclopedia";
+import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDailyRequirement";
 
 let db: Database;
 
@@ -74,6 +75,7 @@ const init = async () => {
     DropTableIfExist(Tables.Convoy) +
     DropTableIfExist(Tables.Vehicle) +
     DropTableIfExist(Encyclopedia.name);
+  DropTableIfExist(IndustrialBuildingDailyRequirement.name);
   const creatorSQL2 =
     "BEGIN TRANSACTION;" +
     create(CityTypes.name, CityTypes.createData) +
@@ -86,6 +88,10 @@ const init = async () => {
     create(Convoy.name, Convoy.createData) +
     create(Vehicle.name, Vehicle.createData) +
     create(Encyclopedia.name, Encyclopedia.createData) +
+    create(
+      IndustrialBuildingDailyRequirement.name,
+      IndustrialBuildingDailyRequirement.createData
+    ) +
     "COMMIT;";
 
   const creatorSQL3 =
@@ -99,6 +105,7 @@ const init = async () => {
     FillTable(Encyclopedia) +
     FillTable(Vehicle) +
     FillTable(Convoy) +
+    FillTable(IndustrialBuildingDailyRequirement) +
     "COMMIT;";
 
   await db.execute(creatorSQL1);

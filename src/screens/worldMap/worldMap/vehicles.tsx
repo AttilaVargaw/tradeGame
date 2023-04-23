@@ -32,7 +32,7 @@ export function Vehicles({
           geometry: {
             coordinates: [posX, posY],
           },
-          properties: { ID, name, type },
+          properties: { ID, name },
         }) => {
           return (
             <Circle

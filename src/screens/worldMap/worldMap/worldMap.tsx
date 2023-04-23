@@ -20,14 +20,25 @@ import styled from "styled-components";
 import { Convoys } from "./convoys";
 import { Cities } from "./cities";
 import { Vehicles } from "./vehicles";
+import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 
 const Container = styled.div`
   display: "flex";
   flex-direction: "column";
 `;
 
+const StyledMapContainer = styled(MapContainer)`
+  width: 100%;
+  height: 100%;
+  background: #05001f;
+`;
+
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
+
+  const [, setCurrentSelectedCities] = useCurrentSelectedCities();
+  const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
 
   const [citiesGeoJson, setCitiesGeoJson] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
@@ -52,25 +63,29 @@ export function WorldMap(): JSX.Element {
   }, [gameState]);
 
   useEffect(() => {
-    /*const keypressHandler = ({ code }: KeyboardEvent) => {
-            setTimeout(() => {
-                switch (code) {
-                    case 'NumpadAdd':
-                    case 'NumpadSubtract':
-                        break
-                    case 'KeyW':
-                        break
-                    case 'KeyS':
-                        break
-                    case 'KeyA':
-                        break
-                    case 'KeyD':
-                }
-            }, 0);
+    const keypressHandler = ({ code }: KeyboardEvent) => {
+      setTimeout(() => {
+        switch (code) {
+          case "NumpadAdd":
+          case "NumpadSubtract":
+            break;
+          case "KeyW":
+            break;
+          case "KeyS":
+            break;
+          case "KeyA":
+            break;
+          case "KeyD":
+            break;
         }
+      }, 0);
+    };
 
-        window.addEventListener('keypress', keypressHandler)
-        return () => window.removeEventListener('keypress', keypressHandler)*/
+    window.addEventListener("keypress", keypressHandler);
+    return () => window.removeEventListener("keypress", keypressHandler);
+  });
+
+  useEffect(() => {
     const contextMenuHandler: EventListenerOrEventListenerObject = function (
       event
     ) {
@@ -89,14 +104,36 @@ export function WorldMap(): JSX.Element {
 
   const onContextMenu = useCallback<React.MouseEventHandler<HTMLDivElement>>(
     ({ nativeEvent: { clientX, clientY } }) => {
-      setContextMenuPosition([clientX, clientY]);
+      if (!currentConvoy) {
+        setContextMenuPosition([clientX, clientY]);
+      }
     },
-    []
+    [currentConvoy]
   );
 
   const { height, width } = useWindowSize();
 
   const mapContainerRef = useRef<LeafletMap>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function OutSideClick(this: Window, ev: MouseEvent) {
+      if (
+        ev.button === 0 &&
+        !ev.ctrlKey &&
+        !containerRef.current?.contains(ev.target as Node)
+      ) {
+        if (!ev.shiftKey) {
+          setCurrentSelectedCities([null, null]);
+        }
+        setCurrentConvoy(null);
+      }
+    }
+
+    window.addEventListener("click", OutSideClick, true);
+
+    return () => window.removeEventListener("click", OutSideClick);
+  }, [setCurrentSelectedCities, setCurrentConvoy]);
 
   useEffect(() => {
     const eventHandler = () => {
@@ -110,13 +147,15 @@ export function WorldMap(): JSX.Element {
 
   const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
 
+  const sideMenuStyle = useMemo(
+    () => ({ height: height, width: menuWidth, top: 0 }),
+    [menuWidth, height]
+  );
+
   return (
     <Container>
-      <div
-        onContextMenu={onContextMenu}
-        style={{ height: height, width: width }}
-      >
-        <MapContainer
+      <div onContextMenu={onContextMenu} style={{ height, width }}>
+        <StyledMapContainer
           doubleClickZoom={false}
           scrollWheelZoom
           zoomDelta={2}
@@ -126,11 +165,6 @@ export function WorldMap(): JSX.Element {
           ]}
           maxBoundsViscosity={100}
           crs={CRS.Simple}
-          style={{
-            width: "100%",
-            height: "100%",
-            background: "#05001f",
-          }}
           center={[500, 1650]}
           zoom={1}
           minZoom={1}
@@ -148,15 +182,9 @@ export function WorldMap(): JSX.Element {
             {citiesGeoJson && <Cities citiesGeoJson={citiesGeoJson} />}
           </ImageOverlay>
           <RouteLayer />
-        </MapContainer>
+        </StyledMapContainer>
       </div>
-      <SideMenu
-        style={{
-          top: 0,
-          height: height,
-          width: menuWidth,
-        }}
-      />
+      <SideMenu style={sideMenuStyle} />
       <ModalRouter />
     </Container>
   );

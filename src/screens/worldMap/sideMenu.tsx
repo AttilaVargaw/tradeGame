@@ -68,7 +68,7 @@ function AccountingButton() {
   return <Button black>5556.22 ℳ</Button>;
 }
 
-export default function SideMenu({ style }: { style: CSSProperties }) {
+export default function SideMenu({ style }: { style?: CSSProperties }) {
   const [, setCurrentModal] = useCurrentModal();
 
   const onConvoysClick = useCallback(() => {

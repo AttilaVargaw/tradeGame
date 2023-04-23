@@ -13,5 +13,10 @@
     "project": ["./tsconfig.json", "./webpack.config.js", "./webpack.prod.js"]
   },
   "plugins": ["react", "react-hooks", "@typescript-eslint"],
-  "parser": "@typescript-eslint/parser"
+  "parser": "@typescript-eslint/parser",
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
 }

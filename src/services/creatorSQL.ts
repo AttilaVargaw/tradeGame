@@ -3,7 +3,6 @@ export const creatorSQL = `
     drop table if exists IndustrialBuildings;
     drop table if exists Item;
     drop table if exists Translations;
-    drop table if exists IndustrialBuildingDailyRequirement;
     drop table if exists CityWarehouse;
 
     BEGIN TRANSACTION;
@@ -83,11 +82,6 @@ export const creatorSQL = `
     INSERT INTO Translations VALUES('appliancesDesc','en','Everything from coffee grinders to bathtubs.');
     INSERT INTO Translations VALUES('mysteriousArtifactsDesc','en','Some strange items. The scientific community is certainly interested in these.');
     INSERT INTO Translations VALUES('mysteriousMachineryDesc','en','Some strange, yet familiar machines. Can range from oil pumps to electronic converters. The scientific community is certainly interested in these.');
-
-    CREATE TABLE IndustrialBuildingDailyRequirement (ID INTEGER PRIMARY KEY AUTOINCREMENT, industrialBuilding INTEGER, item INTEGER, num REAL);
-    INSERT INTO IndustrialBuildingDailyRequirement VALUES(1,3,1,1000.0);
-    INSERT INTO IndustrialBuildingDailyRequirement VALUES(2,1,17,-1000.0);
-    INSERT INTO IndustrialBuildingDailyRequirement VALUES(3,3,1,1000.0);
 
     CREATE TABLE IndustrialBuilding (ID INTEGER PRIMARY KEY, nameKey TEXT, dailyOutput INTEGER);
     INSERT INTO IndustrialBuilding VALUES(1,'artificalFoodFactory',NULL);

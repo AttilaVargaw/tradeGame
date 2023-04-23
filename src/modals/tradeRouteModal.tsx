@@ -1,12 +1,10 @@
-import { useContext, useEffect, useState } from "react";
-import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
-import Col from "react-bootstrap/esm/Col";
-import Container from "react-bootstrap/esm/Container";
-import Modal from "react-bootstrap/esm/Modal";
-import Row from "react-bootstrap/esm/Row";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { TradeRouteProps } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
+import Modal from "./Modal";
+import { Label } from "@Components/label";
+import { TerminalScreen } from "@Components/terminalScreen";
 
 export default function TradeRouteModal(): JSX.Element {
   const [routeID] = useSelectedRouteAtom();
@@ -21,35 +19,25 @@ export default function TradeRouteModal(): JSX.Element {
     }
   }, [routeID, gameState]);
 
-  if (routeData) {
+  const header = useCallback(() => {
+    return <Label type="led">{routeData?.name || ""}</Label>;
+  }, [routeData?.name]);
+
+  const body = useCallback(() => {
     return (
-      <Modal show={true} size="xl">
-        <Modal.Header closeButton>
-          <Modal.Title>{routeData.name}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ height: "80vh" }}>
-          <Container>
-            <Row>Convoys on this route</Row>
-          </Container>
-        </Modal.Body>
-        <Container>
-          <ButtonGroup
-            as={Col}
-            style={{
-              width: "100%",
-              position: "relative",
-              margin: "auto",
-              left: 0,
-              right: 0,
-              paddingTop: "1em",
-              paddingBottom: "1em",
-            }}
-          >
-            {/*<Button onClick={() => setSelectedPage(CityModalSubPages.warehouse)}>Warehouse</Button>*/}
-          </ButtonGroup>
-        </Container>
-      </Modal>
+      <>
+        <Label type="painted">Convoys on this route</Label>
+        <TerminalScreen></TerminalScreen>
+      </>
     );
+  }, []);
+
+  const footer = useCallback(() => {
+    return <></>;
+  }, []);
+
+  if (routeData) {
+    return <Modal header={header} body={body} footer={footer} />;
   } else {
     return <></>;
   }

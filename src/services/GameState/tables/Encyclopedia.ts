@@ -25,6 +25,7 @@ export default {
   ],
   name: "Encyclopedia",
   initData: [
+    { name: "Ranks in the Guild", folder: true },
     {
       name: "Ranks in the Guild",
       body: `
@@ -50,7 +51,7 @@ export default {
       <p>These warrant officers are responsible for leading bigger sections or offices. They are usually serve on bases, or in the staff of bigger convoys.</p>
       <p>Ensign</p>
         `,
-      parent: null,
+      parent: 1,
       folder: false,
     },
   ],

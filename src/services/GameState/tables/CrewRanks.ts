@@ -51,7 +51,7 @@ export default {
       salary: 200,
     },
     {
-      name: "Chief Warrant officer",
+      name: "Master Chief Warrant officer",
       salary: 230,
     },
     {

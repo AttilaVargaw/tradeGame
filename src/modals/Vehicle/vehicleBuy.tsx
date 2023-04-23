@@ -9,40 +9,7 @@ import Placeholder from "@Components/placeholder";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { Button } from "@Components/button";
 import { makeid } from "@Services/utils";
-import { Screen } from "@Components/terminalScreen";
-
-export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
-  desc,
-  name,
-  price,
-  onClick,
-}) => {
-  return (
-    <Col className="mb-4">
-      <Card className="h-100">
-        <Card.Body>
-          <div
-            style={{
-              justifyContent: "center",
-              aspectRatio: 1,
-              paddingBottom: "1em",
-            }}
-          >
-            <Placeholder width="100%" height="100%" />
-          </div>
-          <Screen>
-            <h1>{name}</h1>
-            <h2>{price.toFixed(2)} ℳ</h2>
-            <p>{desc}</p>
-          </Screen>
-        </Card.Body>
-        <Card.Footer className="d-grid gap-2">
-          <Button onClick={onClick}>Order</Button>
-        </Card.Footer>
-      </Card>
-    </Col>
-  );
-};
+import { BuyItem } from "./buyItem";
 
 function GenerateVehicleName() {
   return `${makeid(3)}-${makeid(3)}`;

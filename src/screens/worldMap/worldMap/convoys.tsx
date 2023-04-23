@@ -1,3 +1,5 @@
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import { LeafletMouseEventHandlerFn } from "leaflet";
 import { useCallback } from "react";
@@ -11,18 +13,26 @@ export function Convoys({
     CityPositionProperty
   >;
 }) {
+  const [, setCurrentModal] = useCurrentModal();
+  const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
+
   const onConvoyClick = useCallback(
     (ID: number): LeafletMouseEventHandlerFn => {
-      return () => {};
+      return () => {
+        setCurrentConvoy(ID);
+      };
     },
-    []
+    [setCurrentConvoy]
   );
 
   const onDoubleClick = useCallback(
     (ID: number): LeafletMouseEventHandlerFn => {
-      return () => {};
+      return () => {
+        setCurrentConvoy(ID);
+        setCurrentModal("convoys");
+      };
     },
-    []
+    [setCurrentModal, setCurrentConvoy]
   );
 
   return (
@@ -46,17 +56,19 @@ export function Convoys({
               radius={4}
             >
               <Tooltip permanent>{name}</Tooltip>
-              <Circle
-                eventHandlers={{ dblclick: onDoubleClick(ID) }}
-                pathOptions={{
-                  dashOffset: "10",
-                  dashArray: "5 10",
-                }}
-                color={"red"}
-                key={ID}
-                center={[posY, posX]}
-                radius={6}
-              />
+              {currentConvoy === ID && (
+                <Circle
+                  eventHandlers={{ dblclick: onDoubleClick(ID) }}
+                  pathOptions={{
+                    dashOffset: "10",
+                    dashArray: "3 5",
+                  }}
+                  color={"red"}
+                  key={ID}
+                  center={[posY, posX]}
+                  radius={6}
+                />
+              )}
             </Circle>
           );
         }

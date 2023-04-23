@@ -1,5 +1,6 @@
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import {
@@ -7,7 +8,7 @@ import {
   setContextMenuPosition,
 } from "@Services/contextMenu";
 import { LeafletMouseEventHandlerFn } from "leaflet";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { Circle, Tooltip } from "react-leaflet";
 
 const CityColors: { [key: string]: string } = {
@@ -25,10 +26,7 @@ export function Cities({
 }: {
   citiesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 }) {
-  const [selectedCities, setSelectedCities] = useState<(number | null)[]>([
-    null,
-    null,
-  ]);
+  const [selectedCities, setSelectedCities] = useCurrentSelectedCities();
 
   const gameState = useContext(GameStateContext);
 
@@ -68,8 +66,8 @@ export function Cities({
 
   const onCityClick = useCallback(
     (ID: number): LeafletMouseEventHandlerFn =>
-      () => {
-        setSelectedCities((s) => [s[1], ID]);
+      ({ originalEvent: { shiftKey } }) => {
+        setSelectedCities((s) => [shiftKey ? s[0] : ID, shiftKey ? ID : null]);
       },
     []
   );

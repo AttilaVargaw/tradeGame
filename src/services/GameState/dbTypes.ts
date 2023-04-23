@@ -1,12 +1,5 @@
 import { ResourceChange } from "./tables/common";
 
-export type CityPopulationClass = {
-  num: number;
-  ID: number;
-  populationClass: string;
-  city: string;
-};
-
 export type DailyRequirement = {
   num: number;
   itemID: number;
