@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { GameStateContext } from "@Services/GameState/gameState";
 import SideMenu from "../sideMenu";
-import { CRS, Map as LeafletMap } from "leaflet";
+import { CRS, Map as LeafletMap, LeafletMouseEvent } from "leaflet";
 import { RouteLayer } from "../routeLayer";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import { setContextMenuPosition } from "@Services/contextMenu";
@@ -22,6 +22,7 @@ import { Cities } from "./cities";
 import { Vehicles } from "./vehicles";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
 
 const Container = styled.div`
   display: "flex";
@@ -38,28 +39,15 @@ export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
 
   const [, setCurrentSelectedCities] = useCurrentSelectedCities();
+  const [currentVehicle, setCurrentVehicle] = useCurrentVehicle();
+
   const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
 
   const [citiesGeoJson, setCitiesGeoJson] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
 
-  const [vehiclesGeoJson, setVehiclesGeoJson] =
-    useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
-
-  const [convoysGeoJson, setConvoyslesGeoJson] =
-    useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
-
   useEffect(() => {
     gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
-  }, [gameState]);
-
-  useEffect(() => {
-    gameState.getConvoysAsGeoJson().then(setConvoyslesGeoJson);
-    gameState.getConvoysAsGeoJson().then(console.log);
-  }, [gameState]);
-
-  useEffect(() => {
-    gameState.getVehiclesAsGeoJson().then(setVehiclesGeoJson);
   }, [gameState]);
 
   useEffect(() => {
@@ -104,17 +92,17 @@ export function WorldMap(): JSX.Element {
 
   const onContextMenu = useCallback<React.MouseEventHandler<HTMLDivElement>>(
     ({ nativeEvent: { clientX, clientY } }) => {
-      if (!currentConvoy) {
+      if (!currentConvoy && !currentVehicle) {
         setContextMenuPosition([clientX, clientY]);
       }
     },
-    [currentConvoy]
+    [currentConvoy, currentVehicle]
   );
 
   const { height, width } = useWindowSize();
 
-  const mapContainerRef = useRef<LeafletMap>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapContainerRef = useRef<LeafletMap>(null);
 
   useEffect(() => {
     function OutSideClick(this: Window, ev: MouseEvent) {
@@ -127,23 +115,48 @@ export function WorldMap(): JSX.Element {
           setCurrentSelectedCities([null, null]);
         }
         setCurrentConvoy(null);
+        setCurrentVehicle(null);
       }
     }
 
     window.addEventListener("click", OutSideClick, true);
 
     return () => window.removeEventListener("click", OutSideClick);
-  }, [setCurrentSelectedCities, setCurrentConvoy]);
+  }, [
+    setCurrentSelectedCities,
+    setCurrentConvoy,
+    currentConvoy,
+    gameState,
+    setCurrentVehicle,
+  ]);
 
   useEffect(() => {
-    const eventHandler = () => {
+    function ClickHandler(
+      this: Window,
+      { originalEvent: ev, latlng: { lat, lng } }: LeafletMouseEvent
+    ) {
+      if (ev.button === 0 && ev.ctrlKey) {
+        if (currentConvoy) {
+          gameState.setConvoyGoal(currentConvoy, lng, lat);
+        } else if (currentVehicle) {
+          gameState.setVehicleGoal(currentVehicle, lng, lat);
+        }
+      }
+    }
+
+    function ResizeHandler() {
       mapContainerRef.current?.invalidateSize();
+    }
+
+    window.addEventListener("resize", ResizeHandler);
+
+    mapContainerRef.current?.on("click", ClickHandler);
+
+    return () => {
+      mapContainerRef.current?.off("click", ClickHandler);
+      window.removeEventListener("resize", ResizeHandler);
     };
-
-    window.addEventListener("resize", eventHandler);
-
-    return () => window.removeEventListener("resize", eventHandler);
-  }, []);
+  }, [currentConvoy, gameState, currentVehicle]);
 
   const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
 
@@ -177,8 +190,8 @@ export function WorldMap(): JSX.Element {
               [973, 1920],
             ]}
           >
-            {vehiclesGeoJson && <Vehicles vehiclesGeoJson={vehiclesGeoJson} />}
-            {convoysGeoJson && <Convoys convoysGeoJson={convoysGeoJson} />}
+            <Vehicles />
+            <Convoys />
             {citiesGeoJson && <Cities citiesGeoJson={citiesGeoJson} />}
           </ImageOverlay>
           <RouteLayer />

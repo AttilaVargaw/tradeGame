@@ -69,7 +69,7 @@ export function Cities({
       ({ originalEvent: { shiftKey } }) => {
         setSelectedCities((s) => [shiftKey ? s[0] : ID, shiftKey ? ID : null]);
       },
-    []
+    [setSelectedCities]
   );
 
   return (

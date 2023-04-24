@@ -68,6 +68,8 @@ export enum DBEvents {
   newVehicleBought,
   newConvoyCreated,
   vehicleJoinedConvoy,
+  vehicleGoalSet,
+  convoyGoalSet,
 }
 
 export type DBEvent = {

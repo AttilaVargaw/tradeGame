@@ -61,7 +61,6 @@ export const RouteLayer: FC<RouteLayerProps> = () => {
 
   return (
     <>
-      {" "}
       {tradeRoutes && (
         <GeoJSON
           ref={layerRef}
