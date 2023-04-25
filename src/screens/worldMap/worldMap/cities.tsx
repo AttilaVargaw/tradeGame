@@ -1,12 +1,10 @@
+import { useContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import {
-  addToContextMenu,
-  setContextMenuPosition,
-} from "@Services/contextMenu";
+import { addToContextMenu } from "@Services/contextMenu";
 import { LeafletMouseEventHandlerFn } from "leaflet";
 import { useCallback, useContext, useEffect } from "react";
 import { Circle, Tooltip } from "react-leaflet";
@@ -34,6 +32,8 @@ export function Cities({
 
   const [, setCurrentSelectedCity] = useCurrentSelectedCity();
 
+  const [, setContextMenuPosition] = useContextMenuPosition();
+
   useEffect(() => {
     const onClick = () => {
       const [cityA, cityB] = selectedCities;
@@ -45,7 +45,7 @@ export function Cities({
     };
 
     return addToContextMenu({ disabled: false, labelKey: "addRoute", onClick });
-  }, [selectedCities, gameState]);
+  }, [selectedCities, gameState, setContextMenuPosition]);
 
   const onDoubleClick = useCallback(
     (city: number): LeafletMouseEventHandlerFn =>

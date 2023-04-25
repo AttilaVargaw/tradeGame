@@ -9,12 +9,6 @@ export type ContextMenuItemProps = {
 const contextMenuSubject = new BehaviorSubject<ContextMenuItemProps[]>([]);
 export const contextMenuObservable = contextMenuSubject.asObservable();
 
-const contextMenuPositionSubject = new BehaviorSubject<[number, number] | null>(
-  null
-);
-export const contextMenuPositionObservable =
-  contextMenuPositionSubject.asObservable();
-
 export const addToContextMenu = (value: ContextMenuItemProps) => {
   contextMenuSubject.next([value, ...contextMenuSubject.value]);
 
@@ -24,8 +18,4 @@ export const addToContextMenu = (value: ContextMenuItemProps) => {
         ({ labelKey }) => labelKey !== value.labelKey
       )
     );
-};
-
-export const setContextMenuPosition = (value: [number, number] | null) => {
-  contextMenuPositionSubject.next(value);
 };

@@ -1,26 +1,23 @@
 import { useState, useEffect } from "react";
 import { Button } from "./button";
-
-const dT = 1000 * 60;
+import { useTick } from "./hooks/useTick";
 
 export function SevenDigitClock() {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
-  const [tick, setTick] = useState(new Date().setFullYear(1899, 1, 1));
+
+  const [tick] = useTick();
 
   useEffect(() => {
-    const timeout = setInterval(() => {
-      setTick(() => tick + dT);
-      setTime(
-        new Date(tick + dT).toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-      setDate(new Date(tick + dT).toLocaleDateString());
-    }, 1000);
+    const date = new Date(tick);
 
-    return () => clearInterval(timeout);
+    setTime(
+      date.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
+    setDate(date.toLocaleDateString());
   }, [tick]);
 
   return (

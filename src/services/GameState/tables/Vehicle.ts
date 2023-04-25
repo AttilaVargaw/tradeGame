@@ -9,6 +9,7 @@ export type VehicleData = {
   posX: number;
   goalY?: number;
   goalX?: number;
+  speed: number;
 };
 
 export default {
@@ -24,6 +25,7 @@ export default {
     { name: "posX", type: "REAL" },
     { name: "goalY", type: "REAL" },
     { name: "goalX", type: "REAL" },
+    { name: "speed", type: "REAL" },
     {
       name: "convoy",
       type: "INTEGER",

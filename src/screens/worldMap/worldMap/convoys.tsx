@@ -53,17 +53,12 @@ export function Convoys() {
 
   useEffect(() => {
     const subscription = gameState.dbObservable.subscribe(({ type }) => {
-      switch (type) {
-        case DBEvents.convoyGoalSet:
-          setConvoyGoalsGeoJson(undefined);
-          gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
-          return;
-        case DBEvents.newConvoyCreated:
-        case DBEvents.vehicleJoinedConvoy:
-          setConvoysGeoJson(undefined);
-          gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
-          return;
-      }
+      setConvoyGoalsGeoJson(undefined);
+      gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
+
+      setConvoysGeoJson(undefined);
+      gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
+      return;
     });
 
     return () => subscription.unsubscribe();

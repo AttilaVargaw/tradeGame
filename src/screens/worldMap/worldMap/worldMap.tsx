@@ -11,7 +11,6 @@ import SideMenu from "../sideMenu";
 import { CRS, Map as LeafletMap, LeafletMouseEvent } from "leaflet";
 import { RouteLayer } from "../routeLayer";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
-import { setContextMenuPosition } from "@Services/contextMenu";
 
 import { ImageOverlay, MapContainer } from "react-leaflet";
 import { useWindowSize } from "../../../components/hooks/useWIndowSize";
@@ -23,6 +22,8 @@ import { Vehicles } from "./vehicles";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
+import { useContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
+import { useTick, useTickUpdater } from "@Components/hooks/useTick";
 
 const Container = styled.div`
   display: "flex";
@@ -41,13 +42,25 @@ export function WorldMap(): JSX.Element {
   const [, setCurrentSelectedCities] = useCurrentSelectedCities();
   const [currentVehicle, setCurrentVehicle] = useCurrentVehicle();
 
+  useTickUpdater();
+
   const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
 
   const [citiesGeoJson, setCitiesGeoJson] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
 
+  const [, setContextMenuPosition] = useContextMenuPosition();
+
   useEffect(() => {
     gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
+  }, [gameState]);
+
+  useEffect(() => {
+    const updateInterval = setInterval(() => {
+      gameState.UpdateConvoys(1);
+    }, 1000);
+
+    return () => clearInterval(updateInterval);
   }, [gameState]);
 
   useEffect(() => {
@@ -96,7 +109,7 @@ export function WorldMap(): JSX.Element {
         setContextMenuPosition([clientX, clientY]);
       }
     },
-    [currentConvoy, currentVehicle]
+    [currentConvoy, currentVehicle, setContextMenuPosition]
   );
 
   const { height, width } = useWindowSize();

@@ -136,12 +136,14 @@ export function select({ attributes, join, where, table }: SelectEvent) {
     })
     .join(",")} from ${table}${
     join?.length || 0 > 0
-      ? join?.map(
-          ({ A, equation, as }) =>
-            ` inner join ${A} ${as ? ` ${as}` : ""} on ${joinEquitationToString(
-              equation
-            )}`
-        )
+      ? join
+          ?.map(
+            ({ A, equation, as }) =>
+              ` inner join ${A} ${
+                as ? ` ${as}` : ""
+              } on ${joinEquitationToString(equation)}`
+          )
+          .join(" ")
       : ""
   }${
     (where?.length || 0) > 0
@@ -170,13 +172,11 @@ export function update({
 }) {
   return `UPDATE ${table}${
     join
-      ? join
-          .map(
-            ({ A, equation }) =>
-              ` inner join ${joinEquitationToString(equation)}`
-          )
-          .join(",")
-      : ""
+      ? join.map(
+          ({ A, equation }) => ` inner join ${joinEquitationToString(equation)}`
+        )
+      : //.join(",")
+        ""
   }
   SET ${updateRows
     .map(([attr, value]) => `${attr} = ${InputToString(value)}`)

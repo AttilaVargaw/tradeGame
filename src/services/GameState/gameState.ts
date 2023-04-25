@@ -361,7 +361,7 @@ const getTradeRoute = async (ID: number) => {
             as: "CityB",
           },
         ],
-      }).replace("cityA,", "cityA")
+      })
     )
   )[0];
 
@@ -430,7 +430,7 @@ const getTradeRoutesAsGeoJson = async () => {
           as: "CityB",
         },
       ],
-    }).replace("cityA,", "cityA")
+    })
   );
 
   return tradeRoutes.reduce(
@@ -859,7 +859,72 @@ const setIndustrialBuildingNumber = (ID: number, num: number) => {
   ]);
 };
 
+type ConvoyUpdateData = {
+  minSpeed: number;
+} & ConvoyData;
+
+async function UpdateConvoys(dt: number) {
+  const convoys = await db.select<ConvoyData[]>(
+    select({
+      attributes: [
+        [Tables.Convoy, ["name", "ID", "goalX", "goalY", "posY", "posX"]],
+      ],
+      table: Tables.Convoy,
+    })
+  );
+
+  await Promise.all(
+    convoys.map(async ({ goalX, goalY, ID, posX, posY }) => {
+      if (goalX && goalY) {
+        const convoyQuery = select({
+          attributes: [["", "min(VehicleTypes.speed) as minSpeed"]],
+          table: Tables.Convoy,
+          join: [
+            {
+              A: Tables.Vehicle,
+              equation: {
+                A: [Tables.Convoy, "ID"],
+                B: [Tables.Vehicle, "convoy"],
+              },
+            },
+            {
+              A: Tables.VehicleTypes,
+              equation: {
+                A: [Tables.Vehicle, "type"],
+                B: [Tables.VehicleTypes, "ID"],
+              },
+            },
+          ],
+        });
+
+        const [convoy] = await db.select<ConvoyUpdateData[]>(convoyQuery);
+
+        const headingVector = [posX - goalX, posY - goalY];
+        const speed = convoy.minSpeed;
+
+        const angle = Math.atan2(headingVector[1], headingVector[0]);
+
+        return db.execute(
+          update({
+            table: Tables.Convoy,
+            where: [{ A: [Tables.Convoy, "ID"], value: ID }],
+            updateRows: [
+              ["posX", posX - Math.cos(angle) * speed * dt],
+              ["posY", posY - Math.sin(angle) * speed * dt],
+            ],
+          })
+        );
+      }
+
+      return Promise.resolve();
+    })
+  );
+
+  dbObservable.next({ type: DBEvents.convoyUpdated });
+}
+
 export const GameState = {
+  UpdateConvoys,
   initialized,
   setIndustrialBuildingNumber,
   getNotAvailableItems,

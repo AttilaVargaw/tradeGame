@@ -1,27 +1,29 @@
 import { FC, useEffect, useRef, useState } from "react";
-import Button from "react-bootstrap/esm/Button";
-import Popover from "react-bootstrap/esm/Popover";
 import {
   contextMenuObservable,
   ContextMenuItemProps,
-  contextMenuPositionObservable,
 } from "@Services/contextMenu";
+import { useContextMenuPosition } from "./hooks/useContextMenuPosition";
+import { Link, TerminalScreen } from "./terminalScreen";
+import styled, { css } from "styled-components";
+
+const Container = styled.div<{ top: number; left: number }>`
+  position: absolute;
+  left: ${({ left }) => `${left}px`};
+  top: ${({ top }) => `${top}px`};
+  z-index: 10000;
+`;
 
 export const ContextMenu: FC = () => {
   const [contextMenuItems, setContextMenuItems] = useState<
     ContextMenuItemProps[]
   >([]);
-  const [contextMenuPositionState, setContextMenuPositionState] = useState<
-    [number, number] | null
-  >(null);
+
+  const [contextMenuPosition, setContextMenuPosition] =
+    useContextMenuPosition();
 
   useEffect(() => {
     return contextMenuObservable.subscribe(setContextMenuItems).unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    return contextMenuPositionObservable.subscribe(setContextMenuPositionState)
-      .unsubscribe;
   }, []);
 
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -29,35 +31,32 @@ export const ContextMenu: FC = () => {
   useEffect(() => {
     function OutsideEventListener(ev: MouseEvent) {
       if (!popoverRef.current?.contains(ev.target as Node)) {
-        setContextMenuPositionState(null);
+        setContextMenuPosition(null);
       }
     }
 
     window.addEventListener("mousedown", OutsideEventListener);
 
     return () => window.removeEventListener("mousedown", OutsideEventListener);
-  }, [contextMenuPositionState]);
+  }, [setContextMenuPosition]);
+
+  console.log(contextMenuPosition);
 
   return (
-    <Popover
-      ref={popoverRef}
-      hidden={!contextMenuPositionState}
-      placement="right"
-      id="popover-contained"
-      style={{
-        position: "absolute",
-        top: contextMenuPositionState ? contextMenuPositionState[1] : 0,
-        left: contextMenuPositionState ? contextMenuPositionState[0] : 0,
-      }}
-    >
-      <Popover.Header as="h3">Popover right</Popover.Header>
-      <Popover.Body>
-        {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
-          <Button key={labelKey} onClick={onClick} disabled={disabled}>
-            {labelKey}
-          </Button>
-        ))}
-      </Popover.Body>
-    </Popover>
+    contextMenuPosition && (
+      <Container
+        ref={popoverRef}
+        top={contextMenuPosition[1]}
+        left={contextMenuPosition[0]}
+      >
+        <TerminalScreen>
+          {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
+            <div key={labelKey}>
+              <Link onClick={onClick}>{labelKey}</Link>
+            </div>
+          ))}
+        </TerminalScreen>
+      </Container>
+    )
   );
 };
