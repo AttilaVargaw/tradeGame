@@ -1,4 +1,5 @@
-import React, {
+import {
+  MouseEventHandler,
   useCallback,
   useContext,
   useEffect,
@@ -26,7 +27,10 @@ import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
 import { useContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
-import { useTickUpdater } from "@Components/hooks/useTick";
+import { useGameLoop } from "@Components/hooks/useGameLoop";
+import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
+import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
+import { useTickUpdate } from "@Components/hooks/useTick";
 
 const Container = styled.div`
   display: "flex";
@@ -56,84 +60,25 @@ const PageContainer = styled.div<{ height: number; width: number }>`
   width: ${({ width }) => width}px;
 `;
 
-let oldTimeStamp = 0;
-
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
 
   const [, setCurrentSelectedCities] = useCurrentSelectedCities();
   const [currentVehicle, setCurrentVehicle] = useCurrentVehicle();
-
-  useTickUpdater();
-
   const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
-
   const [, setContextMenuPosition] = useContextMenuPosition();
 
-  const gameLoopAnimationFrame = useRef<number>();
+  useKeypressHandler();
+  useContextMenuHandler();
+  useGameLoop();
+  useTickUpdate();
 
-  useEffect(() => {
-    async function gameLoop(timeStamp: number) {
-      const secondsPassed = (timeStamp - oldTimeStamp) / 1000;
-      oldTimeStamp = timeStamp;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapContainerRef = useRef<LeafletMap>(null);
+  const { height, width } = useWindowSize();
+  const mapContainerCleanUpRef = useRef<LeafletMap>();
 
-      await gameState.UpdateConvoys(secondsPassed);
-
-      document.getElementById("FPS")!.innerHTML = Math.round(
-        1 / secondsPassed
-      ).toString();
-
-      gameLoopAnimationFrame.current = window.requestAnimationFrame(gameLoop);
-
-      return () =>
-        gameLoopAnimationFrame.current &&
-        window.cancelAnimationFrame(gameLoopAnimationFrame.current);
-    }
-
-    window.requestAnimationFrame(gameLoop);
-  }, [gameState]);
-
-  useEffect(() => {
-    const keypressHandler = ({ code }: KeyboardEvent) => {
-      setTimeout(() => {
-        switch (code) {
-          case "NumpadAdd":
-          case "NumpadSubtract":
-            break;
-          case "KeyW":
-            break;
-          case "KeyS":
-            break;
-          case "KeyA":
-            break;
-          case "KeyD":
-            break;
-        }
-      }, 0);
-    };
-
-    window.addEventListener("keypress", keypressHandler);
-    return () => window.removeEventListener("keypress", keypressHandler);
-  });
-
-  useEffect(() => {
-    const contextMenuHandler: EventListenerOrEventListenerObject = function (
-      event
-    ) {
-      // alert("You've tried to open context menu"); //here you draw your own menu
-      event.preventDefault();
-      return false;
-    };
-
-    document.addEventListener("contextmenu", contextMenuHandler, {
-      capture: true,
-    });
-
-    return () =>
-      document.removeEventListener("contextmenu", contextMenuHandler);
-  }, []);
-
-  const onContextMenu = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+  const onContextMenu = useCallback<MouseEventHandler<HTMLDivElement>>(
     ({ nativeEvent: { clientX, clientY } }) => {
       if (!currentConvoy && !currentVehicle) {
         setContextMenuPosition([clientX, clientY]);
@@ -141,11 +86,6 @@ export function WorldMap(): JSX.Element {
     },
     [currentConvoy, currentVehicle, setContextMenuPosition]
   );
-
-  const { height, width } = useWindowSize();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapContainerRef = useRef<LeafletMap>(null);
 
   useEffect(() => {
     function OutSideClick(this: Window, ev: MouseEvent) {
@@ -173,8 +113,6 @@ export function WorldMap(): JSX.Element {
     setCurrentVehicle,
   ]);
 
-  const mapContainerCleanUpRef = useRef<LeafletMap>();
-
   useEffect(() => {
     function ClickHandler(
       this: Window,
@@ -182,7 +120,11 @@ export function WorldMap(): JSX.Element {
     ) {
       if (ev.button === 0 && ev.ctrlKey) {
         if (currentConvoy) {
-          gameState.setConvoyGoal(currentConvoy, lng, lat);
+          gameState.setConvoyGoal(
+            currentConvoy,
+            Math.round(lng),
+            Math.round(lat)
+          );
         } else if (currentVehicle) {
           gameState.setVehicleGoal(currentVehicle, lng, lat);
         }
@@ -215,6 +157,8 @@ export function WorldMap(): JSX.Element {
 
   const renderer = useRef(L.canvas());
 
+  console.log("renderer");
+
   return (
     <Container>
       <PageContainer
@@ -225,7 +169,7 @@ export function WorldMap(): JSX.Element {
         <StyledMapContainer
           doubleClickZoom={false}
           scrollWheelZoom
-          zoomDelta={2}
+          zoomDelta={1}
           maxBounds={maxBounds}
           maxBoundsViscosity={100}
           crs={CRS.Simple}
@@ -234,6 +178,8 @@ export function WorldMap(): JSX.Element {
           minZoom={1}
           ref={mapContainerRef}
           zoomAnimation={false}
+          fadeAnimation={false}
+          markerZoomAnimation={false}
           renderer={renderer.current}
         >
           <ImageOverlay url="lava_sea.png" bounds={bounds}>

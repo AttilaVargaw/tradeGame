@@ -9,6 +9,7 @@ export type ConvoyData = {
   route: number;
   goalY?: number;
   goalX?: number;
+  goalAngle?: number;
 };
 
 export type ConvoyTableName = "Convoy";
@@ -23,6 +24,7 @@ export default {
     { name: "route", type: "INTEGER" },
     { name: "goalY", type: "REAL" },
     { name: "goalX", type: "REAL" },
+    { name: "goalAngle", type: "REAL" },
   ],
   initData: [{ name: "Test Convoy", type: "1", posX: 1670, posY: 520 }],
 } as TableData<ConvoyData>;

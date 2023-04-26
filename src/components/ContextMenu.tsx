@@ -35,7 +35,7 @@ export const ContextMenu: FC = () => {
       }
     }
 
-    window.addEventListener("mousedown", OutsideEventListener);
+    window.addEventListener("mousedown", OutsideEventListener, true);
 
     return () => window.removeEventListener("mousedown", OutsideEventListener);
   }, [setContextMenuPosition]);

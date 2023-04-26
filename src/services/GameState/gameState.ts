@@ -61,7 +61,8 @@ function FillTable<T>({ name, initData }: TableData<T>) {
 }
 
 const init = async () => {
-  db = await Database.load("sqlite:tradegame.db");
+  //db = await Database.load("sqlite:tradegame.db");
+  db = await Database.load("sqlite:memory");
   console.log(await appLocalDataDir());
 
   const creatorSQL1 =
@@ -141,6 +142,14 @@ const setConvoyGoal = async (
   goalX: number,
   goalY: number
 ) => {
+  const [{ goalVectorX, goalVectorY }] = await db.select<
+    { goalVectorX: number; goalVectorY: number }[]
+  >(
+    "select posX-? as goalVectorX, posY-? as goalVectorY from Convoy where ID=?",
+    [goalX, goalY, convoyID]
+  );
+  const angle = Math.atan2(goalVectorY, goalVectorX);
+
   const data = await db.execute(
     update({
       table: Tables.Convoy,
@@ -148,6 +157,7 @@ const setConvoyGoal = async (
       updateRows: [
         ["goalX", goalX],
         ["goalY", goalY],
+        ["goalAngle", angle],
       ],
     })
   );
@@ -305,14 +315,6 @@ const getVehiclesOfConvoy = (ID: number | null) => {
 };
 
 const getConvoylessVehicles = () => {
-  console.log(
-    select({
-      attributes: [[Tables.Vehicle, ["name", "ID"]]],
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
-    })
-  );
-
   return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["name", "ID"]]],
@@ -524,7 +526,8 @@ const getConvoyGoalsAsGeoJson = async () => {
     type: "FeatureCollection",
     features: convoysData
       .filter(({ goalX, goalY }) => goalX && goalY)
-      .map(({ goalX, goalY, posX, posY }) => ({
+      .map(({ goalX, goalY, posX, posY, ID }) => ({
+        properties: { ID },
         type: "Feature",
         geometry: {
           coordinates: [
@@ -598,7 +601,6 @@ const getVehiclesAsGeoJson = async () => {
 };
 
 const getCitiesAsGeoJson = async () => {
-  console.log(getQuery("getCities"));
   const citiesData = await db.select<CityEntity[]>(getQuery("getCities"));
 
   return {
@@ -862,62 +864,36 @@ const setIndustrialBuildingNumber = (ID: number, num: number) => {
 
 type ConvoyUpdateData = {
   minSpeed: number;
+  dS: number;
+  headingX: number;
+  headingY: number;
+  angle: number;
 } & ConvoyData;
 
 async function UpdateConvoys(dt: number) {
-  const convoys = await db.select<ConvoyData[]>(
-    select({
-      attributes: [
-        [Tables.Convoy, ["name", "ID", "goalX", "goalY", "posY", "posX"]],
-      ],
-      table: Tables.Convoy,
-    })
-  );
+  //const t1 = Date.now();
 
-  const updates = await Promise.all(
-    convoys.map(async ({ goalX, goalY, ID, posX, posY }) => {
-      if (goalX && goalY) {
-        const convoyQuery = select({
-          attributes: [["", "min(VehicleTypes.speed) as minSpeed"]],
-          table: Tables.Convoy,
-          join: [
-            {
-              A: Tables.Vehicle,
-              equation: {
-                A: [Tables.Convoy, "ID"],
-                B: [Tables.Vehicle, "convoy"],
-              },
-            },
-            {
-              A: Tables.VehicleTypes,
-              equation: {
-                A: [Tables.Vehicle, "type"],
-                B: [Tables.VehicleTypes, "ID"],
-              },
-            },
-          ],
-        });
+  const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
 
-        const [convoy] = await db.select<ConvoyUpdateData[]>(convoyQuery);
+  const ret = await Promise.all(
+    convoys.map(async ({ goalX, goalY, ID, posX, posY, goalAngle }) => {
+      if (goalX && goalY && goalAngle) {
+        const [convoy] = await db.select<ConvoyUpdateData[]>(
+          getQuery("getConvoySpeed"),
+          [dt, ID]
+        );
 
-        const headingVector = [posX - goalX, posY - goalY];
-        const speed = convoy.minSpeed;
-
-        const angle = Math.atan2(headingVector[1], headingVector[0]);
-
-        const dS = speed * dt;
+        const { headingX, headingY, dS } = convoy;
 
         const newPos = [
-          posX - Math.cos(angle) * dS,
-          posY - Math.sin(angle) * dS,
+          posX - Math.cos(goalAngle) * dS,
+          posY - Math.sin(goalAngle) * dS,
         ];
 
         const newVector = [posX - newPos[0], posY - newPos[1]];
 
         const stop =
-          Lenght(headingVector[0], headingVector[1]) -
-            Lenght(newVector[0], newVector[1]) <
-          0;
+          Lenght(headingX, headingY) - Lenght(newVector[0], newVector[1]) < 0;
 
         const updateRows: [string, number | null][] = [
           ["posX", stop ? goalX : newPos[0]],
@@ -927,14 +903,16 @@ async function UpdateConvoys(dt: number) {
         if (stop) {
           updateRows.push(["goalX", null]);
           updateRows.push(["goalY", null]);
+          updateRows.push(["goalAngle", null]);
         }
 
         await db.execute(
           update({
             table: Tables.Convoy,
-            where: [{ A: [Tables.Convoy, "ID"], value: ID }],
+            where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
             updateRows,
-          })
+          }),
+          [ID]
         );
 
         return true;
@@ -944,9 +922,9 @@ async function UpdateConvoys(dt: number) {
     })
   );
 
-  if (updates.some((value) => value === true)) {
-    dbObservable.next({ type: DBEvents.convoyUpdated });
-  }
+  //console.log(Date.now() - t1);
+
+  return ret;
 }
 
 export const GameState = {

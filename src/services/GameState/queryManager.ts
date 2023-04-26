@@ -1,11 +1,16 @@
 import { select } from "../simpleQueryBuilder";
 import { Tables } from "./tables/common";
 
-export type QueryTypes = "getCities" | "getCity";
+export type QueryTypes =
+  | "getCities"
+  | "getCity"
+  | "getConvoys"
+  | "updateConvoy"
+  | "getConvoySpeed";
 
 const queries = new Map<QueryTypes, string>();
 
-export function getQuery(type: "getCities" | "getCity"): string {
+export function getQuery(type: QueryTypes): string {
   if (!queries.has(type)) {
     switch (type) {
       case "getCities":
@@ -42,6 +47,51 @@ export function getQuery(type: "getCities" | "getCity"): string {
         );
         break;
       }
+      case "getConvoys": {
+        queries.set(
+          type,
+          select({
+            attributes: [
+              [
+                Tables.Convoy,
+                ["name", "ID", "goalX", "goalY", "posY", "posX", "goalAngle"],
+              ],
+            ],
+            table: Tables.Convoy,
+          })
+        );
+        break;
+      }
+      case "getConvoySpeed":
+        queries.set(
+          type,
+          select({
+            attributes: [
+              ["", "min(VehicleTypes.speed) as minSpeed"],
+              ["", "min(VehicleTypes.speed) * ? as dS"],
+              ["", "Convoy.posX - Convoy.goalX as headingX"],
+              ["", "Convoy.posY - Convoy.goalY as headingY"],
+            ],
+            table: Tables.Convoy,
+            join: [
+              {
+                A: Tables.Vehicle,
+                equation: {
+                  A: [Tables.Convoy, "ID"],
+                  B: [Tables.Vehicle, "convoy"],
+                },
+              },
+              {
+                A: Tables.VehicleTypes,
+                equation: {
+                  A: [Tables.Vehicle, "type"],
+                  B: [Tables.VehicleTypes, "ID"],
+                },
+              },
+            ],
+            where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+          })
+        );
     }
   }
 

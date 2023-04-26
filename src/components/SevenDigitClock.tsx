@@ -1,34 +1,44 @@
 import { useState, useEffect } from "react";
 import { Button } from "./button";
-import { useTick } from "./hooks/useTick";
+import styled from "styled-components";
+import { Tick } from "./hooks/useTick";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const Character = styled.div`
+  width: 0.6em;
+`;
 
 export function SevenDigitClock() {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
 
-  const [tick] = useTick();
-
   useEffect(() => {
-    const date = new Date(tick);
+    const subscribtion = Tick.subscribe((tick) => {
+      const date = new Date(tick);
 
-    setTime(
-      date.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
-    setDate(date.toLocaleDateString());
-  }, [tick]);
+      setTime(
+        date.toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+      setDate(date.toLocaleDateString());
+    });
+
+    return () => subscribtion.unsubscribe();
+  }, []);
 
   return (
     <Button black>
-      <div style={{ display: "flex", flexDirection: "row" }}>
+      <Container>
         {[...`${date} ${time}`].map((c, i) => (
-          <div style={{ width: "0.6em" }} key={i}>
-            {c}
-          </div>
+          <Character key={i}>{c}</Character>
         ))}
-      </div>
+      </Container>
     </Button>
   );
 }

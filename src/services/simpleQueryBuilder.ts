@@ -164,11 +164,13 @@ export function update({
   updateRows,
   join,
   where,
+  toBind = false,
 }: {
   updateRows: [string, string | number | null][];
   table: Tables;
   where?: WhereEquitation[];
   join?: Join[];
+  toBind?: boolean;
 }) {
   return `UPDATE ${table}${
     join

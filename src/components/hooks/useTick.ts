@@ -1,22 +1,24 @@
-import { atom, useAtom } from "jotai";
 import { useEffect } from "react";
+import { BehaviorSubject } from "rxjs";
 
-const tickAtom = atom<number>(new Date().setFullYear(1899, 1, 1));
+export const Tick = new BehaviorSubject(new Date(1899, 1, 1).getTime());
 
-const dT = 1000 * 60;
+const startTick = new Date(1899, 1, 1).getTime();
+let prevTick = Date.now();
+let currentTick = startTick;
 
-export function useTick() {
-  return useAtom(tickAtom);
-}
-
-export function useTickUpdater() {
-  const [, setTick] = useTick();
-
+export function useTickUpdate() {
   useEffect(() => {
-    const timeout = setInterval(() => {
-      setTick((tick) => tick + dT);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const dT = now - prevTick;
+      prevTick = now;
+
+      currentTick = dT * 3600 + currentTick;
+
+      Tick.next(currentTick);
     }, 1000);
 
-    return () => clearInterval(timeout);
-  }, [setTick]);
+    return () => clearTimeout(interval);
+  }, []);
 }

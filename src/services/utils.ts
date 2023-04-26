@@ -12,5 +12,5 @@ export function makeid(length: number) {
 }
 
 export function Lenght(a: number, b: number) {
-  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+  return Math.sqrt(a * a + b * b);
 }

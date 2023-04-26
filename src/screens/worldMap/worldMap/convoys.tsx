@@ -1,6 +1,10 @@
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { DBEvents } from "@Services/GameState/dbTypes";
+import {
+  RedrawType,
+  gameRedrawSubject,
+  useGameLoop,
+} from "@Components/hooks/useGameLoop";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { LeafletMouseEventHandlerFn } from "leaflet";
@@ -59,16 +63,13 @@ export function Convoys() {
   }, [gameState]);
 
   useEffect(() => {
-    const subscription = gameState.dbObservable.subscribe(({ type }) => {
+    const subscription = gameRedrawSubject.subscribe((type) => {
       switch (type) {
-        case DBEvents.convoyGoalSet:
-        case DBEvents.convoyUpdated:
-        case DBEvents.newConvoyCreated:
-        case DBEvents.vehicleJoinedConvoy:
+        case RedrawType.Convoys:
           setConvoyGoalsGeoJson(undefined);
-          gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
-
           setConvoysGeoJson(undefined);
+
+          gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
           gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
       }
     });
@@ -93,16 +94,17 @@ export function Convoys() {
         properties: { ID, name },
       }) => {
         const eventHandler = eventHandlers(ID);
+        const rPos: [number, number] = [posY, posX];
 
         return (
           <Circle
             color="red"
             eventHandlers={eventHandler}
             key={ID}
-            center={[posY, posX]}
+            center={rPos}
             radius={4}
           >
-            <Tooltip eventHandlers={eventHandler} permanent direction="center">
+            <Tooltip eventHandlers={eventHandler} permanent direction="left">
               {name}
             </Tooltip>
             {currentConvoy === ID && (
@@ -111,7 +113,7 @@ export function Convoys() {
                 pathOptions={pathOptions}
                 color="red"
                 key={ID}
-                center={[posY, posX]}
+                center={rPos}
                 radius={6}
               />
             )}
@@ -124,7 +126,13 @@ export function Convoys() {
   return (
     <>
       {convoyGoalsGeoJson && (
-        <GeoJSON pathOptions={tradeRouteStyle} data={convoyGoalsGeoJson} />
+        <GeoJSON
+          onEachFeature={({ properties: { ID } }, layer) => {
+            layer.addEventListener(eventHandlers(ID));
+          }}
+          pathOptions={tradeRouteStyle}
+          data={convoyGoalsGeoJson}
+        />
       )}
       {convoysPointer}
     </>
