@@ -4,14 +4,17 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import { GameStateContext } from "@Services/GameState/gameState";
 import SideMenu from "../sideMenu";
-import { CRS, Map as LeafletMap, LeafletMouseEvent } from "leaflet";
+import L, {
+  CRS,
+  LatLngBoundsExpression,
+  LatLngExpression,
+  Map as LeafletMap,
+  LeafletMouseEvent,
+} from "leaflet";
 import { RouteLayer } from "../routeLayer";
-import { CityPositionProperty } from "@Services/GameState/dbTypes";
-
 import { ImageOverlay, MapContainer } from "react-leaflet";
 import { useWindowSize } from "../../../components/hooks/useWIndowSize";
 import { ModalRouter } from "@Components/ModalRouter";
@@ -23,18 +26,37 @@ import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
 import { useContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
-import { useTick, useTickUpdater } from "@Components/hooks/useTick";
+import { useTickUpdater } from "@Components/hooks/useTick";
 
 const Container = styled.div`
   display: "flex";
   flex-direction: "column";
 `;
 
+const bounds = [
+  [0, 0],
+  [973, 1920],
+] as LatLngBoundsExpression;
+
+const maxBounds = [
+  [0, 0],
+  [973, 1920],
+] as LatLngBoundsExpression;
+
 const StyledMapContainer = styled(MapContainer)`
   width: 100%;
   height: 100%;
   background: #05001f;
 `;
+
+const center = [500, 1650] as LatLngExpression;
+
+const PageContainer = styled.div<{ height: number; width: number }>`
+  height: ${({ height }) => height}px;
+  width: ${({ width }) => width}px;
+`;
+
+let oldTimeStamp = 0;
 
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
@@ -46,21 +68,29 @@ export function WorldMap(): JSX.Element {
 
   const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
 
-  const [citiesGeoJson, setCitiesGeoJson] =
-    useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
-
   const [, setContextMenuPosition] = useContextMenuPosition();
 
-  useEffect(() => {
-    gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
-  }, [gameState]);
+  const gameLoopAnimationFrame = useRef<number>();
 
   useEffect(() => {
-    const updateInterval = setInterval(() => {
-      gameState.UpdateConvoys(1);
-    }, 1000);
+    function gameLoop(timeStamp: number) {
+      const secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+      oldTimeStamp = timeStamp;
 
-    return () => clearInterval(updateInterval);
+      gameState.UpdateConvoys(secondsPassed);
+
+      document.getElementById("FPS")!.innerHTML = Math.round(
+        1 / secondsPassed
+      ).toString();
+
+      gameLoopAnimationFrame.current = window.requestAnimationFrame(gameLoop);
+
+      return () =>
+        gameLoopAnimationFrame.current &&
+        window.cancelAnimationFrame(gameLoopAnimationFrame.current);
+    }
+
+    window.requestAnimationFrame(gameLoop);
   }, [gameState]);
 
   useEffect(() => {
@@ -143,6 +173,8 @@ export function WorldMap(): JSX.Element {
     setCurrentVehicle,
   ]);
 
+  const mapContainerCleanUpRef = useRef<LeafletMap>();
+
   useEffect(() => {
     function ClickHandler(
       this: Window,
@@ -165,8 +197,10 @@ export function WorldMap(): JSX.Element {
 
     mapContainerRef.current?.on("click", ClickHandler);
 
+    mapContainerCleanUpRef.current = mapContainerRef.current!;
+
     return () => {
-      mapContainerRef.current?.off("click", ClickHandler);
+      mapContainerCleanUpRef.current?.off("click", ClickHandler);
       window.removeEventListener("resize", ResizeHandler);
     };
   }, [currentConvoy, gameState, currentVehicle]);
@@ -178,38 +212,37 @@ export function WorldMap(): JSX.Element {
     [menuWidth, height]
   );
 
+  const renderer = useRef(L.canvas());
+
   return (
     <Container>
-      <div onContextMenu={onContextMenu} style={{ height, width }}>
+      <PageContainer
+        height={height}
+        width={width}
+        onContextMenu={onContextMenu}
+      >
         <StyledMapContainer
           doubleClickZoom={false}
           scrollWheelZoom
           zoomDelta={2}
-          maxBounds={[
-            [0, 0],
-            [973, 1920],
-          ]}
+          maxBounds={maxBounds}
           maxBoundsViscosity={100}
           crs={CRS.Simple}
-          center={[500, 1650]}
+          center={center}
           zoom={1}
           minZoom={1}
           ref={mapContainerRef}
+          zoomAnimation={false}
+          renderer={renderer.current}
         >
-          <ImageOverlay
-            url="lava_sea.png"
-            bounds={[
-              [0, 0],
-              [973, 1920],
-            ]}
-          >
+          <ImageOverlay url="lava_sea.png" bounds={bounds}>
             <Vehicles />
             <Convoys />
-            {citiesGeoJson && <Cities citiesGeoJson={citiesGeoJson} />}
+            <Cities />
           </ImageOverlay>
           <RouteLayer />
         </StyledMapContainer>
-      </div>
+      </PageContainer>
       <SideMenu style={sideMenuStyle} />
       <ModalRouter />
     </Container>

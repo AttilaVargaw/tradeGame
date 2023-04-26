@@ -6,7 +6,7 @@ import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { addToContextMenu } from "@Services/contextMenu";
 import { LeafletMouseEventHandlerFn } from "leaflet";
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Circle, Tooltip } from "react-leaflet";
 
 const CityColors: { [key: string]: string } = {
@@ -19,11 +19,7 @@ const CityColors: { [key: string]: string } = {
   RandomEncounter: "gold",
 };
 
-export function Cities({
-  citiesGeoJson,
-}: {
-  citiesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
-}) {
+export function Cities() {
   const [selectedCities, setSelectedCities] = useCurrentSelectedCities();
 
   const gameState = useContext(GameStateContext);
@@ -33,6 +29,13 @@ export function Cities({
   const [, setCurrentSelectedCity] = useCurrentSelectedCity();
 
   const [, setContextMenuPosition] = useContextMenuPosition();
+
+  useEffect(() => {
+    gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
+  }, [gameState]);
+
+  const [citiesGeoJson, setCitiesGeoJson] =
+    useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
 
   useEffect(() => {
     const onClick = () => {
@@ -74,7 +77,7 @@ export function Cities({
 
   return (
     <>
-      {citiesGeoJson.features.map(
+      {citiesGeoJson?.features.map(
         ({
           geometry: {
             coordinates: [posX, posY],

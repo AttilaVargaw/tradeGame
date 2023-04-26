@@ -4,7 +4,7 @@ import { DBEvents } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { LeafletMouseEventHandlerFn } from "leaflet";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Circle, Tooltip } from "react-leaflet";
 import { GeoJSON } from "react-leaflet";
 
@@ -16,6 +16,12 @@ const tradeRouteStyle = {
   dashArray: "2 10",
 };
 
+const pathOptions = {
+  dashOffset: "10",
+  dashArray: "3 5",
+  fillOpacity: 0.5,
+};
+
 export function Convoys() {
   const [, setCurrentModal] = useCurrentModal();
   const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
@@ -25,6 +31,7 @@ export function Convoys() {
     (ID: number): LeafletMouseEventHandlerFn => {
       return () => {
         setCurrentConvoy(ID);
+        console.log("clicked");
       };
     },
     [setCurrentConvoy]
@@ -53,59 +60,73 @@ export function Convoys() {
 
   useEffect(() => {
     const subscription = gameState.dbObservable.subscribe(({ type }) => {
-      setConvoyGoalsGeoJson(undefined);
-      gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
+      switch (type) {
+        case DBEvents.convoyGoalSet:
+        case DBEvents.convoyUpdated:
+        case DBEvents.newConvoyCreated:
+        case DBEvents.vehicleJoinedConvoy:
+          setConvoyGoalsGeoJson(undefined);
+          gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
 
-      setConvoysGeoJson(undefined);
-      gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
-      return;
+          setConvoysGeoJson(undefined);
+          gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [gameState]);
 
+  const eventHandlers = useCallback(
+    (ID: number) => ({
+      dblclick: onDoubleClick(ID),
+      click: onConvoyClick(ID),
+    }),
+    [onConvoyClick, onDoubleClick]
+  );
+
+  const convoysPointer = useMemo(() => {
+    return convoysGeoJson?.features.map(
+      ({
+        geometry: {
+          coordinates: [posX, posY],
+        },
+        properties: { ID, name },
+      }) => {
+        const eventHandler = eventHandlers(ID);
+
+        return (
+          <Circle
+            color="red"
+            eventHandlers={eventHandler}
+            key={ID}
+            center={[posY, posX]}
+            radius={4}
+          >
+            <Tooltip eventHandlers={eventHandler} permanent>
+              {name}
+            </Tooltip>
+            {currentConvoy === ID && (
+              <Circle
+                eventHandlers={eventHandler}
+                pathOptions={pathOptions}
+                color="red"
+                key={ID}
+                center={[posY, posX]}
+                radius={6}
+              />
+            )}
+          </Circle>
+        );
+      }
+    );
+  }, [convoysGeoJson?.features, currentConvoy, eventHandlers]);
+
   return (
     <>
-      {convoysGeoJson?.features.map(
-        ({
-          geometry: {
-            coordinates: [posX, posY],
-          },
-          properties: { ID, name },
-        }) => {
-          return (
-            <Circle
-              color={"red"}
-              eventHandlers={{
-                dblclick: onDoubleClick(ID),
-                click: onConvoyClick(ID),
-              }}
-              key={ID}
-              center={[posY, posX]}
-              radius={4}
-            >
-              <Tooltip permanent>{name}</Tooltip>
-              {currentConvoy === ID && (
-                <Circle
-                  eventHandlers={{ dblclick: onDoubleClick(ID) }}
-                  pathOptions={{
-                    dashOffset: "10",
-                    dashArray: "3 5",
-                    fillOpacity: 0.5,
-                  }}
-                  color={"red"}
-                  key={ID}
-                  center={[posY, posX]}
-                  radius={6}
-                />
-              )}
-            </Circle>
-          );
-        }
-      )}
       {convoyGoalsGeoJson && (
         <GeoJSON pathOptions={tradeRouteStyle} data={convoyGoalsGeoJson} />
       )}
+      {convoysPointer}
     </>
   );
 }

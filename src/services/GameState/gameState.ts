@@ -41,6 +41,7 @@ import Convoy, { ConvoyData } from "./tables/Convoy";
 import Vehicle, { VehicleData } from "./tables/Vehicle";
 import Encyclopedia, { EncyclopediaData } from "./tables/Encyclopedia";
 import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDailyRequirement";
+import { Lenght } from "@Services/utils";
 
 let db: Database;
 
@@ -873,7 +874,7 @@ async function UpdateConvoys(dt: number) {
     })
   );
 
-  await Promise.all(
+  const updates = await Promise.all(
     convoys.map(async ({ goalX, goalY, ID, posX, posY }) => {
       if (goalX && goalY) {
         const convoyQuery = select({
@@ -904,23 +905,48 @@ async function UpdateConvoys(dt: number) {
 
         const angle = Math.atan2(headingVector[1], headingVector[0]);
 
-        return db.execute(
+        const dS = speed * dt;
+
+        const newPos = [
+          posX - Math.cos(angle) * dS,
+          posY - Math.sin(angle) * dS,
+        ];
+
+        const newVector = [posX - newPos[0], posY - newPos[1]];
+
+        const stop =
+          Lenght(headingVector[0], headingVector[1]) -
+            Lenght(newVector[0], newVector[1]) <
+          0;
+
+        const updateRows: [string, number | null][] = [
+          ["posX", stop ? goalX : newPos[0]],
+          ["posY", stop ? goalY : newPos[1]],
+        ];
+
+        if (stop) {
+          updateRows.push(["goalX", null]);
+          updateRows.push(["goalY", null]);
+        }
+
+        await db.execute(
           update({
             table: Tables.Convoy,
             where: [{ A: [Tables.Convoy, "ID"], value: ID }],
-            updateRows: [
-              ["posX", posX - Math.cos(angle) * speed * dt],
-              ["posY", posY - Math.sin(angle) * speed * dt],
-            ],
+            updateRows,
           })
         );
+
+        return true;
       }
 
-      return Promise.resolve();
+      return Promise.resolve(false);
     })
   );
 
-  dbObservable.next({ type: DBEvents.convoyUpdated });
+  if (updates.some((value) => value === true)) {
+    dbObservable.next({ type: DBEvents.convoyUpdated });
+  }
 }
 
 export const GameState = {

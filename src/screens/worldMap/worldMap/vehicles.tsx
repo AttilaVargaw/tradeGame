@@ -2,7 +2,7 @@ import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
 import { CityPositionProperty, DBEvents } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { LeafletMouseEventHandlerFn } from "leaflet";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Circle, Tooltip, GeoJSON } from "react-leaflet";
 
 const tradeRouteStyle = {
@@ -63,48 +63,54 @@ export function Vehicles() {
     return () => subscription.unsubscribe();
   }, [gameState]);
 
-  useEffect(() => {
-    console.log(vehicleGoalsGeoJson?.features[0]?.geometry);
-  }, [vehicleGoalsGeoJson]);
+  const vehicles = useMemo(() => {
+    return vehiclesGeoJson?.features.map(
+      ({
+        geometry: {
+          coordinates: [posX, posY],
+        },
+        properties: { ID, name },
+      }) => {
+        const eventHandler = {
+          dblclick: onDoubleClick(ID),
+          click: onVehicleClick(ID),
+        };
+        return (
+          <Circle
+            color={"gold"}
+            eventHandlers={eventHandler}
+            key={ID}
+            center={[posY, posX]}
+            radius={5}
+          >
+            <Tooltip permanent>{name}</Tooltip>
+            {currentVehicle === ID && (
+              <Circle
+                eventHandlers={eventHandler}
+                pathOptions={{
+                  dashOffset: "10",
+                  dashArray: "5 10",
+                }}
+                color={"red"}
+                key={ID}
+                center={[posY, posX]}
+                radius={7}
+              />
+            )}
+          </Circle>
+        );
+      }
+    );
+  }, [
+    currentVehicle,
+    onDoubleClick,
+    onVehicleClick,
+    vehiclesGeoJson?.features,
+  ]);
 
   return (
     <>
-      {vehiclesGeoJson?.features.map(
-        ({
-          geometry: {
-            coordinates: [posX, posY],
-          },
-          properties: { ID, name },
-        }) => {
-          return (
-            <Circle
-              color={"gold"}
-              eventHandlers={{
-                dblclick: onDoubleClick(ID),
-                click: onVehicleClick(ID),
-              }}
-              key={ID}
-              center={[posY, posX]}
-              radius={5}
-            >
-              <Tooltip permanent>{name}</Tooltip>
-              {currentVehicle === ID && (
-                <Circle
-                  eventHandlers={{ dblclick: onDoubleClick(ID) }}
-                  pathOptions={{
-                    dashOffset: "10",
-                    dashArray: "5 10",
-                  }}
-                  color={"red"}
-                  key={ID}
-                  center={[posY, posX]}
-                  radius={7}
-                />
-              )}
-            </Circle>
-          );
-        }
-      )}
+      {vehicles}
       {vehicleGoalsGeoJson && (
         <GeoJSON pathOptions={tradeRouteStyle} data={vehicleGoalsGeoJson} />
       )}

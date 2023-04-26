@@ -10,3 +10,7 @@ export function makeid(length: number) {
   }
   return result;
 }
+
+export function Lenght(a: number, b: number) {
+  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+}
