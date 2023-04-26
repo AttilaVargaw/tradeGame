@@ -102,7 +102,7 @@ export function Convoys() {
             center={[posY, posX]}
             radius={4}
           >
-            <Tooltip eventHandlers={eventHandler} permanent>
+            <Tooltip eventHandlers={eventHandler} permanent direction="center">
               {name}
             </Tooltip>
             {currentConvoy === ID && (

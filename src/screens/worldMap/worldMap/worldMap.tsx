@@ -73,11 +73,11 @@ export function WorldMap(): JSX.Element {
   const gameLoopAnimationFrame = useRef<number>();
 
   useEffect(() => {
-    function gameLoop(timeStamp: number) {
+    async function gameLoop(timeStamp: number) {
       const secondsPassed = (timeStamp - oldTimeStamp) / 1000;
       oldTimeStamp = timeStamp;
 
-      gameState.UpdateConvoys(secondsPassed);
+      await gameState.UpdateConvoys(secondsPassed);
 
       document.getElementById("FPS")!.innerHTML = Math.round(
         1 / secondsPassed
@@ -206,6 +206,7 @@ export function WorldMap(): JSX.Element {
   }, [currentConvoy, gameState, currentVehicle]);
 
   const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
+  const mapWidth = useMemo(() => width * 0.82, [width]);
 
   const sideMenuStyle = useMemo(
     () => ({ height: height, width: menuWidth, top: 0 }),
@@ -218,7 +219,7 @@ export function WorldMap(): JSX.Element {
     <Container>
       <PageContainer
         height={height}
-        width={width}
+        width={mapWidth}
         onContextMenu={onContextMenu}
       >
         <StyledMapContainer
