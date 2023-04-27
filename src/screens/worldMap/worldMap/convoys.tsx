@@ -102,6 +102,7 @@ export function Convoys() {
             <Tooltip
               className="marker"
               content={name}
+              interactive
               eventHandlers={eventHandler}
               permanent
               direction="top"

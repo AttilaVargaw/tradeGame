@@ -8,7 +8,7 @@ const Container = styled.div`
 `;
 
 export const Link = styled.span`
-  color: lightblue;
+  color: blue;
 
   :focus,
   :hover {
@@ -16,7 +16,7 @@ export const Link = styled.span`
     cursor: pointer;
   }
 
-  text-shadow: 0 0 0.5px lightblue, 0 0 1px lightblue, 0 0 1.5px darkblue,
+  text-shadow: 0 0 0.5px blue, 0 0 1px blue, 0 0 1.5px darkblue,
     0 0 2px darkblue, 0 0 2.5px darkblue, 0 0 3px darkblue, 0 0 3.5px darkblue;
 `;
 

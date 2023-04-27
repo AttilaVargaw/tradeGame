@@ -2,23 +2,31 @@ import { useEffect } from "react";
 import { BehaviorSubject } from "rxjs";
 
 export const Tick = new BehaviorSubject(new Date(1899, 1, 1).getTime());
+export const TickSpeed = new BehaviorSubject(1);
 
 const startTick = new Date(1899, 1, 1).getTime();
-let prevTick = Date.now();
+//let prevTick = Date.now();
 let currentTick = startTick;
+let interval = 0;
 
 export function useTickUpdate() {
   useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const dT = now - prevTick;
-      prevTick = now;
+    TickSpeed.subscribe(() => {
+      clearTimeout(interval);
 
-      currentTick = dT * 3600 + currentTick;
+      interval = window.setInterval(() => {
+        if (TickSpeed.value !== 0) {
+          //const now = Date.now();
+          //const dT = now - prevTick;
+          //prevTick = now;
 
-      Tick.next(currentTick);
-    }, 1000);
+          currentTick = 3600 * 1000 + currentTick;
 
-    return () => clearTimeout(interval);
+          Tick.next(currentTick);
+        }
+      }, 1000 / TickSpeed.value);
+    });
+
+    return TickSpeed.unsubscribe;
   }, []);
 }

@@ -94,11 +94,14 @@ export function Cities() {
               key={ID}
               center={[posY, posX]}
               radius={8}
+              interactive
+              className="city-cirlce"
             >
               <Tooltip
                 className="city-marker"
                 opacity={1}
                 direction="top"
+                interactive
                 permanent
               >
                 {type !== "RandomEncounter" ? name : "Random Encounter"}

@@ -83,7 +83,7 @@ export function Vehicles() {
             center={[posY, posX]}
             radius={5}
           >
-            <Tooltip className="marker" direction="top" permanent>
+            <Tooltip interactive className="marker" direction="top" permanent>
               {name}
             </Tooltip>
             {currentVehicle === ID && (
@@ -97,6 +97,7 @@ export function Vehicles() {
                 key={ID}
                 center={[posY, posX]}
                 radius={7}
+                interactive
               />
             )}
           </Circle>
