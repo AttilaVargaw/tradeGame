@@ -62,10 +62,12 @@ export function Convoys() {
       switch (type) {
         case RedrawType.Convoys:
           setConvoyGoalsGeoJson(undefined);
-          setConvoysGeoJson(undefined);
-
           gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
-          gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
+          window.requestAnimationFrame(() => {
+            setConvoysGeoJson(undefined);
+
+            gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
+          });
       }
     });
 

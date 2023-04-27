@@ -76,8 +76,8 @@ const init = async () => {
     DropTableIfExist(Tables.TradeRoutes) +
     DropTableIfExist(Tables.Convoy) +
     DropTableIfExist(Tables.Vehicle) +
-    DropTableIfExist(Encyclopedia.name);
-  DropTableIfExist(IndustrialBuildingDailyRequirement.name);
+    DropTableIfExist(Encyclopedia.name) +
+    DropTableIfExist(IndustrialBuildingDailyRequirement.name);
   const creatorSQL2 =
     "BEGIN TRANSACTION;" +
     create(CityTypes.name, CityTypes.createData) +
@@ -871,7 +871,7 @@ type ConvoyUpdateData = {
 } & ConvoyData;
 
 async function UpdateConvoys(dt: number) {
-  //const t1 = Date.now();
+  const t1 = Date.now();
 
   const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
 
@@ -922,7 +922,7 @@ async function UpdateConvoys(dt: number) {
     })
   );
 
-  //console.log(Date.now() - t1);
+  console.log(Date.now() - t1);
 
   return ret;
 }
