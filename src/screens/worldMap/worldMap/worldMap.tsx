@@ -75,6 +75,7 @@ export function WorldMap(): JSX.Element {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<LeafletMap>(null);
+  const sideMenuRef = useRef<HTMLDivElement>(null);
   const { height, width } = useWindowSize();
   const mapContainerCleanUpRef = useRef<LeafletMap>();
 
@@ -92,7 +93,8 @@ export function WorldMap(): JSX.Element {
       if (
         ev.button === 0 &&
         !ev.ctrlKey &&
-        !containerRef.current?.contains(ev.target as Node)
+        !containerRef.current?.contains(ev.target as Node) &&
+        !sideMenuRef.current?.contains(ev.target as Node)
       ) {
         if (!ev.shiftKey) {
           setCurrentSelectedCities([null, null]);
@@ -100,6 +102,7 @@ export function WorldMap(): JSX.Element {
         setCurrentConvoy(null);
         setCurrentVehicle(null);
       }
+      console.log(sideMenuRef.current?.contains(ev.target as Node));
     }
 
     window.addEventListener("click", OutSideClick, true);
@@ -157,8 +160,6 @@ export function WorldMap(): JSX.Element {
 
   const renderer = useRef(L.canvas());
 
-  console.log("renderer");
-
   return (
     <Container>
       <PageContainer
@@ -180,7 +181,10 @@ export function WorldMap(): JSX.Element {
           zoomAnimation={false}
           fadeAnimation={false}
           markerZoomAnimation={false}
+          dragging={false}
           renderer={renderer.current}
+          boxZoom={false}
+          preferCanvas={true}
         >
           <ImageOverlay url="lava_sea.png" bounds={bounds}>
             <Vehicles />
@@ -190,7 +194,7 @@ export function WorldMap(): JSX.Element {
           <RouteLayer />
         </StyledMapContainer>
       </PageContainer>
-      <SideMenu style={sideMenuStyle} />
+      <SideMenu ref={sideMenuRef} style={sideMenuStyle} />
       <ModalRouter />
     </Container>
   );

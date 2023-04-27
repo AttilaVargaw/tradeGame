@@ -1,10 +1,28 @@
+import { PropsWithChildren, useCallback } from "react";
 import styled, { css } from "styled-components";
 
-export const Button = styled.div<{
-  black?: boolean;
+export function Toggle({
+  onChange,
+  active = false,
+  children,
+}: PropsWithChildren<{
+  onChange: (newValue: boolean) => void;
+  active: boolean;
+}>) {
+  const onClick = useCallback(() => {
+    onChange(!active);
+  }, [active, onChange]);
+
+  return (
+    <ToggleBody active={active} onClick={onClick}>
+      {children}
+    </ToggleBody>
+  );
+}
+
+export const ToggleBody = styled.div<{
   active?: boolean;
   disabled?: boolean;
-  red?: boolean;
 }>`
   :hover:not([disabled]) {
     color: greenyellow;
@@ -22,21 +40,34 @@ export const Button = styled.div<{
     border-bottom: 0.7em solid #111;
     border-left: 0.7em solid #222;
     border-right: 0.7em solid #222;
-    background: ${({ black }) => (black ? "#111" : "#777")};
+    background: #777;
     font-size: 1.4em;
   }
 
-  background: ${({ black }) => (black ? "#111" : "grey")};
+  ${({ active }) =>
+    active
+      ? css`
+          border-top: 0.7em solid #444;
+          border-bottom: 0.7em solid #111;
+          border-left: 0.7em solid #222;
+          border-right: 0.7em solid #222;
+          background: #777;
+          font-size: 1.4em;
+        `
+      : css`
+          border-top: 0.5em solid #777;
+          border-bottom: 0.5em solid #444;
+          border-left: 0.5em solid #555;
+          border-right: 0.5em solid #555;
+          font-size: 1.5em;
+        `}
 
-  border-top: 0.5em solid #777;
-  border-bottom: 0.5em solid #444;
-  border-left: 0.5em solid #555;
-  border-right: 0.5em solid #555;
+  background: grey;
+
   outline: black solid 2px;
 
   padding: 0.1em;
-  font-size: 1.5em;
-  font-family: ${({ black }) => (black ? "Seven Segment" : "system-ui")};
+  font-family: system-ui;
 
   color: ${({ active, disabled }) => {
     if (!disabled) {
@@ -44,6 +75,7 @@ export const Button = styled.div<{
     }
     return "lightgray";
   }};
+
   text-align: center;
 
   ${({ disabled }) =>

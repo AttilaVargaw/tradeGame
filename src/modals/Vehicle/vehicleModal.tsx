@@ -1,5 +1,5 @@
 import { Label } from "@Components/label";
-import Modal from "../Modal";
+import Modal, { ModalCloseButton } from "../Modal";
 import { useCallback, useState } from "react";
 import { VehicleListModal } from "./vehicleList";
 import { VehicleBuyModal } from "./vehicleBuy";
@@ -25,18 +25,24 @@ export default function VehicleModal() {
   return (
     <Modal
       header={() => (
-        <Label type="led">{`< ${
-          selectedPage === 0 ? "Vehicle list" : "Orders"
-        } >`}</Label>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <Label style={{ flex: 20 }} type="led">{`< ${
+            selectedPage === 0 ? "Vehicle list" : "Orders"
+          } >`}</Label>
+          <div style={{ flex: 1, margin: "0.5em" }}>
+            <ModalCloseButton />
+          </div>
+        </div>
       )}
       body={body}
       footer={() => (
         <div
           style={{
             width: "100%",
-            margin: "1em",
-            display: "flex",
+            display: "grid",
             flexDirection: "row",
+            gridAutoColumns: "1fr",
+            gridTemplateColumns: "repeat(5, 1fr)",
           }}
         >
           <Button

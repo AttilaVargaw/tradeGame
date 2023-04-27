@@ -9,7 +9,7 @@ import {
 } from "react";
 import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { GeoJSON as LeafletGeoJSON, tooltip } from "leaflet";
+import { GeoJSON as LeafletGeoJSON, PathOptions, tooltip } from "leaflet";
 import { GeoJSON } from "react-leaflet";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
@@ -37,13 +37,15 @@ export const RouteLayer: FC<RouteLayerProps> = () => {
     [setSelectedTradeRoute, setCurrentModal]
   );
 
-  const tradeRouteStyle = useMemo(
+  const tradeRouteStyle = useMemo<PathOptions>(
     () => ({
-      color: "grey",
-      weight: 8,
-      fillColor: "#1a1d62",
+      color: "greenyellow",
+      weight: 5,
+      fillColor: "greenyellow",
       fillOpacity: 1,
-      dashArray: "2 10",
+      lineCap: "square",
+      opacity: 0.5,
+      dashArray: [2, 10],
     }),
     []
   );

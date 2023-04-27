@@ -33,12 +33,26 @@ export function SevenDigitClock() {
   }, []);
 
   return (
-    <Button black>
-      <Container>
-        {[...`${date} ${time}`].map((c, i) => (
-          <Character key={i}>{c}</Character>
-        ))}
-      </Container>
-    </Button>
+    <div>
+      <Button black>
+        <Container>
+          {[...`${date} ${time}`].map((c, i) => (
+            <Character key={i}>{c}</Character>
+          ))}
+        </Container>
+      </Button>
+      <div
+        style={{
+          display: "grid",
+          gridAutoColumns: "1fr",
+          gridTemplateColumns: "repeat(4, 1fr)",
+        }}
+      >
+        <Button>&#9208;</Button>
+        <Button>&#9205;</Button>
+        <Button>&#9193;</Button>
+        <Button>&#9197;</Button>
+      </div>
+    </div>
   );
 }

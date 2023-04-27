@@ -23,7 +23,6 @@ export function useGameLoop() {
       oldTimeStamp = timeStamp;
 
       const updates = await gameState.UpdateConvoys(secondsPassed);
-      //setTick((tick) => tick + secondsPassed * 36000);
 
       if (updates.some((value) => value === true)) {
         gameRedrawSubject.next(RedrawType.Convoys);

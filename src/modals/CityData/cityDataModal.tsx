@@ -61,9 +61,10 @@ export default function CityDataModal(): JSX.Element | null {
           <div
             style={{
               width: "100%",
-              margin: "1em",
-              display: "flex",
+              display: "grid",
               flexDirection: "row",
+              gridAutoColumns: "1fr",
+              gridTemplateColumns: "repeat(5, 1fr)",
             }}
           >
             <Button

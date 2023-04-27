@@ -24,6 +24,7 @@ export const Input = styled.input`
     0 0 3.5px darkgreen;
 
   font-family: "Seven Segment";
+  outline: 2px solid grey;
 `;
 
 export const Select = styled.select`

@@ -108,13 +108,12 @@ export default function CityPopulation() {
   return (
     <Container>
       <Label type="painted">Population</Label>
-      <div style={{ flexDirection: "row", display: "flex" }}>
+      <div>
         <div
           style={{
-            flexDirection: "row",
-            display: "flex",
-            flex: 1,
-            justifyContent: "space-between",
+            display: "grid",
+            gridAutoColumns: "1fr",
+            gridTemplateColumns: "repeat(5, 1fr)",
           }}
         >
           {classes.map(({ name, num, ID }) => (
@@ -126,6 +125,9 @@ export default function CityPopulation() {
                   type="number"
                   value={num}
                   onChange={setPopulation(ID)}
+                  style={{
+                    width: "100%",
+                  }}
                 />
               ) : (
                 <Label>{num || 0}</Label>

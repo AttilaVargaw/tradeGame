@@ -1,10 +1,18 @@
 import { SevenDigitClock } from "@Components/SevenDigitClock";
 import { Button } from "@Components/button";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { useCallback, useContext, useEffect, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import styled, { CSSProperties } from "styled-components";
+import { ConvoySideMenu } from "./convoySideMenu";
 
 const Container = styled.div`
   position: fixed;
@@ -68,8 +76,14 @@ function AccountingButton() {
   return <Button black>5556.22 ℳ</Button>;
 }
 
-export default function SideMenu({ style }: { style?: CSSProperties }) {
+export default forwardRef<
+  HTMLDivElement,
+  {
+    style?: CSSProperties;
+  }
+>(function SideMenu({ style }, ref) {
   const [, setCurrentModal] = useCurrentModal();
+  const [currentConvoy] = useCurrentConvoy();
 
   const onConvoysClick = useCallback(() => {
     setCurrentModal("convoys");
@@ -84,12 +98,25 @@ export default function SideMenu({ style }: { style?: CSSProperties }) {
   }, [setCurrentModal]);
 
   return (
-    <Container style={style}>
+    <Container ref={ref} style={style}>
       <SevenDigitClock />
-      <AccountingButton />
-      <VehicleCountButton onClick={onVehiclesClick} />
-      <ConvoyCountButton onClick={onConvoysClick} />
-      <Button onClick={onEncyklopediaClick}>Encyclopedia</Button>
+      {!currentConvoy && (
+        <>
+          <Button black onClick={onEncyklopediaClick}>
+            Messages: 2
+          </Button>
+          <Button black onClick={onEncyklopediaClick}>
+            Trade routes: 3
+          </Button>
+          <AccountingButton />
+          <VehicleCountButton onClick={onVehiclesClick} />
+          <ConvoyCountButton onClick={onConvoysClick} />
+          <Button onClick={onEncyklopediaClick}>Encyclopedia</Button>
+          <Button onClick={onEncyklopediaClick}>Command Staff</Button>
+          <Button onClick={onEncyklopediaClick}>Human Rescources</Button>
+        </>
+      )}
+      {currentConvoy && <ConvoySideMenu />}
     </Container>
   );
-}
+});

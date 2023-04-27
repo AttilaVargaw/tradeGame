@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { VehicleData } from "@Services/GameState/tables/Vehicle";
-import { Link, TerminalScreen } from "@Components/terminalScreen";
+import { Link, Screen } from "@Components/terminalScreen";
 
 export const VehicleListModal = () => {
   const gameState = useContext(GameStateContext);
@@ -13,12 +13,12 @@ export const VehicleListModal = () => {
   }, [gameState]);
 
   return (
-    <TerminalScreen>
+    <Screen style={{ height: "50%" }}>
       {vehicles.map(({ name, ID }) => (
         <div key={ID}>
           <Link>{name}</Link>
         </div>
       ))}
-    </TerminalScreen>
+    </Screen>
   );
 };

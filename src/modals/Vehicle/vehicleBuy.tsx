@@ -99,20 +99,26 @@ export const VehicleBuyModal = () => {
 
   return (
     <>
-      {currentVehicle && (
-        <Button onClick={() => setCurrentVehicle(null)}>&lt;</Button>
-      )}
       {!currentVehicle && (
         <Card>
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <Button onClick={setVehicleType("air")}>Air vehicles</Button>
+          <div
+            style={{
+              width: "100%",
+              display: "grid",
+              gridAutoColumns: "1fr",
+              gridTemplateColumns: "repeat(6, 1fr)",
+            }}
+          >
+            <Button onClick={setVehicleType("air")}>Helicopters</Button>
+            <Button onClick={setVehicleType("air")}>Airships</Button>
             <Button onClick={setVehicleType("wheeled")}>
-              Wheeled vehicles
+              Wheeled Transporters
             </Button>
-
+            <Button onClick={setVehicleType("wheeled")}>Wheeled Escorts</Button>
             <Button onClick={setVehicleType("tracked")}>
-              Tracked vehicles
+              Tracked Transporters
             </Button>
+            <Button onClick={setVehicleType("tracked")}>Tracked Escorts</Button>
           </div>
           <Card.Body>
             <CardGroup className="row row-cols-1 row-cols-md-4">

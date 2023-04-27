@@ -1,3 +1,4 @@
+import { Button } from "@Components/button";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { useEffect, useRef } from "react";
 import styled from "styled-components";
@@ -62,4 +63,8 @@ export default function Modal({
       <Footer style={{ alignSelf: "end" }}>{footer()}</Footer>
     </Container>
   );
+}
+
+export function ModalCloseButton() {
+  return <Button>X</Button>;
 }
