@@ -1,10 +1,6 @@
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import {
-  RedrawType,
-  gameRedrawSubject,
-  useGameLoop,
-} from "@Components/hooks/useGameLoop";
+import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { LeafletMouseEventHandlerFn } from "leaflet";
@@ -35,7 +31,6 @@ export function Convoys() {
     (ID: number): LeafletMouseEventHandlerFn => {
       return () => {
         setCurrentConvoy(ID);
-        console.log("clicked");
       };
     },
     [setCurrentConvoy]
@@ -104,9 +99,13 @@ export function Convoys() {
             center={rPos}
             radius={4}
           >
-            <Tooltip eventHandlers={eventHandler} permanent direction="left">
-              {name}
-            </Tooltip>
+            <Tooltip
+              className="marker"
+              content={name}
+              eventHandlers={eventHandler}
+              permanent
+              direction="top"
+            />
             {currentConvoy === ID && (
               <Circle
                 eventHandlers={eventHandler}

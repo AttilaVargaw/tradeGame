@@ -70,7 +70,12 @@ export const RouteLayer: FC<RouteLayerProps> = () => {
             layer
               .addEventListener("click", routeClick(ID))
               .setTooltipContent(
-                tooltip({ permanent: true, interactive: true })
+                tooltip({
+                  permanent: true,
+                  interactive: true,
+                  className: "marker",
+                  direction: "top",
+                })
               )
               .toggleTooltip();
           }}

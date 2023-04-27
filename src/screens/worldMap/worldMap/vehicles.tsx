@@ -83,7 +83,9 @@ export function Vehicles() {
             center={[posY, posX]}
             radius={5}
           >
-            <Tooltip permanent>{name}</Tooltip>
+            <Tooltip className="marker" direction="top" permanent>
+              {name}
+            </Tooltip>
             {currentVehicle === ID && (
               <Circle
                 eventHandlers={eventHandler}

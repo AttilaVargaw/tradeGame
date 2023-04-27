@@ -33,7 +33,7 @@ export default {
     },
   ],
   initData: [
-    { convoy: 1, name: "Test Vehicle", type: 3, posX: 1650, posY: 510 },
-    { name: "Test Vehicle 2", type: 1, posX: 1655, posY: 520 },
+    { convoy: 1, name: "Test Vehicle", type: 8, posX: 3300, posY: 1020 },
+    { name: "Test Vehicle 2", type: 1, posX: 3310, posY: 1040 },
   ],
 } as TableData<VehicleData>;

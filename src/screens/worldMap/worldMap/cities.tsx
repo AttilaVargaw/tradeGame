@@ -95,7 +95,12 @@ export function Cities() {
               center={[posY, posX]}
               radius={8}
             >
-              <Tooltip permanent>
+              <Tooltip
+                className="city-marker"
+                opacity={1}
+                direction="top"
+                permanent
+              >
                 {type !== "RandomEncounter" ? name : "Random Encounter"}
               </Tooltip>
               {(selectedCities[0] === ID || selectedCities[1] === ID) && (

@@ -26,5 +26,5 @@ export default {
     { name: "goalX", type: "REAL" },
     { name: "goalAngle", type: "REAL" },
   ],
-  initData: [{ name: "Test Convoy", type: "1", posX: 1670, posY: 520 }],
+  initData: [{ name: "Test Convoy", type: "1", posX: 3340, posY: 1040 }],
 } as TableData<ConvoyData>;

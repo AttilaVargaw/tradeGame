@@ -39,12 +39,12 @@ const Container = styled.div`
 
 const bounds = [
   [0, 0],
-  [973, 1920],
+  [1946, 3840],
 ] as LatLngBoundsExpression;
 
 const maxBounds = [
   [0, 0],
-  [973, 1920],
+  [1946, 3840],
 ] as LatLngBoundsExpression;
 
 const StyledMapContainer = styled(MapContainer)`
@@ -53,7 +53,7 @@ const StyledMapContainer = styled(MapContainer)`
   background: #05001f;
 `;
 
-const center = [500, 1650] as LatLngExpression;
+const center = [1000, 3300] as LatLngExpression;
 
 const PageContainer = styled.div<{ height: number; width: number }>`
   height: ${({ height }) => height}px;
@@ -102,7 +102,6 @@ export function WorldMap(): JSX.Element {
         setCurrentConvoy(null);
         setCurrentVehicle(null);
       }
-      console.log(sideMenuRef.current?.contains(ev.target as Node));
     }
 
     window.addEventListener("click", OutSideClick, true);
@@ -178,13 +177,11 @@ export function WorldMap(): JSX.Element {
           zoom={1}
           minZoom={1}
           ref={mapContainerRef}
-          zoomAnimation={false}
-          fadeAnimation={false}
-          markerZoomAnimation={false}
-          dragging={false}
+          dragging={true}
           renderer={renderer.current}
           boxZoom={false}
-          preferCanvas={true}
+          keyboardPanDelta={100}
+          easeLinearity={1}
         >
           <ImageOverlay url="lava_sea.png" bounds={bounds}>
             <Vehicles />
