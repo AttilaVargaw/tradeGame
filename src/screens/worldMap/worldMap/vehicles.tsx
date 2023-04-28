@@ -1,9 +1,15 @@
 import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
 import { CityPositionProperty, DBEvents } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { LeafletMouseEventHandlerFn } from "leaflet";
+import L, { LeafletMouseEventHandlerFn } from "leaflet";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Circle, Tooltip, GeoJSON } from "react-leaflet";
+import {
+  Circle,
+  Tooltip,
+  GeoJSON,
+  LayersControl,
+  LayerGroup,
+} from "react-leaflet";
 
 const tradeRouteStyle = {
   color: "grey",
@@ -18,7 +24,8 @@ export function Vehicles() {
 
   const onVehicleClick = useCallback(
     (ID: number): LeafletMouseEventHandlerFn => {
-      return () => {
+      return (event) => {
+        L.DomEvent.stopPropagation(event);
         setCurrentVehicle(ID);
       };
     },
@@ -27,7 +34,9 @@ export function Vehicles() {
 
   const onDoubleClick = useCallback(
     (ID: number): LeafletMouseEventHandlerFn => {
-      return () => {};
+      return (event) => {
+        L.DomEvent.stopPropagation(event);
+      };
     },
     []
   );
@@ -62,6 +71,18 @@ export function Vehicles() {
 
     return () => subscription.unsubscribe();
   }, [gameState]);
+
+  useEffect(() => {
+    function OutSideClick(this: Window, ev: MouseEvent) {
+      if (ev.button === 0 && !ev.ctrlKey) {
+        setCurrentVehicle(null);
+      }
+    }
+
+    window.addEventListener("click", OutSideClick, true);
+
+    return () => window.removeEventListener("click", OutSideClick);
+  }, [gameState, setCurrentVehicle]);
 
   const vehicles = useMemo(() => {
     return vehiclesGeoJson?.features.map(
@@ -112,11 +133,13 @@ export function Vehicles() {
   ]);
 
   return (
-    <>
-      {vehicles}
-      {vehicleGoalsGeoJson && (
-        <GeoJSON pathOptions={tradeRouteStyle} data={vehicleGoalsGeoJson} />
-      )}
-    </>
+    <LayersControl.Overlay checked name="Convoys">
+      <LayerGroup>
+        {vehicles}
+        {vehicleGoalsGeoJson && (
+          <GeoJSON pathOptions={tradeRouteStyle} data={vehicleGoalsGeoJson} />
+        )}
+      </LayerGroup>
+    </LayersControl.Overlay>
   );
 }

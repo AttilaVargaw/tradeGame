@@ -1,17 +1,19 @@
 import { GameStateContext } from "@Services/GameState/gameState";
 import { useContext, useEffect, useRef } from "react";
-import { Subject, async } from "rxjs";
-import { TickSpeed } from "./useTick";
-
-let oldTimeStamp = 0;
+import { BehaviorSubject, Subject } from "rxjs";
 
 export enum RedrawType {
   Convoys,
 }
+export const Tick = new BehaviorSubject(new Date(1899, 1, 1).getTime());
+export const TickSpeed = new BehaviorSubject(1);
 
 export const gameRedrawSubject = new Subject<RedrawType>();
 export const gameRedrawDoneSubject = new Subject<RedrawType>();
 const fpsCounter = document.getElementById("FPS")!;
+
+const startTick = new Date(1899, 1, 1).getTime();
+const updateFrequency = 50;
 
 export function useGameLoop() {
   const gameState = useContext(GameStateContext);
@@ -19,62 +21,50 @@ export function useGameLoop() {
   const gameLoopAnimationFrame = useRef<number>();
   const tick = useRef<number>();
 
-  const prewFps = useRef<number>();
-  const couner = useRef(0);
-  const fpsSum = useRef(0);
-  const fpsAvg = useRef(0);
+  const oldTimeStamp = useRef(0);
+  const currentTick = useRef(startTick);
 
   useEffect(() => {
     async function gameLoop(timeStamp: number) {
-      const secondsPassed = (timeStamp - oldTimeStamp) * 0.001;
-      oldTimeStamp = timeStamp;
+      const dMs = timeStamp - oldTimeStamp.current;
+      const ds = dMs * 0.001;
+      const fps = Math.round(1 / ds);
+      fpsCounter.innerHTML = fps.toString();
 
-      let updates: boolean[] = [];
-
-      if (tick.current && tick.current !== 0) {
-        for (let i = 0; i < tick.current; ++i)
-          updates = await gameState.UpdateConvoys(secondsPassed);
-      }
-
-      if (updates.some((value) => value === true)) {
-        gameRedrawSubject.next(RedrawType.Convoys);
-      }
-
-      const fps = Math.round(1 / secondsPassed);
-
-      if (couner.current === 60) {
-        couner.current = 0;
-        fpsAvg.current = fpsSum.current / 60;
-        fpsSum.current = 0;
+      if (fps < 30) {
+        fpsCounter.style.setProperty("color", "red");
+      } else if (fps < 45) {
+        fpsCounter.style.setProperty("color", "yellow");
       } else {
-        ++couner.current;
-        fpsSum.current += fps;
+        fpsCounter.style.setProperty("color", "white");
       }
 
-      if (prewFps.current !== fps) {
-        prewFps.current = fpsAvg.current;
-        if (fpsAvg.current < 30) {
-          fpsCounter.style.setProperty("color", "red");
-        } else if (fpsAvg.current < 45) {
-          fpsCounter.style.setProperty("color", "yellow");
-        } else {
-          fpsCounter.style.setProperty("color", "white");
+      if (dMs >= updateFrequency) {
+        oldTimeStamp.current = timeStamp;
+        let updates: boolean[] = [];
+
+        if (TickSpeed.value !== 0) {
+          currentTick.current += dMs * 3600 * TickSpeed.value;
+
+          Tick.next(currentTick.current);
         }
-        fpsCounter.innerHTML = Math.round(fpsAvg.current).toString();
-      }
 
+        for (let i = 0; i < TickSpeed.value; ++i) {
+          updates = await gameState.UpdateConvoys(ds);
+        }
+
+        if (updates.some((value) => value === true)) {
+          gameRedrawSubject.next(RedrawType.Convoys);
+        }
+      }
       gameLoopAnimationFrame.current = window.requestAnimationFrame(gameLoop);
     }
 
-    window.requestAnimationFrame(gameLoop);
-
-    const tickSpeedSubscription = TickSpeed.subscribe(
-      (newValue) => (tick.current = newValue)
-    );
+    gameLoopAnimationFrame.current = window.requestAnimationFrame(gameLoop);
 
     return () => {
+      console.log("redraw");
       window.cancelAnimationFrame(gameLoopAnimationFrame.current!);
-      tickSpeedSubscription.unsubscribe();
     };
   }, [gameState]);
 }

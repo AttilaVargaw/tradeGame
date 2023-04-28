@@ -1,7 +1,5 @@
-import { atom, useAtom } from "jotai";
+import { BehaviorSubject } from "rxjs";
 
-const contextMenuPositionAtom = atom<[number, number] | null>(null);
-
-export function useContextMenuPosition() {
-  return useAtom(contextMenuPositionAtom);
-}
+export const ContextMenuPosition = new BehaviorSubject<[number, number] | null>(
+  null
+);

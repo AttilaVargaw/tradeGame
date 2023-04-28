@@ -3,9 +3,9 @@ import {
   contextMenuObservable,
   ContextMenuItemProps,
 } from "@Services/contextMenu";
-import { useContextMenuPosition } from "./hooks/useContextMenuPosition";
 import { Link, TerminalScreen } from "./terminalScreen";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
+import { ContextMenuPosition } from "./hooks/useContextMenuPosition";
 
 const Container = styled.div<{ top: number; left: number }>`
   position: absolute;
@@ -19,9 +19,6 @@ export const ContextMenu: FC = () => {
     ContextMenuItemProps[]
   >([]);
 
-  const [contextMenuPosition, setContextMenuPosition] =
-    useContextMenuPosition();
-
   useEffect(() => {
     return contextMenuObservable.subscribe(setContextMenuItems).unsubscribe;
   }, []);
@@ -31,23 +28,32 @@ export const ContextMenu: FC = () => {
   useEffect(() => {
     function OutsideEventListener(ev: MouseEvent) {
       if (!popoverRef.current?.contains(ev.target as Node)) {
-        setContextMenuPosition(null);
+        ContextMenuPosition.next(null);
       }
     }
 
+    const contextMenuPositonSubscription = ContextMenuPosition.subscribe(
+      setContextMenuPositionState
+    );
+
     window.addEventListener("mousedown", OutsideEventListener, true);
 
-    return () => window.removeEventListener("mousedown", OutsideEventListener);
-  }, [setContextMenuPosition]);
+    return () => {
+      window.removeEventListener("mousedown", OutsideEventListener);
+      contextMenuPositonSubscription.unsubscribe();
+    };
+  }, []);
 
-  console.log(contextMenuPosition);
+  const [contextMenuPositionState, setContextMenuPositionState] = useState<
+    [number, number] | null
+  >(null);
 
   return (
-    contextMenuPosition && (
+    contextMenuPositionState && (
       <Container
         ref={popoverRef}
-        top={contextMenuPosition[1]}
-        left={contextMenuPosition[0]}
+        top={contextMenuPositionState[1]}
+        left={contextMenuPositionState[0]}
       >
         <TerminalScreen>
           {contextMenuItems.map(({ disabled, labelKey, onClick }) => (

@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import Button from "react-bootstrap/esm/Button";
 import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
@@ -15,6 +14,7 @@ import { Item, WarehouseItem } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { Button } from "@Components/button";
 
 export default function CityWarehouseForm() {
   const debugMode = useContext(debugModeContext);

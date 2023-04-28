@@ -10,7 +10,7 @@ import {
 import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { GeoJSON as LeafletGeoJSON, PathOptions, tooltip } from "leaflet";
-import { GeoJSON } from "react-leaflet";
+import { GeoJSON, LayerGroup, LayersControl } from "react-leaflet";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
@@ -62,27 +62,29 @@ export const RouteLayer: FC<RouteLayerProps> = () => {
   }, [gameState]);
 
   return (
-    <>
-      {tradeRoutes && (
-        <GeoJSON
-          ref={layerRef}
-          onEachFeature={({ properties: { ID } }, layer) => {
-            layer
-              .addEventListener("click", routeClick(ID))
-              .setTooltipContent(
-                tooltip({
-                  permanent: true,
-                  interactive: true,
-                  className: "marker",
-                  direction: "top",
-                })
-              )
-              .toggleTooltip();
-          }}
-          pathOptions={tradeRouteStyle}
-          data={tradeRoutes}
-        />
-      )}
-    </>
+    <LayersControl.Overlay name="Routes">
+      <LayerGroup>
+        {tradeRoutes && (
+          <GeoJSON
+            ref={layerRef}
+            onEachFeature={({ properties: { ID } }, layer) => {
+              layer
+                .addEventListener("click", routeClick(ID))
+                .setTooltipContent(
+                  tooltip({
+                    permanent: true,
+                    interactive: true,
+                    className: "marker",
+                    direction: "top",
+                  })
+                )
+                .toggleTooltip();
+            }}
+            pathOptions={tradeRouteStyle}
+            data={tradeRoutes}
+          />
+        )}
+      </LayerGroup>
+    </LayersControl.Overlay>
   );
 };

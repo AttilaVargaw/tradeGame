@@ -1,14 +1,14 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import Button from "react-bootstrap/esm/Button";
 import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
-import Form from "react-bootstrap/esm/Form";
-import Row from "react-bootstrap/esm/Row";
 import { IndustrialBuilding } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { ResourceChange } from "@Services/GameState/tables/common";
+import { Button } from "@Components/button";
+import { Label } from "@Components/label";
+import { Input, Select } from "@Components/input";
 
 export default function CityIndustry() {
   const [cityID] = useCurrentSelectedCity();
@@ -67,13 +67,13 @@ export default function CityIndustry() {
       {industrialBuildings.map(
         ({ nameKey, buildingNum, inputOutputData, ID }) => (
           <Container key={nameKey}>
-            <Row key={nameKey}>
+            <div key={nameKey}>
               <Col sm="10">
-                <strong>{nameKey}</strong>
+                <Label type="painted">{nameKey}</Label>
               </Col>
               {debugMode ? (
                 <Col>
-                  <Form.Control
+                  <Input
                     style={{ paddingTop: ".5em", paddingBottom: ".5em" }}
                     min={0}
                     type="number"
@@ -82,84 +82,76 @@ export default function CityIndustry() {
                   />
                 </Col>
               ) : (
-                <Col sm="2">{buildingNum}</Col>
+                <Label type="led">{buildingNum}</Label>
               )}
-            </Row>
-            <Row>
+            </div>
+            <div>
               <Col>
-                <Row>Daily requirements</Row>
+                <Label type="painted">Daily requirements</Label>
                 {inputOutputData
                   ?.filter(({ num }) => num < 0)
                   .map(({ nameKey, num }) => (
-                    <Row key={nameKey}>
-                      <Col sm="10">{nameKey}</Col>
-                      <Col sm="2">{num}</Col>
-                    </Row>
+                    <div key={nameKey}>
+                      <Label type="painted">{nameKey}</Label>
+                      <Label type="painted">{num}</Label>
+                    </div>
                   ))}
               </Col>
               <Col>
-                <Row>Daily production</Row>
+                <Label type="painted">Daily production</Label>
                 {inputOutputData
                   ?.filter(({ num }) => num > 0)
                   .map(({ nameKey, num }) => (
-                    <Row key={nameKey}>
+                    <div key={nameKey}>
                       <Col sm="10">{nameKey}</Col>
                       <Col sm="2">{num}</Col>
-                    </Row>
+                    </div>
                   ))}
               </Col>
-            </Row>
+            </div>
           </Container>
         )
       )}
       {debugMode && (
         <Container>
-          <Form.Group as={Row}>
-            <Col sm="8">
-              <Form.Select onChange={setNewBuildingDropdown}>
-                {allIndustrialBuildings.map(({ ID, nameKey }) => (
-                  <option key={ID} value={ID}>
-                    {nameKey}
-                  </option>
-                ))}
-              </Form.Select>
-            </Col>
-            <Col sm="2">
-              <Button style={{ width: "100%" }} onClick={addNewBuilding}>
-                Add
-              </Button>
-            </Col>
-          </Form.Group>
+          <Col sm="8">
+            <Select onChange={setNewBuildingDropdown}>
+              {allIndustrialBuildings.map(({ ID, nameKey }) => (
+                <option key={ID} value={ID}>
+                  {nameKey}
+                </option>
+              ))}
+            </Select>
+          </Col>
+          <Col sm="2">
+            <Button onClick={addNewBuilding}>Add</Button>
+          </Col>
         </Container>
       )}
-      <Row>
+      <div>
         <Col>
-          <Row>
-            <h2>Daily requirements</h2>
-          </Row>
+          <Label type="painted">Daily requirements</Label>
           {aggregatedInputOutput
             .filter(({ num }) => num < 0)
             .map(({ num, nameKey, ID }) => (
-              <Row key={ID}>
-                <Col>{nameKey}</Col>
-                <Col>{num}</Col>
-              </Row>
+              <div key={ID}>
+                <Label type="painted">{nameKey}</Label>
+                <Label type="painted">{num}</Label>
+              </div>
             ))}
         </Col>
         <Col>
-          <Row>
-            <h2>Daily output</h2>
-          </Row>
+          <Label type="painted">Daily output</Label>
           {aggregatedInputOutput
             .filter(({ num }) => num > 0)
             .map(({ num, nameKey, ID }) => (
-              <Row key={ID}>
-                <Col>{nameKey}</Col>
-                <Col>{num}</Col>
-              </Row>
+              <div key={ID}>
+                <Label type="painted">{nameKey}</Label>
+                <Label type="painted">{num}</Label>
+              </div>
             ))}
         </Col>
-      </Row>
+      </div>
     </>
   );
 }

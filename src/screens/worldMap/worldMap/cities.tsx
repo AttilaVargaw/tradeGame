@@ -1,4 +1,4 @@
-import { useContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
+import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
@@ -6,8 +6,15 @@ import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { addToContextMenu } from "@Services/contextMenu";
 import { LeafletMouseEventHandlerFn } from "leaflet";
+import { useMemo } from "react";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Circle, Tooltip } from "react-leaflet";
+import {
+  Circle,
+  LayerGroup,
+  LayersControl,
+  Tooltip,
+  useMap,
+} from "react-leaflet";
 
 const CityColors: { [key: string]: string } = {
   Mine: "black",
@@ -28,7 +35,9 @@ export function Cities() {
 
   const [, setCurrentSelectedCity] = useCurrentSelectedCity();
 
-  const [, setContextMenuPosition] = useContextMenuPosition();
+  const [, setCurrentSelectedCities] = useCurrentSelectedCities();
+
+  //const map = useMap()
 
   useEffect(() => {
     gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
@@ -43,12 +52,26 @@ export function Cities() {
 
       if (cityA && cityB) {
         gameState.addTradeRoute(selectedCities);
-        setContextMenuPosition(null);
+        ContextMenuPosition.next(null);
       }
     };
 
     return addToContextMenu({ disabled: false, labelKey: "addRoute", onClick });
-  }, [selectedCities, gameState, setContextMenuPosition]);
+  }, [selectedCities, gameState]);
+
+  useEffect(() => {
+    function OutSideClick(this: Window, ev: MouseEvent) {
+      if (ev.button === 0 && !ev.ctrlKey) {
+        if (!ev.shiftKey) {
+          setCurrentSelectedCities([null, null]);
+        }
+      }
+    }
+
+    window.addEventListener("click", OutSideClick, true);
+
+    return () => window.removeEventListener("click", OutSideClick);
+  }, [gameState, setCurrentSelectedCities]);
 
   const onDoubleClick = useCallback(
     (city: number): LeafletMouseEventHandlerFn =>
@@ -75,9 +98,9 @@ export function Cities() {
     [setSelectedCities]
   );
 
-  return (
-    <>
-      {citiesGeoJson?.features.map(
+  const cities = useMemo(
+    () =>
+      citiesGeoJson?.features.map(
         ({
           geometry: {
             coordinates: [posX, posY],
@@ -122,7 +145,13 @@ export function Cities() {
             </Circle>
           );
         }
-      )}
-    </>
+      ),
+    [citiesGeoJson?.features, onCityClick, onDoubleClick, selectedCities]
+  );
+
+  return (
+    <LayersControl.Overlay checked name="Cities">
+      <LayerGroup>{cities}</LayerGroup>
+    </LayersControl.Overlay>
   );
 }

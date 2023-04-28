@@ -3,9 +3,16 @@ import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
-import { LeafletMouseEventHandlerFn } from "leaflet";
+import L, { LeafletMouseEvent, LeafletMouseEventHandlerFn } from "leaflet";
+import { useRef } from "react";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Circle, Tooltip } from "react-leaflet";
+import {
+  Circle,
+  LayerGroup,
+  LayersControl,
+  Tooltip,
+  useMap,
+} from "react-leaflet";
 import { GeoJSON } from "react-leaflet";
 
 const tradeRouteStyle = {
@@ -27,19 +34,71 @@ export function Convoys() {
   const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
   const gameState = useContext(GameStateContext);
 
-  const onConvoyClick = useCallback(
-    (ID: number): LeafletMouseEventHandlerFn => {
-      return () => {
-        setCurrentConvoy(ID);
-      };
+  const map = useMap();
+
+  useEffect(() => {
+    function OutSideClick(
+      this: Window,
+      { originalEvent: { button, ctrlKey } }: LeafletMouseEvent
+    ) {
+      if (button === 0 && !ctrlKey) {
+        setCurrentConvoy(null);
+      }
+    }
+
+    map.addEventListener("click", OutSideClick);
+
+    return () => {
+      map.removeEventListener("click", OutSideClick);
+    };
+  }, [gameState, setCurrentConvoy, map]);
+
+  const goalSetter = useCallback(
+    function (this: number, event: LeafletMouseEvent) {
+      L.DomEvent.stopPropagation(event);
+
+      const {
+        latlng: { lat, lng },
+        originalEvent: { button, ctrlKey },
+      } = event;
+
+      if (button === 0 && ctrlKey) {
+        gameState.setConvoyGoal(this, lng, lat);
+      } else {
+        map.removeEventListener("click", goalSetter, this);
+      }
+
+      return () => map.removeEventListener("click", goalSetter, this);
     },
-    [setCurrentConvoy]
+    [map, gameState]
+  );
+
+  const onConvoyClick = useCallback(
+    (ID: number): LeafletMouseEventHandlerFn =>
+      (event: LeafletMouseEvent) => {
+        L.DomEvent.stopPropagation(event);
+
+        const { button } = event.originalEvent;
+
+        if (button === 0) {
+          setCurrentConvoy(ID);
+
+          map.addEventListener("click", goalSetter, ID);
+
+          return () => {
+            map.removeEventListener("click", goalSetter, ID);
+          };
+        }
+        return;
+      },
+    [setCurrentConvoy, map, goalSetter]
   );
 
   const onDoubleClick = useCallback(
     (ID: number): LeafletMouseEventHandlerFn => {
-      return () => {
+      return (event) => {
         setCurrentConvoy(ID);
+        L.DomEvent.stopPropagation(event);
         setCurrentModal("convoys");
       };
     },
@@ -58,15 +117,16 @@ export function Convoys() {
   }, [gameState]);
 
   useEffect(() => {
-    const subscription = gameRedrawSubject.subscribe((type) => {
+    const subscription = gameRedrawSubject.subscribe(async (type) => {
       switch (type) {
         case RedrawType.Convoys:
-          setConvoyGoalsGeoJson(undefined);
-          gameState.getConvoyGoalsAsGeoJson().then(setConvoyGoalsGeoJson);
-          window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(async () => {
+            setConvoyGoalsGeoJson(undefined);
             setConvoysGeoJson(undefined);
-
-            gameState.getConvoysAsGeoJson().then(setConvoysGeoJson);
+            const goals = await gameState.getConvoyGoalsAsGeoJson();
+            const convoys = await gameState.getConvoysAsGeoJson();
+            setConvoyGoalsGeoJson(goals);
+            setConvoysGeoJson(convoys);
           });
       }
     });
@@ -126,17 +186,19 @@ export function Convoys() {
   }, [convoysGeoJson?.features, currentConvoy, eventHandlers]);
 
   return (
-    <>
-      {convoyGoalsGeoJson && (
-        <GeoJSON
-          onEachFeature={({ properties: { ID } }, layer) => {
-            layer.addEventListener(eventHandlers(ID));
-          }}
-          pathOptions={tradeRouteStyle}
-          data={convoyGoalsGeoJson}
-        />
-      )}
-      {convoysPointer}
-    </>
+    <LayersControl.Overlay checked name="Convoys">
+      <LayerGroup>
+        {convoyGoalsGeoJson && (
+          <GeoJSON
+            onEachFeature={({ properties: { ID } }, layer) => {
+              layer.addEventListener(eventHandlers(ID));
+            }}
+            pathOptions={tradeRouteStyle}
+            data={convoyGoalsGeoJson}
+          />
+        )}
+        {convoysPointer}
+      </LayerGroup>
+    </LayersControl.Overlay>
   );
 }

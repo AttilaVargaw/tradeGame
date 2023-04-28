@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "./button";
 import styled from "styled-components";
-import { Tick, TickSpeed } from "./hooks/useTick";
 import { Toggle } from "./toggle";
+import { Tick, TickSpeed } from "./hooks/useGameLoop";
 
 const Container = styled.div`
   display: flex;
@@ -15,7 +15,6 @@ const Character = styled.div`
 
 export function SevenDigitClock() {
   const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
 
   const [speed, setSpeed] = useState(1);
 
@@ -35,10 +34,11 @@ export function SevenDigitClock() {
         setTime(
           date.toLocaleTimeString(undefined, {
             hour: "2-digit",
-            minute: "2-digit",
+            year: "2-digit",
+            month: "2-digit",
+            day: "2-digit",
           })
         );
-        setDate(date.toLocaleDateString());
       });
     });
 
@@ -49,9 +49,10 @@ export function SevenDigitClock() {
     <div>
       <Button black>
         <Container>
-          {[...`${date} ${time}`].map((c, i) => (
+          {[...time].map((c, i) => (
             <Character key={i}>{c}</Character>
           ))}
+          <Character>:00</Character>
         </Container>
       </Button>
       <div

@@ -5,14 +5,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import ButtonGroup from "react-bootstrap/esm/ButtonGroup";
-import Col from "react-bootstrap/esm/Col";
 import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { Input, Select } from "@Components/input";
 import { Label } from "@Components/label";
-import { Button } from "@Components/button";
 import Modal from "../Modal";
 import { VehicleData } from "@Services/GameState/tables/Vehicle";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
@@ -21,6 +18,7 @@ import { Link } from "@Components/terminalScreen";
 import { Row } from "@Components/grid";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { ConvoyInfo } from "./convoyInfo";
+import { Button } from "@Components/button";
 
 /*enum ConvoyModalSubpages {
   list,
@@ -63,20 +61,7 @@ function Header() {
 function Footer() {
   return (
     <Container>
-      <ButtonGroup
-        as={Col}
-        style={{
-          width: "100%",
-          position: "relative",
-          margin: "auto",
-          left: 0,
-          right: 0,
-          paddingTop: "1em",
-          paddingBottom: "1em",
-        }}
-      >
-        {/*<Button onClick={() => setSelectedPage(CityModalSubPages.warehouse)}>Warehouse</Button>*/}
-      </ButtonGroup>
+      {/*<Button onClick={() => setSelectedPage(CityModalSubPages.warehouse)}>Warehouse</Button>*/}
     </Container>
   );
 }

@@ -1,11 +1,4 @@
-import {
-  MouseEventHandler,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import { GameStateContext } from "@Services/GameState/gameState";
 import SideMenu from "../sideMenu";
 import L, {
@@ -16,21 +9,17 @@ import L, {
   LeafletMouseEvent,
 } from "leaflet";
 import { RouteLayer } from "../routeLayer";
-import { ImageOverlay, MapContainer } from "react-leaflet";
+import { ImageOverlay, LayersControl, MapContainer } from "react-leaflet";
 import { useWindowSize } from "../../../components/hooks/useWIndowSize";
 import { ModalRouter } from "@Components/ModalRouter";
 import styled from "styled-components";
 import { Convoys } from "./convoys";
 import { Cities } from "./cities";
 import { Vehicles } from "./vehicles";
-import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentVehicle } from "@Components/hooks/useCurrentVehicle";
-import { useContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { useGameLoop } from "@Components/hooks/useGameLoop";
 import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
 import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import { useTickUpdate } from "@Components/hooks/useTick";
+import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 
 const Container = styled.div`
   display: "flex";
@@ -63,91 +52,43 @@ const PageContainer = styled.div<{ height: number; width: number }>`
 export function WorldMap(): JSX.Element {
   const gameState = useContext(GameStateContext);
 
-  const [, setCurrentSelectedCities] = useCurrentSelectedCities();
-  const [currentVehicle, setCurrentVehicle] = useCurrentVehicle();
-  const [currentConvoy, setCurrentConvoy] = useCurrentConvoy();
-  const [, setContextMenuPosition] = useContextMenuPosition();
-
   useKeypressHandler();
   useContextMenuHandler();
   useGameLoop();
-  useTickUpdate();
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<LeafletMap>(null);
   const sideMenuRef = useRef<HTMLDivElement>(null);
   const { height, width } = useWindowSize();
   const mapContainerCleanUpRef = useRef<LeafletMap>();
 
-  const onContextMenu = useCallback<MouseEventHandler<HTMLDivElement>>(
-    ({ nativeEvent: { clientX, clientY } }) => {
-      if (!currentConvoy && !currentVehicle) {
-        setContextMenuPosition([clientX, clientY]);
-      }
-    },
-    [currentConvoy, currentVehicle, setContextMenuPosition]
-  );
-
   useEffect(() => {
-    function OutSideClick(this: Window, ev: MouseEvent) {
-      if (
-        ev.button === 0 &&
-        !ev.ctrlKey &&
-        !containerRef.current?.contains(ev.target as Node) &&
-        !sideMenuRef.current?.contains(ev.target as Node)
-      ) {
-        if (!ev.shiftKey) {
-          setCurrentSelectedCities([null, null]);
-        }
-        setCurrentConvoy(null);
-        setCurrentVehicle(null);
-      }
-    }
-
-    window.addEventListener("click", OutSideClick, true);
-
-    return () => window.removeEventListener("click", OutSideClick);
-  }, [
-    setCurrentSelectedCities,
-    setCurrentConvoy,
-    currentConvoy,
-    gameState,
-    setCurrentVehicle,
-  ]);
-
-  useEffect(() => {
-    function ClickHandler(
-      this: Window,
-      { originalEvent: ev, latlng: { lat, lng } }: LeafletMouseEvent
-    ) {
-      if (ev.button === 0 && ev.ctrlKey) {
-        if (currentConvoy) {
-          gameState.setConvoyGoal(
-            currentConvoy,
-            Math.round(lng),
-            Math.round(lat)
-          );
-        } else if (currentVehicle) {
-          gameState.setVehicleGoal(currentVehicle, lng, lat);
-        }
-      }
-    }
-
     function ResizeHandler() {
       mapContainerRef.current?.invalidateSize();
     }
 
     window.addEventListener("resize", ResizeHandler);
 
-    mapContainerRef.current?.on("click", ClickHandler);
-
     mapContainerCleanUpRef.current = mapContainerRef.current!;
 
+    function ContextMenuHanlder({
+      originalEvent: { clientX, clientY },
+    }: LeafletMouseEvent) {
+      ContextMenuPosition.next([clientX, clientY]);
+    }
+
+    mapContainerRef.current?.addEventListener(
+      "contextmenu",
+      ContextMenuHanlder
+    );
+
     return () => {
-      mapContainerCleanUpRef.current?.off("click", ClickHandler);
+      mapContainerRef.current?.removeEventListener(
+        "contextmenu",
+        ContextMenuHanlder
+      );
       window.removeEventListener("resize", ResizeHandler);
     };
-  }, [currentConvoy, gameState, currentVehicle]);
+  }, [gameState]);
 
   const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
   const mapWidth = useMemo(() => width * 0.82, [width]);
@@ -161,11 +102,7 @@ export function WorldMap(): JSX.Element {
 
   return (
     <Container>
-      <PageContainer
-        height={height}
-        width={mapWidth}
-        onContextMenu={onContextMenu}
-      >
+      <PageContainer height={height} width={mapWidth}>
         <StyledMapContainer
           doubleClickZoom={false}
           scrollWheelZoom
@@ -181,14 +118,17 @@ export function WorldMap(): JSX.Element {
           renderer={renderer.current}
           boxZoom={false}
           keyboardPanDelta={100}
+          preferCanvas
           easeLinearity={1}
         >
           <ImageOverlay url="lava_sea.png" bounds={bounds}>
-            <Vehicles />
-            <Convoys />
-            <Cities />
+            <LayersControl position="topright">
+              <Vehicles />
+              <Convoys />
+              <Cities />
+              <RouteLayer />
+            </LayersControl>
           </ImageOverlay>
-          <RouteLayer />
         </StyledMapContainer>
       </PageContainer>
       <SideMenu ref={sideMenuRef} style={sideMenuStyle} />
