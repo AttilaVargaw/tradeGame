@@ -1,6 +1,5 @@
-import { GameStateContext } from "@Services/GameState/gameState";
-import { useContext, useEffect, useRef } from "react";
 import { BehaviorSubject, Subject } from "rxjs";
+import type { GameState } from "@Services/GameState/gameState";
 
 export enum RedrawType {
   Convoys,
@@ -15,56 +14,50 @@ const fpsCounter = document.getElementById("FPS")!;
 const startTick = new Date(1899, 1, 1).getTime();
 const updateFrequency = 50;
 
-export function useGameLoop() {
-  const gameState = useContext(GameStateContext);
+export function GameLoop(gameState: typeof GameState) {
+  let gameLoopAnimationFrame: number;
+  let oldTimeStamp = 0;
+  let currentTick = startTick;
 
-  const gameLoopAnimationFrame = useRef<number>();
-  const tick = useRef<number>();
+  async function gameLoop(timeStamp: number) {
+    //const t = Date.now();
+    const dMs = timeStamp - oldTimeStamp;
+    const ds = dMs * 0.001;
+    const fps = Math.round(1 / ds);
+    fpsCounter.innerHTML = fps.toString();
 
-  const oldTimeStamp = useRef(0);
-  const currentTick = useRef(startTick);
-
-  useEffect(() => {
-    async function gameLoop(timeStamp: number) {
-      const dMs = timeStamp - oldTimeStamp.current;
-      const ds = dMs * 0.001;
-      const fps = Math.round(1 / ds);
-      fpsCounter.innerHTML = fps.toString();
-
-      if (fps < 30) {
-        fpsCounter.style.setProperty("color", "red");
-      } else if (fps < 45) {
-        fpsCounter.style.setProperty("color", "yellow");
-      } else {
-        fpsCounter.style.setProperty("color", "white");
-      }
-
-      if (dMs >= updateFrequency) {
-        oldTimeStamp.current = timeStamp;
-        let updates: boolean[] = [];
-
-        if (TickSpeed.value !== 0) {
-          currentTick.current += dMs * 3600 * TickSpeed.value;
-
-          Tick.next(currentTick.current);
-        }
-
-        for (let i = 0; i < TickSpeed.value; ++i) {
-          updates = await gameState.UpdateConvoys(ds);
-        }
-
-        if (updates.some((value) => value === true)) {
-          gameRedrawSubject.next(RedrawType.Convoys);
-        }
-      }
-      gameLoopAnimationFrame.current = window.requestAnimationFrame(gameLoop);
+    if (fps < 30) {
+      fpsCounter.style.setProperty("color", "red");
+    } else if (fps < 45) {
+      fpsCounter.style.setProperty("color", "yellow");
+    } else {
+      fpsCounter.style.setProperty("color", "white");
     }
 
-    gameLoopAnimationFrame.current = window.requestAnimationFrame(gameLoop);
+    if (dMs >= updateFrequency) {
+      oldTimeStamp = timeStamp;
+      let updates: boolean[] = [];
 
-    return () => {
-      console.log("redraw");
-      window.cancelAnimationFrame(gameLoopAnimationFrame.current!);
-    };
-  }, [gameState]);
+      if (TickSpeed.value !== 0) {
+        currentTick += dMs * 3600 * TickSpeed.value;
+
+        Tick.next(currentTick);
+      }
+
+      for (let i = 0; i < TickSpeed.value; ++i) {
+        updates = await gameState.UpdateConvoys(ds);
+      }
+
+      if (updates.some((value) => value === true)) {
+        gameRedrawSubject.next(RedrawType.Convoys);
+      }
+    }
+
+    gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
+
+    //if (Date.now() - t > 0)
+      //console.log("Used time in the update loop:", Date.now() - t);
+  }
+  gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
+  return () => cancelAnimationFrame(gameLoopAnimationFrame);
 }
