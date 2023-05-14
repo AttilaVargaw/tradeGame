@@ -108,6 +108,7 @@ const init = async () => {
     FillTable(Vehicle) +
     FillTable(Convoy) +
     FillTable(IndustrialBuildingDailyRequirement) +
+    FillTable(TradeRoutes) +
     "COMMIT;";
 
   await db.execute(creatorSQL1);
@@ -142,14 +143,6 @@ const setConvoyGoal = async (
   goalX: number,
   goalY: number
 ) => {
-  const [{ goalVectorX, goalVectorY }] = await db.select<
-    { goalVectorX: number; goalVectorY: number }[]
-  >(
-    "select posX-? as goalVectorX, posY-? as goalVectorY from Convoy where ID=?",
-    [goalX, goalY, convoyID]
-  );
-  const angle = Math.atan2(goalVectorY, goalVectorX);
-
   const data = await db.execute(
     update({
       table: Tables.Convoy,
@@ -157,7 +150,6 @@ const setConvoyGoal = async (
       updateRows: [
         ["goalX", goalX],
         ["goalY", goalY],
-        ["goalAngle", angle],
       ],
     })
   );
@@ -235,6 +227,17 @@ async function GetConvoiyCount() {
   )[0]["count(ID)"];
 }
 
+async function GetTraderouteCount() {
+  return (
+    await db.select<{ "count(ID)": number }[]>(
+      select({
+        table: Tables.TradeRoutes,
+        attributes: [["", "count(ID)"]],
+      })
+    )
+  )[0]["count(ID)"];
+}
+
 const addVehicle = async (type: number, name: string) => {
   const data = await db.execute(
     insert({
@@ -277,11 +280,23 @@ const getConvoys = () => {
   );
 };
 
+const setConvoyTradeRoute = async (ID: number, routeId: number | null) => {
+  const data = await db.execute(
+    update({
+      table: Tables.Convoy,
+      updateRows: [["route", routeId]],
+      where: [{ A: [Tables.Convoy, "ID"], value: ID }],
+    })
+  );
+
+  dbObservable.next({ type: DBEvents.convoyUpdated, data });
+};
+
 const getConvoy = async (ID: number) => {
   return (
     await db.select<ConvoyData[]>(
       select({
-        attributes: [[Tables.Convoy, ["name", "ID"]]],
+        attributes: [[Tables.Convoy, ["name", "ID", "route"]]],
         table: Tables.Convoy,
         where: [{ A: [Tables.Convoy, "ID"], value: ID }],
       })
@@ -333,46 +348,54 @@ export type TradeRouteView = {
   cityBName: string;
 };
 
-const getTradeRoute = async (ID: number) => {
-  const { cityAID, cityBID, name } = (
-    await db.select<TradeRouteView[]>(
-      select({
-        attributes: [
-          ["cityB", ["ID", "name"]],
-          ["cityA", ["ID", "name"]],
-          [Tables.TradeRoutes, ["name", "ID"]],
+const getTradeRoute = (ID?: number) => {
+  return db.select<TradeRouteAsGeoJSONView[]>(
+    select({
+      table: Tables.TradeRoutes,
+      where: ID ? [{ A: [Tables.TradeRoutes, "ID"], value: ID }] : undefined,
+      attributes: [
+        [
+          "CityA",
+          [
+            ["ID", "cityAID"],
+            ["name", "cityAName"],
+            ["posX", "cityAPosX"],
+            ["posY", "cityAPosY"],
+          ],
         ],
-        table: Tables.TradeRoutes,
-        where: [{ A: [Tables.TradeRoutes, "ID"], value: ID }],
-        join: [
-          {
-            A: Tables.City,
-            equation: {
-              A: ["CityA", "ID"],
-              B: [Tables.TradeRoutes, "cityA"],
-              operator: "=",
-            },
-            as: "CityA",
-          },
-          {
-            A: Tables.City,
-            equation: {
-              A: ["CityB", "ID"],
-              B: [Tables.TradeRoutes, "cityB"],
-              operator: "=",
-            },
-            as: "CityB",
-          },
+        [
+          "CityB",
+          [
+            ["ID", "cityBID"],
+            ["name", "cityBName"],
+            ["posX", "cityBPosX"],
+            ["posY", "cityBPosY"],
+          ],
         ],
-      })
-    )
-  )[0];
-
-  return {
-    cities: [cityAID, cityBID],
-    ID,
-    name,
-  } as TradeRouteProps;
+        [Tables.TradeRoutes, ["name", "ID"]],
+      ],
+      join: [
+        {
+          A: Tables.City,
+          equation: {
+            A: ["CityA", "ID"],
+            B: [Tables.TradeRoutes, "cityA"],
+            operator: "=",
+          },
+          as: "CityA",
+        },
+        {
+          A: Tables.City,
+          equation: {
+            A: ["CityB", "ID"],
+            B: [Tables.TradeRoutes, "cityB"],
+            operator: "=",
+          },
+          as: "CityB",
+        },
+      ],
+    })
+  );
 };
 
 export type TradeRouteAsGeoJSONView = {
@@ -388,10 +411,11 @@ export type TradeRouteAsGeoJSONView = {
   cityBName: string;
 };
 
-const getTradeRoutesAsGeoJson = async () => {
+const getTradeRoutesAsGeoJson = async (ID?: number) => {
   const tradeRoutes = await db.select<TradeRouteAsGeoJSONView[]>(
     select({
       table: Tables.TradeRoutes,
+      where: ID ? [{ A: [Tables.TradeRoutes, "ID"], value: ID }] : undefined,
       attributes: [
         [
           "CityA",
@@ -477,7 +501,7 @@ const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
       })
     );
 
-    dbObservable.next({ type: DBEvents.tradeRouteUpdate, data });
+    dbObservable.next({ type: DBEvents.tradeRouteAdded, data });
   }
 };
 
@@ -868,6 +892,8 @@ type ConvoyUpdateData = {
   headingX: number;
   headingY: number;
   angle: number;
+  goalVectorY: number;
+  goalVectorX: number;
 } & ConvoyData;
 
 async function UpdateConvoys(dt: number) {
@@ -876,50 +902,53 @@ async function UpdateConvoys(dt: number) {
   const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
 
   const ret = await Promise.all(
-    convoys.map(async ({ goalX, goalY, ID, posX, posY, goalAngle }) => {
-      if (goalX && goalY && goalAngle) {
-        const [convoy] = await db.select<ConvoyUpdateData[]>(
-          getQuery("getConvoySpeed"),
-          [dt, ID]
-        );
+    convoys.map(
+      async ({ goalX, goalY, ID, posX, posY, goalVectorY, goalVectorX }) => {
+        if (goalX && goalY && goalVectorY && goalVectorX) {
+          const [convoy] = await db.select<ConvoyUpdateData[]>(
+            getQuery("getConvoySpeed"),
+            [dt, ID]
+          );
 
-        const { headingX, headingY, dS } = convoy;
+          const angle = Math.atan2(goalVectorY, goalVectorX);
 
-        const newPos = [
-          posX - Math.cos(goalAngle) * dS,
-          posY - Math.sin(goalAngle) * dS,
-        ];
+          const { headingX, headingY, dS } = convoy;
 
-        const newVector = [posX - newPos[0], posY - newPos[1]];
+          const newPos = [
+            posX - Math.cos(angle) * dS,
+            posY - Math.sin(angle) * dS,
+          ];
 
-        const stop =
-          Lenght(headingX, headingY) - Lenght(newVector[0], newVector[1]) < 0;
+          const newVector = [posX - newPos[0], posY - newPos[1]];
 
-        const updateRows: [string, number | null][] = [
-          ["posX", stop ? goalX : newPos[0]],
-          ["posY", stop ? goalY : newPos[1]],
-        ];
+          const stop =
+            Lenght(headingX, headingY) - Lenght(newVector[0], newVector[1]) < 0;
 
-        if (stop) {
-          updateRows.push(["goalX", null]);
-          updateRows.push(["goalY", null]);
-          updateRows.push(["goalAngle", null]);
+          const updateRows: [string, number | null][] = [
+            ["posX", stop ? goalX : newPos[0]],
+            ["posY", stop ? goalY : newPos[1]],
+          ];
+
+          if (stop) {
+            updateRows.push(["goalX", null]);
+            updateRows.push(["goalY", null]);
+          }
+
+          await db.execute(
+            update({
+              table: Tables.Convoy,
+              where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+              updateRows,
+            }),
+            [ID]
+          );
+
+          return true;
         }
 
-        await db.execute(
-          update({
-            table: Tables.Convoy,
-            where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
-            updateRows,
-          }),
-          [ID]
-        );
-
-        return true;
+        return Promise.resolve(false);
       }
-
-      return Promise.resolve(false);
-    })
+    )
   );
 
   //console.log(Date.now() - t1);
@@ -950,6 +979,7 @@ export const GameState = {
   getCitiesAsGeoJson,
   getTradeRoutesAsGeoJson,
   getConvoyGoalsAsGeoJson,
+  GetTraderouteCount,
   addTradeRoute,
   dbObservable: dbObservable.asObservable(),
   getTradeRoute,
@@ -971,6 +1001,7 @@ export const GameState = {
   getConvoysAsGeoJson,
   getVehicleGoalsAsGeoJson,
   setVehicleGoal,
+  setConvoyTradeRoute,
 };
 
 export const GameStateContext = createContext(GameState);

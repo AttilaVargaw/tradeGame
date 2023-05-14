@@ -1,5 +1,6 @@
 import { BehaviorSubject, Subject } from "rxjs";
 import type { GameState } from "@Services/GameState/gameState";
+import { ConvoyAI } from "@Services/AI/convoy";
 
 export enum RedrawType {
   Convoys,
@@ -12,7 +13,9 @@ export const gameRedrawDoneSubject = new Subject<RedrawType>();
 const fpsCounter = document.getElementById("FPS")!;
 
 const startTick = new Date(1899, 1, 1).getTime();
-const updateFrequency = 50;
+const updateFrequency = 30;
+
+const convoyAI = ConvoyAI();
 
 export function GameLoop(gameState: typeof GameState) {
   let gameLoopAnimationFrame: number;
@@ -51,12 +54,14 @@ export function GameLoop(gameState: typeof GameState) {
       if (updates.some((value) => value === true)) {
         gameRedrawSubject.next(RedrawType.Convoys);
       }
+
+      await convoyAI.Udpate();
     }
 
     gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
 
     //if (Date.now() - t > 0)
-      //console.log("Used time in the update loop:", Date.now() - t);
+    //console.log("Used time in the update loop:", Date.now() - t);
   }
   gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
   return () => cancelAnimationFrame(gameLoopAnimationFrame);

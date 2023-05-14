@@ -36,7 +36,7 @@ export const ContextMenu: FC = () => {
       setContextMenuPositionState
     );
 
-    window.addEventListener("mousedown", OutsideEventListener, true);
+    window.addEventListener("mousedown", OutsideEventListener);
 
     return () => {
       window.removeEventListener("mousedown", OutsideEventListener);
@@ -57,9 +57,9 @@ export const ContextMenu: FC = () => {
       >
         <TerminalScreen>
           {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
-            <div key={labelKey}>
-              <Link onClick={onClick}>{labelKey}</Link>
-            </div>
+            <Link key={labelKey} onClick={onClick}>
+              {labelKey}
+            </Link>
           ))}
         </TerminalScreen>
       </Container>

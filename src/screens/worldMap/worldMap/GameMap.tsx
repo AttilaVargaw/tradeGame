@@ -1,6 +1,12 @@
 import { useContext, useEffect, useRef } from "react";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { CRS, LatLngBoundsExpression, LatLngExpression, Map } from "leaflet";
+import {
+  CRS,
+  LatLngBoundsExpression,
+  LatLngExpression,
+  Map,
+  svg,
+} from "leaflet";
 import { RouteLayer } from "../routeLayer";
 import { ImageOverlay, LayersControl, MapContainer } from "react-leaflet";
 import styled from "styled-components";
@@ -9,7 +15,6 @@ import { Cities } from "./cities";
 import { Vehicles } from "./vehicles";
 import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
 import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import "../../../workerCanavasRenderer";
 
 const bounds = [
   [0, 0],
@@ -47,26 +52,21 @@ export function GameMap(): JSX.Element {
     };
   }, [gameState]);
 
-  const painter = useRef<Worker>();
+  const renderer = useRef(svg());
 
-  useEffect(() => {
-    painter.current = new Worker("./renderer.js");
-
-    return () => painter.current!.terminate();
-  }, []);
-
-  const renderer = useRef(L.workerCanvasRenderer());
-
-  useEffect(() => {}, [
-
-  ])
+  useEffect(() => {}, []);
 
   return (
     <StyledMapContainer
       center={center}
       zoom={1}
       crs={CRS.Simple}
+      preferCanvas
       renderer={renderer.current}
+      maxBounds={maxBounds}
+      zoomAnimation={false}
+      markerZoomAnimation={false}
+      boxZoom={false}
     >
       <ImageOverlay url="lava_sea.png" bounds={bounds}>
         <LayersControl position="topright">

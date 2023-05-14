@@ -52,11 +52,14 @@ export const RouteLayer: FC<RouteLayerProps> = () => {
 
   useEffect(() => {
     return gameState.dbObservable.subscribe(({ type }) => {
-      if (type === DBEvents.tradeRouteUpdate) {
-        setTradeRoutes(undefined);
-        gameState.getTradeRoutesAsGeoJson().then((tradeRoutes) => {
-          setTradeRoutes(tradeRoutes);
-        });
+      switch (type) {
+        case DBEvents.tradeRouteAdded:
+        case DBEvents.tradeRouteUpdate:
+          setTradeRoutes(undefined);
+          gameState.getTradeRoutesAsGeoJson().then((tradeRoutes) => {
+            setTradeRoutes(tradeRoutes);
+          });
+          break;
       }
     }).unsubscribe;
   }, [gameState]);

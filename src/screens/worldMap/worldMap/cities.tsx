@@ -8,13 +8,7 @@ import { addToContextMenu } from "@Services/contextMenu";
 import { LeafletMouseEventHandlerFn } from "leaflet";
 import { useMemo } from "react";
 import { useCallback, useContext, useEffect, useState } from "react";
-import {
-  Circle,
-  LayerGroup,
-  LayersControl,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
+import { Circle, LayerGroup, LayersControl, Tooltip } from "react-leaflet";
 
 const CityColors: { [key: string]: string } = {
   Mine: "black",

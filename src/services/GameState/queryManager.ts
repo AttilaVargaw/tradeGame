@@ -54,8 +54,10 @@ export function getQuery(type: QueryTypes): string {
             attributes: [
               [
                 Tables.Convoy,
-                ["name", "ID", "goalX", "goalY", "posY", "posX", "goalAngle"],
+                ["name", "ID", "goalX", "goalY", "posY", "posX"],
               ],
+              ["", "posX-goalX as goalVectorX"],
+              ["", "posY-goalY as goalVectorY"],
             ],
             table: Tables.Convoy,
           })

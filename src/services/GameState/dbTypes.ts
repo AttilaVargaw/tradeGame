@@ -63,6 +63,7 @@ export enum DBEvents {
   NOP,
   initialized,
   tradeRouteUpdate,
+  tradeRouteAdded,
   cityWarehouseUpdate,
   cityPopulationUpdate,
   newVehicleBought,

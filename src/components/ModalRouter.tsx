@@ -4,6 +4,7 @@ import { ConvoyModal } from "../modals/Convoy/convoyModal";
 import { useCurrentModal } from "./hooks/useCurrentModal";
 import VehicleModal from "../modals/Vehicle/vehicleModal";
 import { EncyclopediaModal } from "../modals/encyclopedia";
+import { ConvoyTradeRouteModal } from "../modals/Convoy/convoyTradeRouteModal";
 
 export function ModalRouter(): JSX.Element | null {
   const [currentModal] = useCurrentModal();
@@ -19,6 +20,8 @@ export function ModalRouter(): JSX.Element | null {
       return <TradeRouteModal />;
     case "encyclopedia":
       return <EncyclopediaModal />;
+    case "convoyTradeRoute":
+      return <ConvoyTradeRouteModal />;
     default:
       return null;
   }

@@ -1,6 +1,9 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { TradeRouteProps } from "@Services/GameState/dbTypes";
-import { GameStateContext } from "@Services/GameState/gameState";
+import {
+  GameStateContext,
+  TradeRouteAsGeoJSONView,
+} from "@Services/GameState/gameState";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import Modal from "./Modal";
 import { Label } from "@Components/label";
@@ -11,11 +14,13 @@ export default function TradeRouteModal(): JSX.Element {
 
   const gameState = useContext(GameStateContext);
 
-  const [routeData, setRouteData] = useState<TradeRouteProps>();
+  const [routeData, setRouteData] = useState<TradeRouteAsGeoJSONView>();
 
   useEffect(() => {
     if (routeID) {
-      gameState.getTradeRoute(routeID).then(setRouteData);
+      gameState
+        .getTradeRoute(routeID)
+        .then(([tradeRoute]) => setRouteData(tradeRoute));
     }
   }, [routeID, gameState]);
 

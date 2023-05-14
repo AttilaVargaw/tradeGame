@@ -4,7 +4,6 @@ import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import L, { LeafletMouseEvent, LeafletMouseEventHandlerFn } from "leaflet";
-import { useRef } from "react";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   Circle,

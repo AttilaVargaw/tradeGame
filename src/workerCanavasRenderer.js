@@ -1,7 +1,4 @@
-// import { Renderer } from "leaflet/src/layer/vector/Renderer.js";
-import * as DomEvent from "leaflet/src/dom/DomEvent.js";
-import * as Util from "leaflet/src/core/Util.js";
-import { Bounds } from "leaflet/src/geometry/Bounds.js";
+import { Renderer, DomUtil, DomEvent, Browser, Util, Bounds } from "leaflet";
 
 /*
  * @class Canvas
@@ -35,7 +32,7 @@ import { Bounds } from "leaflet/src/geometry/Bounds.js";
  * ```
  */
 
-L.WorkerCanvasRenderer = L.Renderer.extend({
+export var Canvas = Renderer.extend({
   // @section
   // @aka Canvas options
   options: {
@@ -44,27 +41,27 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     tolerance: 0,
   },
 
-  getEvents() {
-    const events = L.Renderer.prototype.getEvents.call(this);
+  getEvents: function () {
+    var events = Renderer.prototype.getEvents.call(this);
     events.viewprereset = this._onViewPreReset;
     return events;
   },
 
-  _onViewPreReset() {
+  _onViewPreReset: function () {
     // Set a flag so that a viewprereset+moveend+viewreset only updates&redraws once
     this._postponeUpdatePaths = true;
   },
 
-  onAdd(map) {
-    L.Renderer.prototype.onAdd.call(this, map);
+  onAdd: function () {
+    Renderer.prototype.onAdd.call(this);
 
     // Redraw vectors since canvas is cleared upon removal,
     // in case of removing the renderer itself from the map.
     this._draw();
   },
 
-  _initContainer() {
-    const container = (this._container = document.createElement("canvas"));
+  _initContainer: function () {
+    var container = (this._container = document.createElement("canvas"));
 
     DomEvent.on(container, "mousemove", this._onMouseMove, this);
     DomEvent.on(
@@ -79,55 +76,61 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._ctx = container.getContext("2d");
   },
 
-  _destroyContainer() {
+  _destroyContainer: function () {
     Util.cancelAnimFrame(this._redrawRequest);
     delete this._ctx;
-    L.Renderer.prototype._destroyContainer.call(this);
+    DomUtil.remove(this._container);
+    DomEvent.off(this._container);
+    delete this._container;
   },
 
-  _resizeContainer() {
-    const size = L.Renderer.prototype._resizeContainer.call(this);
-    const m = (this._ctxScale = window.devicePixelRatio);
-
-    // set canvas size (also clearing it); use double size on retina
-    this._container.width = m * size.x;
-    this._container.height = m * size.y;
-  },
-
-  _updatePaths() {
+  _updatePaths: function () {
     if (this._postponeUpdatePaths) {
       return;
     }
 
-    let layer;
+    var layer;
     this._redrawBounds = null;
-    for (const id in this._layers) {
-      if (Object.hasOwn(this._layers, id)) {
-        layer = this._layers[id];
-        layer._update();
-      }
+    for (var id in this._layers) {
+      layer = this._layers[id];
+      layer._update();
     }
     this._redraw();
   },
 
-  _update() {
-    console.log(this._map._animatingZoom);
+  _update: function () {
     if (this._map._animatingZoom && this._bounds) {
       return;
     }
 
-    const b = this._bounds,
-      s = this._ctxScale;
+    Renderer.prototype._update.call(this);
+
+    var b = this._bounds,
+      container = this._container,
+      size = b.getSize(),
+      m = Browser.retina ? 2 : 1;
+
+    DomUtil.setPosition(container, b.min);
+
+    // set canvas size (also clearing it); use double size on retina
+    container.width = m * size.x;
+    container.height = m * size.y;
+    container.style.width = size.x + "px";
+    container.style.height = size.y + "px";
+
+    if (Browser.retina) {
+      this._ctx.scale(2, 2);
+    }
 
     // translate so we use the same path coordinates after canvas element moves
-    this._ctx.setTransform(s, 0, 0, s, -b.min.x * s, -b.min.y * s);
+    this._ctx.translate(-b.min.x, -b.min.y);
 
     // Tell paths to redraw themselves
     this.fire("update");
   },
 
-  _reset() {
-    L.Renderer.prototype._reset.call(this);
+  _reset: function () {
+    Renderer.prototype._reset.call(this);
 
     if (this._postponeUpdatePaths) {
       this._postponeUpdatePaths = false;
@@ -135,12 +138,12 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     }
   },
 
-  _initPath(layer) {
+  _initPath: function (layer) {
     this._updateDashArray(layer);
     this._layers[Util.stamp(layer)] = layer;
 
-    const order = (layer._order = {
-      layer,
+    var order = (layer._order = {
+      layer: layer,
       prev: this._drawLast,
       next: null,
     });
@@ -151,14 +154,14 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._drawFirst = this._drawFirst || this._drawLast;
   },
 
-  _addPath(layer) {
+  _addPath: function (layer) {
     this._requestRedraw(layer);
   },
 
-  _removePath(layer) {
-    const order = layer._order;
-    const next = order.next;
-    const prev = order.prev;
+  _removePath: function (layer) {
+    var order = layer._order;
+    var next = order.next;
+    var prev = order.prev;
 
     if (next) {
       next.prev = prev;
@@ -178,7 +181,7 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._requestRedraw(layer);
   },
 
-  _updatePath(layer) {
+  _updatePath: function (layer) {
     // Redraw the union of the layer's old pixel
     // bounds and the new pixel bounds.
     this._extendRedrawBounds(layer);
@@ -189,16 +192,17 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._requestRedraw(layer);
   },
 
-  _updateStyle(layer) {
+  _updateStyle: function (layer) {
     this._updateDashArray(layer);
     this._requestRedraw(layer);
   },
 
-  _updateDashArray(layer) {
+  _updateDashArray: function (layer) {
     if (typeof layer.options.dashArray === "string") {
-      const parts = layer.options.dashArray.split(/[, ]+/),
-        dashArray = [];
-      let dashValue, i;
+      var parts = layer.options.dashArray.split(/[, ]+/),
+        dashArray = [],
+        dashValue,
+        i;
       for (i = 0; i < parts.length; i++) {
         dashValue = Number(parts[i]);
         // Ignore dash array containing invalid lengths
@@ -213,7 +217,7 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     }
   },
 
-  _requestRedraw(layer) {
+  _requestRedraw: function (layer) {
     if (!this._map) {
       return;
     }
@@ -223,9 +227,9 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
       this._redrawRequest || Util.requestAnimFrame(this._redraw, this);
   },
 
-  _extendRedrawBounds(layer) {
+  _extendRedrawBounds: function (layer) {
     if (layer._pxBounds) {
-      const padding = (layer.options.weight || 0) + 1;
+      var padding = (layer.options.weight || 0) + 1;
       this._redrawBounds = this._redrawBounds || new Bounds();
       this._redrawBounds.extend(
         layer._pxBounds.min.subtract([padding, padding])
@@ -234,7 +238,7 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     }
   },
 
-  _redraw() {
+  _redraw: function () {
     this._redrawRequest = null;
 
     if (this._redrawBounds) {
@@ -248,10 +252,10 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._redrawBounds = null;
   },
 
-  _clear() {
-    const bounds = this._redrawBounds;
+  _clear: function () {
+    var bounds = this._redrawBounds;
     if (bounds) {
-      const size = bounds.getSize();
+      var size = bounds.getSize();
       this._ctx.clearRect(bounds.min.x, bounds.min.y, size.x, size.y);
     } else {
       this._ctx.save();
@@ -261,12 +265,12 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     }
   },
 
-  _draw() {
-    let layer;
-    const bounds = this._redrawBounds;
+  _draw: function () {
+    var layer,
+      bounds = this._redrawBounds;
     this._ctx.save();
     if (bounds) {
-      const size = bounds.getSize();
+      var size = bounds.getSize();
       this._ctx.beginPath();
       this._ctx.rect(bounds.min.x, bounds.min.y, size.x, size.y);
       this._ctx.clip();
@@ -274,7 +278,7 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
 
     this._drawing = true;
 
-    for (let order = this._drawFirst; order; order = order.next) {
+    for (var order = this._drawFirst; order; order = order.next) {
       layer = order.layer;
       if (!bounds || (layer._pxBounds && layer._pxBounds.intersects(bounds))) {
         layer._updatePath();
@@ -286,13 +290,16 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._ctx.restore(); // Restore state before clipping.
   },
 
-  _updatePoly(layer, closed) {
+  _updatePoly: function (layer, closed) {
     if (!this._drawing) {
       return;
     }
 
-    let i, j, len2, p;
-    const parts = layer._parts,
+    var i,
+      j,
+      len2,
+      p,
+      parts = layer._parts,
       len = parts.length,
       ctx = this._ctx;
 
@@ -317,12 +324,12 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     // TODO optimization: 1 fill/stroke for all features with equal style instead of 1 for each feature
   },
 
-  _updateCircle(layer) {
+  _updateCircle: function (layer) {
     if (!this._drawing || layer._empty()) {
       return;
     }
 
-    const p = layer._point,
+    var p = layer._point,
       ctx = this._ctx,
       r = Math.max(Math.round(layer._radius), 1),
       s = (Math.max(Math.round(layer._radiusY), 1) || r) / r;
@@ -342,8 +349,8 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._fillStroke(ctx, layer);
   },
 
-  _fillStroke(ctx, layer) {
-    const options = layer.options;
+  _fillStroke: function (ctx, layer) {
+    var options = layer.options;
 
     if (options.fill) {
       ctx.globalAlpha = options.fillOpacity;
@@ -367,11 +374,12 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
   // Canvas obviously doesn't have mouse events for individual drawn objects,
   // so we emulate that by calculating what's under the mouse on mousemove/click manually
 
-  _onClick(e) {
-    const point = this._map.mouseEventToLayerPoint(e);
-    let layer, clickedLayer;
+  _onClick: function (e) {
+    var point = this._map.mouseEventToLayerPoint(e),
+      layer,
+      clickedLayer;
 
-    for (let order = this._drawFirst; order; order = order.next) {
+    for (var order = this._drawFirst; order; order = order.next) {
       layer = order.layer;
       if (layer.options.interactive && layer._containsPoint(point)) {
         if (
@@ -385,34 +393,34 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._fireEvent(clickedLayer ? [clickedLayer] : false, e);
   },
 
-  _onMouseMove(e) {
+  _onMouseMove: function (e) {
     if (!this._map || this._map.dragging.moving() || this._map._animatingZoom) {
       return;
     }
 
-    const point = this._map.mouseEventToLayerPoint(e);
+    var point = this._map.mouseEventToLayerPoint(e);
     this._handleMouseHover(e, point);
   },
 
-  _handleMouseOut(e) {
-    const layer = this._hoveredLayer;
+  _handleMouseOut: function (e) {
+    var layer = this._hoveredLayer;
     if (layer) {
       // if we're leaving the layer, fire mouseout
-      this._container.classList.remove("leaflet-interactive");
+      DomUtil.removeClass(this._container, "leaflet-interactive");
       this._fireEvent([layer], e, "mouseout");
       this._hoveredLayer = null;
       this._mouseHoverThrottled = false;
     }
   },
 
-  _handleMouseHover(e, point) {
+  _handleMouseHover: function (e, point) {
     if (this._mouseHoverThrottled) {
       return;
     }
 
-    let layer, candidateHoveredLayer;
+    var layer, candidateHoveredLayer;
 
-    for (let order = this._drawFirst; order; order = order.next) {
+    for (var order = this._drawFirst; order; order = order.next) {
       layer = order.layer;
       if (layer.options.interactive && layer._containsPoint(point)) {
         candidateHoveredLayer = layer;
@@ -423,7 +431,7 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
       this._handleMouseOut(e);
 
       if (candidateHoveredLayer) {
-        this._container.classList.add("leaflet-interactive"); // change cursor
+        DomUtil.addClass(this._container, "leaflet-interactive"); // change cursor
         this._fireEvent([candidateHoveredLayer], e, "mouseover");
         this._hoveredLayer = candidateHoveredLayer;
       }
@@ -432,24 +440,27 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._fireEvent(this._hoveredLayer ? [this._hoveredLayer] : false, e);
 
     this._mouseHoverThrottled = true;
-    setTimeout(() => {
-      this._mouseHoverThrottled = false;
-    }, 32);
+    setTimeout(
+      Util.bind(function () {
+        this._mouseHoverThrottled = false;
+      }, this),
+      32
+    );
   },
 
-  _fireEvent(layers, e, type) {
+  _fireEvent: function (layers, e, type) {
     this._map._fireDOMEvent(e, type || e.type, layers);
   },
 
-  _bringToFront(layer) {
-    const order = layer._order;
+  _bringToFront: function (layer) {
+    var order = layer._order;
 
     if (!order) {
       return;
     }
 
-    const next = order.next;
-    const prev = order.prev;
+    var next = order.next;
+    var prev = order.prev;
 
     if (next) {
       next.prev = prev;
@@ -474,15 +485,15 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
     this._requestRedraw(layer);
   },
 
-  _bringToBack(layer) {
-    const order = layer._order;
+  _bringToBack: function (layer) {
+    var order = layer._order;
 
     if (!order) {
       return;
     }
 
-    const next = order.next;
-    const prev = order.prev;
+    var next = order.next;
+    var prev = order.prev;
 
     if (prev) {
       prev.next = next;
@@ -510,6 +521,6 @@ L.WorkerCanvasRenderer = L.Renderer.extend({
 
 // @factory L.canvas(options?: Renderer options)
 // Creates a Canvas renderer with the given options.
-L.workerCanvasRenderer = function (options) {
-  return new L.WorkerCanvasRenderer(options);
-};
+export function canvas(options) {
+  return Browser.canvas ? new Canvas(options) : null;
+}

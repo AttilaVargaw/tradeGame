@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { MouseEventHandler, useCallback, useMemo } from "react";
 import SideMenu from "../sideMenu";
 import { useWindowSize } from "../../../components/hooks/useWIndowSize";
 import { ModalRouter } from "@Components/ModalRouter";
@@ -6,10 +6,14 @@ import styled from "styled-components";
 import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
 import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
 import { GameMap } from "./GameMap";
+import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 const Container = styled.div`
-  display: "flex";
-  flex-direction: "column";
+  display: flex;
+  flex-direction: column;
 `;
 
 const PageContainer = styled.div<{ height: number; width: number }>`
@@ -31,9 +35,26 @@ export function WorldMap(): JSX.Element {
     [menuWidth, height]
   );
 
+  const [currentConvoy] = useCurrentConvoy();
+  const [currentSelectedCity] = useCurrentSelectedCity();
+  const [currentSelectedCities] = useCurrentSelectedCities();
+
+  const onContextMenu = useCallback<MouseEventHandler>(
+    (event) => {
+      if (!currentConvoy && !currentSelectedCity && currentSelectedCities) {
+        ContextMenuPosition.next([event.clientX, event.clientY]);
+      }
+    },
+    [currentConvoy, currentSelectedCities, currentSelectedCity]
+  );
+
   return (
     <Container>
-      <PageContainer height={height} width={mapWidth}>
+      <PageContainer
+        onContextMenu={onContextMenu}
+        height={height}
+        width={mapWidth}
+      >
         <GameMap />
         <SideMenu style={sideMenuStyle} />
         <ModalRouter />
