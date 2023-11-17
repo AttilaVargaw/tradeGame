@@ -1,32 +1,28 @@
 import { useContext, useEffect, useRef } from "react";
 import { GameStateContext } from "@Services/GameState/gameState";
-import {
+import L, {
   CRS,
   LatLngBoundsExpression,
   LatLngExpression,
   Map,
-  svg,
+  canvas,
 } from "leaflet";
-import { RouteLayer } from "../routeLayer";
-import { ImageOverlay, LayersControl, MapContainer } from "react-leaflet";
 import styled from "styled-components";
-import { Convoys } from "./convoys";
-import { Cities } from "./cities";
-import { Vehicles } from "./vehicles";
 import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
 import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
+import { useConvoyLayer } from "./convoys";
+import { VehiclesLayer } from "./vehicles";
+import { useCitites } from "./cities";
+import { useTradeRoutes } from "../routeLayer";
+import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
+import { currentConvoyObservable, currentConvoySubject, useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 
 const bounds = [
   [0, 0],
   [1946, 3840],
 ] as LatLngBoundsExpression;
 
-const maxBounds = [
-  [0, 0],
-  [1946, 3840],
-] as LatLngBoundsExpression;
-
-const StyledMapContainer = styled(MapContainer)`
+const StyledMapContainer = styled.div`
   width: 100%;
   height: 100%;
   background: #05001f;
@@ -52,30 +48,76 @@ export function GameMap(): JSX.Element {
     };
   }, [gameState]);
 
-  const renderer = useRef(svg());
+  const renderer = useRef(canvas());
 
-  useEffect(() => {}, []);
+  const map = useRef<HTMLDivElement>(null);
 
-  return (
-    <StyledMapContainer
-      center={center}
-      zoom={1}
-      crs={CRS.Simple}
-      preferCanvas
-      renderer={renderer.current}
-      maxBounds={maxBounds}
-      zoomAnimation={false}
-      markerZoomAnimation={false}
-      boxZoom={false}
-    >
-      <ImageOverlay url="lava_sea.png" bounds={bounds}>
-        <LayersControl position="topright">
-          <Vehicles />
-          <Convoys />
-          <Cities />
-          <RouteLayer />
-        </LayersControl>
-      </ImageOverlay>
-    </StyledMapContainer>
-  );
+  const mapInstance = useRef<L.Map | null>(null);
+
+  const convoyLayer = useConvoyLayer();
+
+  const cityLayer = useCitites();
+
+  const tradeRoutes = useTradeRoutes();
+
+  useEffect(() => {
+    const vehicleLayer = VehiclesLayer();
+    const background = L.imageOverlay("lava_sea.png", bounds);
+
+    if (map.current) {
+      mapInstance.current = L.map(map.current, {
+        renderer: renderer.current,
+        center,
+        zoom: 1,
+        maxBounds: bounds,
+        zoomAnimation: false,
+        boxZoom: false,
+        markerZoomAnimation: false,
+        crs: CRS.Simple,
+        layers: [
+          convoyLayer.current,
+          background,
+          cityLayer.current,
+          vehicleLayer,
+          tradeRoutes.current,
+        ],
+        doubleClickZoom: false,
+      })
+        .addEventListener("click", () => {
+          currentCitiesObservable.next([null, null]);
+          currentConvoySubject.next(null);
+        })
+        .addEventListener("contextmenu", ({ latlng: { lat, lng } }) => {
+          if (currentConvoySubject.value) {
+            gameState.setConvoyGoal(currentConvoySubject.value, lat, lng);
+          }
+        });
+    } else {
+      console.error("The map element is missing!");
+    }
+
+    mapInstance.current &&
+      L.control
+        .layers(
+          {
+            base: background,
+          },
+          {
+            cities: cityLayer.current,
+            vehicles: vehicleLayer,
+            convoys: convoyLayer.current,
+            tradeRoutes: tradeRoutes.current,
+          },
+          { hideSingleBase: false }
+        )
+        .addTo(mapInstance.current);
+  }, [cityLayer, convoyLayer, gameState, tradeRoutes]);
+
+  useEffect(() => {
+    gameState.getConvoysAsGeoJson().then((convoys) => {
+      convoyLayer.current.addData(convoys);
+    });
+  }, [convoyLayer, gameState]);
+
+  return <StyledMapContainer ref={map} />;
 }

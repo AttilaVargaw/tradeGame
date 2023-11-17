@@ -4,7 +4,7 @@ export const Input = styled.input`
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   color: lightgreen;
-  background: #111;
+  background: #111 !important;
   font-size: 1.2em;
   border: none;
   border-radius: 0.5em;
@@ -30,12 +30,13 @@ export const Input = styled.input`
 export const Select = styled.select`
   padding: 0.5em;
   color: lightgreen;
-  background: #111;
+  background: #111 !important;
   font-size: 1.2em;
   border: none;
   border-radius: 0.5em;
   margin: 0.2em;
   text-align: end;
+  height: 3em;
 
   :focus,
   :hover {

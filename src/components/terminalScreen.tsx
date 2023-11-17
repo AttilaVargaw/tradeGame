@@ -10,8 +10,8 @@ const Container = styled.div`
 export const Link = styled.span`
   color: blue;
 
-  :focus,
-  :hover {
+  &:focus,
+  &:hover {
     color: blueviolet;
     cursor: pointer;
   }

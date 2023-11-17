@@ -123,6 +123,10 @@ const init = async () => {
   await db.execute(creatorSQL);
 
   dbObservable.next({ type: DBEvents.initialized });
+  dbObservable.next({ type: DBEvents.tradeRouteUpdate })
+  dbObservable.next({ type: DBEvents.convoyUpdated })
+  dbObservable.next({ type: DBEvents.cityWarehouseUpdate })
+  dbObservable.next({ type: DBEvents.cityPopulationUpdate })
 };
 
 async function CreateConvoy(name: string) {
@@ -274,7 +278,7 @@ const getVehicleType = (ID: number) => {
 const getConvoys = () => {
   return db.select<ConvoyData[]>(
     select({
-      attributes: [[Tables.Convoy, ["name", "ID"]]],
+      attributes: [[Tables.Convoy, ["name", "ID", "route", "posY", "posX", "goalX", "goalY"]]],
       table: Tables.Convoy,
     })
   );
@@ -296,7 +300,7 @@ const getConvoy = async (ID: number) => {
   return (
     await db.select<ConvoyData[]>(
       select({
-        attributes: [[Tables.Convoy, ["name", "ID", "route"]]],
+        attributes: [[Tables.Convoy, ["name", "ID", "route", "posY", "posX"]]],
         table: Tables.Convoy,
         where: [{ A: [Tables.Convoy, "ID"], value: ID }],
       })
@@ -469,8 +473,8 @@ const getTradeRoutesAsGeoJson = async (ID?: number) => {
         geometry: {
           type: "LineString",
           coordinates: [
-            [cityAPosX, cityAPosY],
-            [cityBPosX, cityBPosY],
+            [cityAPosY, cityAPosX],
+            [cityBPosY, cityBPosX],
           ],
         },
         properties: {
@@ -539,8 +543,8 @@ const getConvoyGoalsAsGeoJson = async () => {
         [Tables.Convoy, "posX"],
         [Tables.Convoy, "posY"],
         [Tables.Convoy, "ID"],
-        [Tables.Convoy, "goalY"],
         [Tables.Convoy, "goalX"],
+        [Tables.Convoy, "goalY"],
       ],
       table: Tables.Convoy,
     })
@@ -555,8 +559,8 @@ const getConvoyGoalsAsGeoJson = async () => {
         type: "Feature",
         geometry: {
           coordinates: [
-            [goalX, goalY],
-            [posX, posY],
+            [goalY, goalX],
+            [posY, posX],
           ],
           type: "LineString",
         },
@@ -638,6 +642,10 @@ const getCitiesAsGeoJson = async () => {
       properties: { name, type, ID },
     })),
   } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
+};
+
+const getCities = () => {
+  return db.select<CityEntity[]>(getQuery("getCities"));
 };
 
 const getCityIndustrialBuildings = async (ID: number) => {
@@ -897,8 +905,6 @@ type ConvoyUpdateData = {
 } & ConvoyData;
 
 async function UpdateConvoys(dt: number) {
-  //const t1 = Date.now();
-
   const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
 
   const ret = await Promise.all(
@@ -951,8 +957,6 @@ async function UpdateConvoys(dt: number) {
     )
   );
 
-  //console.log(Date.now() - t1);
-
   return ret;
 }
 
@@ -1002,6 +1006,7 @@ export const GameState = {
   getVehicleGoalsAsGeoJson,
   setVehicleGoal,
   setConvoyTradeRoute,
+  getCities
 };
 
 export const GameStateContext = createContext(GameState);

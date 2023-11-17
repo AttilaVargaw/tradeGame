@@ -32,7 +32,7 @@ export default function TradeRouteModal(): JSX.Element {
     return (
       <>
         <Label type="painted">Convoys on this route</Label>
-        <TerminalScreen></TerminalScreen>
+        <TerminalScreen />
       </>
     );
   }, []);

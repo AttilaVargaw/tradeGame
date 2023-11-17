@@ -5,78 +5,87 @@ export function Toggle({
   onChange,
   active = false,
   children,
+  disabled,
+  style,
 }: PropsWithChildren<{
   onChange: (newValue: boolean) => void;
   active: boolean;
+  disabled?: boolean;
+  style?: React.CSSProperties;
 }>) {
   const onClick = useCallback(() => {
     onChange(!active);
   }, [active, onChange]);
 
   return (
-    <ToggleBody active={active} onClick={onClick}>
+    <ToggleBody
+      style={style}
+      disabled={disabled}
+      $active={active}
+      onClick={onClick}
+    >
       {children}
     </ToggleBody>
   );
 }
 
 export const ToggleBody = styled.div<{
-  active?: boolean;
+  $active?: boolean;
   disabled?: boolean;
 }>`
-  :hover:not([disabled]) {
-    color: greenyellow;
-    cursor: pointer;
+  &:hover&:not([disabled]) {
+    color: greenyellow !important;
+    cursor: pointer !important;
   }
 
-  box-sizing: border-box;
-  height: 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  box-sizing: border-box !important;
+  height: 4rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 
   :active {
-    border-top: 0.7em solid #444;
-    border-bottom: 0.7em solid #111;
-    border-left: 0.7em solid #222;
-    border-right: 0.7em solid #222;
-    background: #777;
-    font-size: 1.4em;
+    border-top: 0.7em solid #444 !important;
+    border-bottom: 0.7em solid #111 !important;
+    border-left: 0.7em solid #222 !important;
+    border-right: 0.7em solid #222 !important;
+    background: #777 !important;
+    font-size: 1.4em !important;
   }
 
-  ${({ active }) =>
-    active
+  ${({ $active }) =>
+    $active
       ? css`
-          border-top: 0.7em solid #444;
-          border-bottom: 0.7em solid #111;
-          border-left: 0.7em solid #222;
-          border-right: 0.7em solid #222;
-          background: #777;
-          font-size: 1.4em;
+          border-top: 0.7em solid #444 !important;
+          border-bottom: 0.7em solid #111 !important;
+          border-left: 0.7em solid #222 !important;
+          border-right: 0.7em solid #222 !important;
+          background: #777 !important;
+          font-size: 1.4em !important;
         `
       : css`
-          border-top: 0.5em solid #777;
-          border-bottom: 0.5em solid #444;
-          border-left: 0.5em solid #555;
-          border-right: 0.5em solid #555;
-          font-size: 1.5em;
+          border-top: 0.5em solid #777 !important;
+          border-bottom: 0.5em solid #444 !important;
+          border-left: 0.5em solid #555 !important;
+          border-right: 0.5em solid #555 !important;
+          font-size: 1.5em !important;
         `}
 
-  background: grey;
+  background: grey!important;
 
-  outline: black solid 2px;
+  outline: black solid 2px !important;
 
-  padding: 0.1em;
-  font-family: system-ui;
+  padding: 0.1em !important;
+  font-family: system-ui !important;
 
-  color: ${({ active, disabled }) => {
+  color: ${({ $active, disabled }) => {
     if (!disabled) {
-      return active ? "greenyellow" : "lightgreen";
+      return $active ? "greenyellow" : "lightgreen";
     }
     return "lightgray";
   }};
 
-  text-align: center;
+  text-align: center !important;
 
   ${({ disabled }) =>
     disabled

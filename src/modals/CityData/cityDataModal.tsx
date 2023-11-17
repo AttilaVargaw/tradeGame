@@ -68,33 +68,33 @@ export default function CityDataModal(): JSX.Element | null {
             }}
           >
             <Button
-              active={selectedPage === CityModalSubPages.warehouse}
+              $active={selectedPage === CityModalSubPages.warehouse}
               onClick={() => setSelectedPage(CityModalSubPages.warehouse)}
             >
               Warehouse
             </Button>
             <Button
-              active={selectedPage === CityModalSubPages.popularity}
+              $active={selectedPage === CityModalSubPages.popularity}
               onClick={() => setSelectedPage(CityModalSubPages.popularity)}
               disabled
             >
               Relations
             </Button>
             <Button
-              active={selectedPage === CityModalSubPages.industry}
+              $active={selectedPage === CityModalSubPages.industry}
               onClick={() => setSelectedPage(CityModalSubPages.industry)}
             >
               Industry
             </Button>
             <Button
-              active={selectedPage === CityModalSubPages.personel}
+              $active={selectedPage === CityModalSubPages.personel}
               onClick={() => setSelectedPage(CityModalSubPages.personel)}
             >
               Personel
             </Button>
             {cityData.fullPopulation > 0 && (
               <Button
-                active={selectedPage === CityModalSubPages.population}
+                $active={selectedPage === CityModalSubPages.population}
                 onClick={() => setSelectedPage(CityModalSubPages.population)}
               >
                 Population

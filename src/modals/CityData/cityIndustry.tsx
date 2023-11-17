@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import Col from "react-bootstrap/esm/Col";
-import Container from "react-bootstrap/esm/Container";
+
 import { IndustrialBuilding } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
@@ -9,6 +8,15 @@ import { ResourceChange } from "@Services/GameState/tables/common";
 import { Button } from "@Components/button";
 import { Label } from "@Components/label";
 import { Input, Select } from "@Components/input";
+import { Td, Th, Tr } from "@Components/grid";
+import { Toggle } from "@Components/toggle";
+import { styled } from "styled-components";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
 
 export default function CityIndustry() {
   const [cityID] = useCurrentSelectedCity();
@@ -62,59 +70,86 @@ export default function CityIndustry() {
     [reload, gameState]
   );
 
+  const [aggeratedView, setAggeratedView] = useState(false);
+
   return (
-    <>
-      {industrialBuildings.map(
-        ({ nameKey, buildingNum, inputOutputData, ID }) => (
-          <Container key={nameKey}>
-            <div key={nameKey}>
-              <Col sm="10">
+    <Container>
+      <Tr>
+        <Th>
+          <Toggle
+            style={{ padding: "1em" }}
+            active={aggeratedView}
+            onChange={setAggeratedView}
+          >
+            Aggregated
+          </Toggle>
+        </Th>
+        <Th>{!aggeratedView && <Label type="painted">Level</Label>}</Th>
+        <Th>
+          <Label type="painted">Daily requirements</Label>
+        </Th>
+        <Th>
+          <Label type="painted">Daily production</Label>
+        </Th>
+      </Tr>
+      {!aggeratedView &&
+        industrialBuildings.map(
+          ({ nameKey, buildingNum, inputOutputData, ID }) => (
+            <Tr key={ID}>
+              <Td>
                 <Label type="painted">{nameKey}</Label>
-              </Col>
-              {debugMode ? (
-                <Col>
-                  <Input
-                    style={{ paddingTop: ".5em", paddingBottom: ".5em" }}
-                    min={0}
-                    type="number"
-                    value={buildingNum}
-                    onChange={setBuildingNumber(ID)}
-                  />
-                </Col>
-              ) : (
-                <Label type="led">{buildingNum}</Label>
+              </Td>
+              {
+                <Td>
+                  {debugMode ? (
+                    <Input
+                      style={{
+                        paddingTop: ".5em",
+                        paddingBottom: ".5em",
+                        width: "80%",
+                      }}
+                      min={0}
+                      type="number"
+                      value={buildingNum}
+                      onChange={setBuildingNumber(ID)}
+                    />
+                  ) : (
+                    <Label type="led">{buildingNum}</Label>
+                  )}
+                </Td>
+              }
+
+              {inputOutputData.length > 0 && (
+                <Td>
+                  {inputOutputData
+                    .filter(({ num }) => num < 0)
+                    .map(({ nameKey, num, ID }) => (
+                      <div key={ID}>
+                        <Label type="painted">{nameKey}</Label>
+                        <Label type="painted">{num}</Label>
+                      </div>
+                    ))}
+                </Td>
               )}
-            </div>
-            <div>
-              <Col>
-                <Label type="painted">Daily requirements</Label>
-                {inputOutputData
-                  ?.filter(({ num }) => num < 0)
-                  .map(({ nameKey, num }) => (
-                    <div key={nameKey}>
-                      <Label type="painted">{nameKey}</Label>
-                      <Label type="painted">{num}</Label>
-                    </div>
-                  ))}
-              </Col>
-              <Col>
-                <Label type="painted">Daily production</Label>
-                {inputOutputData
-                  ?.filter(({ num }) => num > 0)
-                  .map(({ nameKey, num }) => (
-                    <div key={nameKey}>
-                      <Col sm="10">{nameKey}</Col>
-                      <Col sm="2">{num}</Col>
-                    </div>
-                  ))}
-              </Col>
-            </div>
-          </Container>
-        )
-      )}
-      {debugMode && (
-        <Container>
-          <Col sm="8">
+              {inputOutputData.length > 0 && (
+                <Td>
+                  {inputOutputData
+                    .filter(({ num }) => num > 0)
+                    .map(({ nameKey, num, ID }) => (
+                      <div key={ID}>
+                        <Label type="painted">{nameKey}</Label>
+                        <Label type="painted">{num}</Label>
+                      </div>
+                    ))}
+                </Td>
+              )}
+            </Tr>
+          )
+        )}
+
+      {!aggeratedView && debugMode && (
+        <Tr>
+          <Td>
             <Select onChange={setNewBuildingDropdown}>
               {allIndustrialBuildings.map(({ ID, nameKey }) => (
                 <option key={ID} value={ID}>
@@ -122,36 +157,37 @@ export default function CityIndustry() {
                 </option>
               ))}
             </Select>
-          </Col>
-          <Col sm="2">
+          </Td>
+          <Td>
             <Button onClick={addNewBuilding}>Add</Button>
-          </Col>
-        </Container>
+          </Td>
+        </Tr>
       )}
-      <div>
-        <Col>
-          <Label type="painted">Daily requirements</Label>
-          {aggregatedInputOutput
-            .filter(({ num }) => num < 0)
-            .map(({ num, nameKey, ID }) => (
-              <div key={ID}>
+
+      {aggeratedView &&
+        aggregatedInputOutput
+          .filter(({ num }) => num < 0)
+          .map(({ num, nameKey, ID }) => (
+            <Tr key={ID}>
+              <Td>
                 <Label type="painted">{nameKey}</Label>
                 <Label type="painted">{num}</Label>
-              </div>
-            ))}
-        </Col>
-        <Col>
-          <Label type="painted">Daily output</Label>
-          {aggregatedInputOutput
-            .filter(({ num }) => num > 0)
-            .map(({ num, nameKey, ID }) => (
-              <div key={ID}>
+              </Td>
+            </Tr>
+          ))}
+
+      {aggeratedView &&
+        aggregatedInputOutput
+          .filter(({ num }) => num > 0)
+          .map(({ num, nameKey, ID }) => (
+            <Tr key={ID}>
+              <Td />
+              <Td>
                 <Label type="painted">{nameKey}</Label>
                 <Label type="painted">{num}</Label>
-              </div>
-            ))}
-        </Col>
-      </div>
-    </>
+              </Td>
+            </Tr>
+          ))}
+    </Container>
   );
 }

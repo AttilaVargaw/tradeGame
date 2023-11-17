@@ -1,14 +1,21 @@
 import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
+import {
+  currentCityObservable,
+  currentSelectedCity,
+} from "@Components/hooks/useCurrentSelectedCity";
+
+import {
+  currentCitiesObservable,
+  currentSelectedCities,
+} from "@Components/hooks/useSelectedCities";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
-import { GameStateContext } from "@Services/GameState/gameState";
+import { GameState } from "@Services/GameState/gameState";
+import { CityEntity } from "@Services/GameState/tables/City";
 import { addToContextMenu } from "@Services/contextMenu";
-import { LeafletMouseEventHandlerFn } from "leaflet";
-import { useMemo } from "react";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { Circle, LayerGroup, LayersControl, Tooltip } from "react-leaflet";
+import L, { LatLngExpression, circle } from "leaflet";
+import { useRef } from "react";
+import { useEffect } from "react";
 
 const CityColors: { [key: string]: string } = {
   Mine: "black",
@@ -20,132 +27,172 @@ const CityColors: { [key: string]: string } = {
   RandomEncounter: "gold",
 };
 
-export function Cities() {
-  const [selectedCities, setSelectedCities] = useCurrentSelectedCities();
+function useCityMarker() {
+  return useRef(
+    circle([0, 0], {
+      dashOffset: "10",
+      dashArray: "5 10",
+      fillOpacity: 0.5,
+      radius: 10,
+      color: "grey",
+      bubblingMouseEvents: false,
+    })
+  );
+}
 
-  const gameState = useContext(GameStateContext);
+export function useCitites() {
+  const currentCitiesMarkerA = useCityMarker();
+
+  const currentCitiesMarkerB = useCityMarker();
 
   const [, setCurrentModal] = useCurrentModal();
 
-  const [, setCurrentSelectedCity] = useCurrentSelectedCity();
-
-  const [, setCurrentSelectedCities] = useCurrentSelectedCities();
-
-  //const map = useMap()
+  const citiesGeoJson =
+    useRef<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
 
   useEffect(() => {
-    gameState.getCitiesAsGeoJson().then(setCitiesGeoJson);
-  }, [gameState]);
+    GameState.getCities().then((cities) => {
+      citiesGeoJson.current = {
+        type: "FeatureCollection",
+        features: cities.map(({ posX, posY, name, type, ID }) => ({
+          type: "Feature",
+          geometry: {
+            coordinates: [posX, posY],
+            type: "Point",
+          },
+          properties: { name, type, ID },
+        })),
+      } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 
-  const [citiesGeoJson, setCitiesGeoJson] =
-    useState<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
+      cityLayer.current.addData(citiesGeoJson.current);
+    });
+  }, []);
 
   useEffect(() => {
     const onClick = () => {
-      const [cityA, cityB] = selectedCities;
+      const [cityA, cityB] = currentCitiesObservable.value;
 
       if (cityA && cityB) {
-        gameState.addTradeRoute(selectedCities);
+        GameState.addTradeRoute(currentCitiesObservable.value);
         ContextMenuPosition.next(null);
       }
     };
 
     return addToContextMenu({ disabled: false, labelKey: "addRoute", onClick });
-  }, [selectedCities, gameState]);
+  }, []);
 
   useEffect(() => {
-    function OutSideClick(this: Window, ev: MouseEvent) {
-      if (ev.button === 0 && !ev.ctrlKey) {
-        if (!ev.shiftKey) {
-          setCurrentSelectedCities([null, null]);
+    currentSelectedCities.subscribe((cities) =>
+      cities.forEach((ID, i) => {
+        const city = citiesGeoJson.current?.features.find(
+          ({ properties }) => properties.ID === ID
+        );
+        const marker = (i === 0 ? currentCitiesMarkerA : currentCitiesMarkerB)
+          .current;
+
+        if (city) {
+          marker
+            .addTo(cityLayer.current)
+            .setLatLng(city.geometry.coordinates as LatLngExpression)
+            .setStyle({
+              color: CityColors[city.properties.type],
+            });
+        } else {
+          cityLayer.current.removeLayer(marker);
         }
-      }
-    }
+      })
+    );
+  }, [currentCitiesMarkerA, currentCitiesMarkerB]);
 
-    window.addEventListener("click", OutSideClick, true);
+  const cityLayer = useRef<L.GeoJSON<CityEntity>>(
+    L.geoJSON([], {
+      pointToLayer: ({
+        geometry: { coordinates },
+        properties: { ID, name, type },
+      }) =>
+        L.circle(coordinates as LatLngExpression, {
+          radius: 8,
+          interactive: true,
+          className: "city-cicle",
+          color: CityColors[type],
+          bubblingMouseEvents: false,
+        })
+          .addEventListener("click", (el) => {
+            if (el.originalEvent.shiftKey) {
+              currentCitiesObservable.next([
+                currentCitiesObservable.value[0],
+                ID,
+              ]);
 
-    return () => window.removeEventListener("click", OutSideClick);
-  }, [gameState, setCurrentSelectedCities]);
+              const cityA = citiesGeoJson.current?.features.find(
+                ({ properties }) =>
+                  properties.ID === currentCitiesObservable.value[0]
+              );
 
-  const onDoubleClick = useCallback(
-    (city: number): LeafletMouseEventHandlerFn =>
-      () => {
-        if (citiesGeoJson) {
-          const cityID: number | undefined = citiesGeoJson?.features.find(
-            ({ properties: { ID } }) => ID === city
-          )?.properties.ID;
+              const cityB = citiesGeoJson.current?.features.find(
+                ({ properties }) => properties.ID === ID
+              );
 
-          if (cityID) {
-            setCurrentSelectedCity(cityID);
-            setCurrentModal("cityInfo");
-          }
-        }
-      },
-    [setCurrentSelectedCity, citiesGeoJson, setCurrentModal]
+              cityA &&
+                currentCitiesMarkerA.current
+                  .addTo(cityLayer.current)
+                  .setLatLng(cityA.geometry.coordinates as LatLngExpression)
+                  .setStyle({
+                    color: CityColors[cityA.properties.type],
+                  });
+
+              cityB &&
+                currentCitiesMarkerB.current
+                  .addTo(cityLayer.current)
+                  .setLatLng(cityB.geometry.coordinates as LatLngExpression)
+                  .setStyle({
+                    color: CityColors[cityB.properties.type],
+                  });
+
+              cityLayer.current.addLayer(currentCitiesMarkerA.current);
+              cityLayer.current.addLayer(currentCitiesMarkerB.current);
+            } else {
+              currentCitiesObservable.next([ID, null]);
+              // cityLayer.current.removeLayer(currentCitiesMarkerA.current);
+
+              const cityA = citiesGeoJson.current?.features.find(
+                ({ properties }) => ID === properties.ID
+              );
+
+              cityA &&
+                currentCitiesMarkerA.current
+                  .addTo(cityLayer.current)
+                  .setLatLng(cityA.geometry.coordinates as LatLngExpression)
+                  .setStyle({
+                    color: CityColors[cityA.properties.type],
+                  });
+
+              cityLayer.current.removeLayer(currentCitiesMarkerB.current);
+            }
+          })
+          .addEventListener("dblclick", () => {
+            if (citiesGeoJson.current) {
+              const cityID: number | undefined =
+                citiesGeoJson.current?.features.find(
+                  ({ properties: { ID: ID2 } }) => ID === ID2
+                )?.properties.ID;
+
+              if (cityID) {
+                currentCityObservable.next(cityID);
+                setCurrentModal("cityInfo");
+              }
+            }
+          })
+          .bindTooltip(type !== "RandomEncounter" ? name : "Random Encounter", {
+            className: "city-marker",
+            opacity: 1,
+            direction: "top",
+            permanent: true,
+            interactive: true,
+            content: type !== "RandomEncounter" ? name : "Random Encounter",
+          }),
+    })
   );
 
-  const onCityClick = useCallback(
-    (ID: number): LeafletMouseEventHandlerFn =>
-      ({ originalEvent: { shiftKey } }) => {
-        setSelectedCities((s) => [shiftKey ? s[0] : ID, shiftKey ? ID : null]);
-      },
-    [setSelectedCities]
-  );
-
-  const cities = useMemo(
-    () =>
-      citiesGeoJson?.features.map(
-        ({
-          geometry: {
-            coordinates: [posX, posY],
-          },
-          properties: { ID, name, type },
-        }) => {
-          return (
-            <Circle
-              color={CityColors[type]}
-              eventHandlers={{
-                dblclick: onDoubleClick(ID),
-                click: onCityClick(ID),
-              }}
-              key={ID}
-              center={[posY, posX]}
-              radius={8}
-              interactive
-              className="city-cirlce"
-            >
-              <Tooltip
-                className="city-marker"
-                opacity={1}
-                direction="top"
-                interactive
-                permanent
-              >
-                {type !== "RandomEncounter" ? name : "Random Encounter"}
-              </Tooltip>
-              {(selectedCities[0] === ID || selectedCities[1] === ID) && (
-                <Circle
-                  eventHandlers={{ dblclick: onDoubleClick(ID) }}
-                  pathOptions={{
-                    dashOffset: "10",
-                    dashArray: "5 10",
-                  }}
-                  color={CityColors[type]}
-                  key={ID}
-                  center={[posY, posX]}
-                  radius={10}
-                />
-              )}
-            </Circle>
-          );
-        }
-      ),
-    [citiesGeoJson?.features, onCityClick, onDoubleClick, selectedCities]
-  );
-
-  return (
-    <LayersControl.Overlay checked name="Cities">
-      <LayerGroup>{cities}</LayerGroup>
-    </LayersControl.Overlay>
-  );
+  return cityLayer;
 }

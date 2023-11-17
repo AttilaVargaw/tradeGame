@@ -107,7 +107,6 @@ export default function CityPopulation() {
 
   return (
     <Container>
-      <Label type="painted">Population</Label>
       <div>
         <div
           style={{

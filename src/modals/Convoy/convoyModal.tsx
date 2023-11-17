@@ -6,7 +6,6 @@ import {
   useState,
 } from "react";
 import Container from "react-bootstrap/esm/Container";
-import Form from "react-bootstrap/esm/Form";
 import { GameStateContext } from "@Services/GameState/gameState";
 import { Input, Select } from "@Components/input";
 import { Label } from "@Components/label";
@@ -15,7 +14,7 @@ import { VehicleData } from "@Services/GameState/tables/Vehicle";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { Screen } from "@Components/terminalScreen";
 import { Link } from "@Components/terminalScreen";
-import { Row } from "@Components/grid";
+import { GridItem } from "@Components/grid";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { ConvoyInfo } from "./convoyInfo";
 import { Button } from "@Components/button";
@@ -138,33 +137,31 @@ export const ConvoyModal = () => {
             ))}
           </Screen>
           <Container style={{ height: "50%" }}>
-            <Form>
-              <Row>
-                <Label style={{ flex: 1 }} type="painted">
-                  Name
-                </Label>
-                <Input
-                  style={{ flex: 1 }}
-                  min={0}
-                  value={newConvoyData.name}
-                  type={"input"}
-                  onChange={setNewConvoyName}
-                />
-              </Row>
-              <Row>
-                <Label style={{ flex: 1 }} type="painted">
-                  Command vehicle
-                </Label>
-                <Select style={{ flex: 1 }} onSelect={setCommandVehicle}>
-                  {availableCommandVehicles.map(({ ID, name }) => (
-                    <option key={ID} value={ID}>
-                      {name}
-                    </option>
-                  ))}
-                </Select>
-              </Row>
-              <Button onClick={onCreate}>Create</Button>
-            </Form>
+            <GridItem $col={1} $row={1}>
+              <Label style={{ flex: 1 }} type="painted">
+                Name
+              </Label>
+              <Input
+                style={{ flex: 1 }}
+                min={0}
+                value={newConvoyData.name}
+                type={"input"}
+                onChange={setNewConvoyName}
+              />
+            </GridItem>
+            <GridItem $col={1} $row={1}>
+              <Label style={{ flex: 1 }} type="painted">
+                Command vehicle
+              </Label>
+              <Select style={{ flex: 1 }} onSelect={setCommandVehicle}>
+                {availableCommandVehicles.map(({ ID, name }) => (
+                  <option key={ID} value={ID}>
+                    {name}
+                  </option>
+                ))}
+              </Select>
+            </GridItem>
+            <Button onClick={onCreate}>Create</Button>
           </Container>
         </>
       );

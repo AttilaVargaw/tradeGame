@@ -1,5 +1,4 @@
 import { Label } from "@Components/label";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -16,7 +15,6 @@ const ElementContainer = styled.div`
 `;
 
 export default function CityPersonel() {
-  const [cityID] = useCurrentSelectedCity();
 
   return (
     <Container style={{ margin: "16pt" }}>

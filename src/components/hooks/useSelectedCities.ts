@@ -1,10 +1,25 @@
-import { atom, useAtom } from "jotai";
+import { useState, useEffect } from "react";
+import { BehaviorSubject } from "rxjs";
 
-const currentSelectedCitiesAtom = atom<[number | null, number | null]>([
-  null,
-  null,
-]);
+export type Cities = [number | null, number | null];
+
+export const currentCitiesObservable = new BehaviorSubject<Cities>([null, null]);
+
+export const currentSelectedCities = currentCitiesObservable.asObservable();
+
+//export const setCurrentSelectedCities = currentCitiesObservable.next;
 
 export function useCurrentSelectedCities() {
-  return useAtom(currentSelectedCitiesAtom);
+  const [citiesID, setCitiesID] = useState<Cities>([null, null]);
+
+  useEffect(() => {
+    const subscribtion = currentSelectedCities.subscribe(setCitiesID);
+
+    return () => subscribtion.unsubscribe();
+  }, []);
+
+  return [citiesID, setCitiesID] as [
+    Cities,
+    React.Dispatch<React.SetStateAction<Cities>>
+  ];
 }

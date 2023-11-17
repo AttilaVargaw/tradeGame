@@ -46,13 +46,13 @@ export default function VehicleModal() {
           }}
         >
           <Button
-            active={selectedPage === VehicleModalSubPages.Buy}
+            $active={selectedPage === VehicleModalSubPages.Buy}
             onClick={() => setSelectedPage(VehicleModalSubPages.Buy)}
           >
             Buy
           </Button>
           <Button
-            active={selectedPage === VehicleModalSubPages.List}
+            $active={selectedPage === VehicleModalSubPages.List}
             onClick={() => setSelectedPage(VehicleModalSubPages.List)}
           >
             List

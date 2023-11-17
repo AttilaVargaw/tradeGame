@@ -1,16 +1,12 @@
 import {
-  FC,
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
-  useState,
 } from "react";
-import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
+import { DBEvents } from "@Services/GameState/dbTypes";
 import { GameStateContext } from "@Services/GameState/gameState";
-import { GeoJSON as LeafletGeoJSON, PathOptions, tooltip } from "leaflet";
-import { GeoJSON, LayerGroup, LayersControl } from "react-leaflet";
+import L, { PathOptions, tooltip } from "leaflet";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
@@ -18,16 +14,22 @@ export type RouteLayerProps = {
   // onRouteClick: (ID: number) => void;
 };
 
-export const RouteLayer: FC<RouteLayerProps> = () => {
+const tradeRouteStyle: PathOptions = {
+  color: "greenyellow",
+  weight: 5,
+  fillColor: "greenyellow",
+  fillOpacity: 1,
+  lineCap: "square",
+  opacity: 0.5,
+  dashArray: [2, 10],
+};
+
+export function useTradeRoutes() {
   // const map = useMap();
-  const layerRef = useRef<LeafletGeoJSON>(null);
   const gameState = useContext(GameStateContext);
 
   const [, setSelectedTradeRoute] = useSelectedRouteAtom();
   const [, setCurrentModal] = useCurrentModal();
-
-  const [tradeRoutes, setTradeRoutes] =
-    useState<GeoJSON.FeatureCollection<GeoJSON.LineString, TradeRouteProps>>();
 
   const routeClick = useCallback(
     (ID: number) => () => {
@@ -37,57 +39,41 @@ export const RouteLayer: FC<RouteLayerProps> = () => {
     [setSelectedTradeRoute, setCurrentModal]
   );
 
-  const tradeRouteStyle = useMemo<PathOptions>(
-    () => ({
-      color: "greenyellow",
-      weight: 5,
-      fillColor: "greenyellow",
-      fillOpacity: 1,
-      lineCap: "square",
-      opacity: 0.5,
-      dashArray: [2, 10],
-    }),
-    []
-  );
-
   useEffect(() => {
+    gameState.getTradeRoutesAsGeoJson().then((tradeRoutes) => {
+      routeLayer.current.clearLayers().addData(tradeRoutes);
+    });
+
     return gameState.dbObservable.subscribe(({ type }) => {
       switch (type) {
         case DBEvents.tradeRouteAdded:
         case DBEvents.tradeRouteUpdate:
-          setTradeRoutes(undefined);
           gameState.getTradeRoutesAsGeoJson().then((tradeRoutes) => {
-            setTradeRoutes(tradeRoutes);
+            routeLayer.current.clearLayers().addData(tradeRoutes);
           });
           break;
       }
     }).unsubscribe;
   }, [gameState]);
 
-  return (
-    <LayersControl.Overlay name="Routes">
-      <LayerGroup>
-        {tradeRoutes && (
-          <GeoJSON
-            ref={layerRef}
-            onEachFeature={({ properties: { ID } }, layer) => {
-              layer
-                .addEventListener("click", routeClick(ID))
-                .setTooltipContent(
-                  tooltip({
-                    permanent: true,
-                    interactive: true,
-                    className: "marker",
-                    direction: "top",
-                  })
-                )
-                .toggleTooltip();
-            }}
-            pathOptions={tradeRouteStyle}
-            data={tradeRoutes}
-          />
-        )}
-      </LayerGroup>
-    </LayersControl.Overlay>
+  const routeLayer = useRef(
+    L.geoJSON<{ ID: number }>([], {
+      style: tradeRouteStyle,
+      onEachFeature: ({ properties: { ID } }, layer) => {
+        layer
+          .addEventListener("dblclick", routeClick(ID))
+          .setTooltipContent(
+            tooltip({
+              permanent: true,
+              interactive: true,
+              className: "marker",
+              direction: "top",
+            })
+          )
+          .toggleTooltip();
+      },
+    })
   );
-};
+
+  return routeLayer;
+}

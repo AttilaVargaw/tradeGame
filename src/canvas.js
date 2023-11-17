@@ -1,5 +1,4 @@
 import { Renderer, DomUtil, DomEvent, Browser, Util, Bounds } from "leaflet";
-import { async } from "rxjs";
 
 /*
  * @class Canvas
@@ -33,25 +32,13 @@ import { async } from "rxjs";
  * ```
  */
 
-export var WorkerCanvas = Renderer.extend({
+export var Canvas = Renderer.extend({
   // @section
   // @aka Canvas options
   options: {
     // @option tolerance: Number = 0
     // How much to extend the click tolerance around a path/object on the map.
     tolerance: 0,
-  },
-
-  worker: new Worker("./renderer.js"),
-
-  useWorker: function (commands, transferables) {
-    this.worker.postMessage(commands, transferables);
-
-    return new Promise(
-      (resolve) =>
-        (this.worker.onmessage = (message) =>
-          message.data === "done" && resolve())
-    );
   },
 
   getEvents: function () {
@@ -73,9 +60,8 @@ export var WorkerCanvas = Renderer.extend({
     this._draw();
   },
 
-  _initContainer: async function () {
-    var container = (this._container =
-      document.createElement("canvas")).transferControlToOffscreen();
+  _initContainer: function () {
+    var container = (this._container = document.createElement("canvas"));
 
     DomEvent.on(container, "mousemove", this._onMouseMove, this);
     DomEvent.on(
@@ -87,12 +73,7 @@ export var WorkerCanvas = Renderer.extend({
     DomEvent.on(container, "mouseout", this._handleMouseOut, this);
     container["_leaflet_disable_events"] = true;
 
-    //this._ctx = container.getContext("2d");
-
-    await this.useWorker(
-      { commands: [{ type: "setCanvas", args: [container] }] },
-      [container]
-    );
+    this._ctx = container.getContext("2d");
   },
 
   _destroyContainer: function () {
@@ -117,7 +98,7 @@ export var WorkerCanvas = Renderer.extend({
     this._redraw();
   },
 
-  _update: async function () {
+  _update: function () {
     if (this._map._animatingZoom && this._bounds) {
       return;
     }
@@ -132,28 +113,17 @@ export var WorkerCanvas = Renderer.extend({
     DomUtil.setPosition(container, b.min);
 
     // set canvas size (also clearing it); use double size on retina
-    //container.width = m * size.x;
-    //container.height = m * size.y;
+    container.width = m * size.x;
+    container.height = m * size.y;
     container.style.width = size.x + "px";
     container.style.height = size.y + "px";
 
-    await this.useWorker({
-      commands: [
-        { type: "width", args: [m * size.x] },
-        { type: "height", args: [m * size.y] },
-      ],
-    });
-
     if (Browser.retina) {
-      await this.useWorker({
-        commands: [{ type: "scale", args: [2, 2] }],
-      });
+      this._ctx.scale(2, 2);
     }
+
     // translate so we use the same path coordinates after canvas element moves
-    //this._ctx.translate(-b.min.x, -b.min.y);
-    await this.useWorker({
-      commands: [{ type: "translate", args: [-b.min.x, -b.min.y] }],
-    });
+    this._ctx.translate(-b.min.x, -b.min.y);
 
     // Tell paths to redraw themselves
     this.fire("update");
@@ -268,7 +238,7 @@ export var WorkerCanvas = Renderer.extend({
     }
   },
 
-  _redraw: async function () {
+  _redraw: function () {
     this._redrawRequest = null;
 
     if (this._redrawBounds) {
@@ -276,67 +246,34 @@ export var WorkerCanvas = Renderer.extend({
       this._redrawBounds.max._ceil();
     }
 
-    await this._clear(); // clear layers in redraw bounds
-    await this._draw(); // draw layers
+    this._clear(); // clear layers in redraw bounds
+    this._draw(); // draw layers
 
     this._redrawBounds = null;
   },
 
-  _clear: async function () {
+  _clear: function () {
     var bounds = this._redrawBounds;
     if (bounds) {
       var size = bounds.getSize();
-      await this.useWorker({
-        commands: [
-          {
-            type: "clearRect",
-            args: [bounds.min.x, bounds.min.y, size.x, size.y],
-          },
-        ],
-      });
-      //this._ctx.clearRect(bounds.min.x, bounds.min.y, size.x, size.y);
+      this._ctx.clearRect(bounds.min.x, bounds.min.y, size.x, size.y);
     } else {
-      await this.useWorker({
-        commands: [
-          { type: "save" },
-          { type: "setTransform", args: [1, 0, 0, 1, 0, 0] },
-          {
-            type: "clearRect",
-            args: [0, 0, this._container.width, this._container.height],
-          },
-          { type: "restore" },
-        ],
-      });
-
-      //this._ctx.save();
-      //this._ctx.setTransform(1, 0, 0, 1, 0, 0);
-      //this._ctx.clearRect(0, 0, this._container.width, this._container.height);
-      //this._ctx.restore();
+      this._ctx.save();
+      this._ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this._ctx.clearRect(0, 0, this._container.width, this._container.height);
+      this._ctx.restore();
     }
   },
 
-  _draw: async function () {
+  _draw: function () {
     var layer,
       bounds = this._redrawBounds;
-    //this._ctx.save();
-    await this.useWorker({ commands: [{ type: "save" }] });
-
+    this._ctx.save();
     if (bounds) {
       var size = bounds.getSize();
-      await this.useWorker({
-        commands: [
-          { type: "beginPath" },
-          {
-            type: "rect",
-            args: [bounds.min.x, bounds.min.y, size.x, size.y],
-          },
-          { type: "clip" },
-        ],
-      });
-
-      //this._ctx.beginPath();
-      //this._ctx.rect(bounds.min.x, bounds.min.y, size.x, size.y);
-      //this._ctx.clip();
+      this._ctx.beginPath();
+      this._ctx.rect(bounds.min.x, bounds.min.y, size.x, size.y);
+      this._ctx.clip();
     }
 
     this._drawing = true;
@@ -350,11 +287,10 @@ export var WorkerCanvas = Renderer.extend({
 
     this._drawing = false;
 
-    await this.useWorker({ commands: [{ type: "restore" }] });
-    //this._ctx.restore(); // Restore state before clipping.
+    this._ctx.restore(); // Restore state before clipping.
   },
 
-  _updatePoly: async function (layer, closed) {
+  _updatePoly: function (layer, closed) {
     if (!this._drawing) {
       return;
     }
@@ -371,112 +307,67 @@ export var WorkerCanvas = Renderer.extend({
       return;
     }
 
-    await this.useWorker({ commands: [{ type: "beginPath" }] });
-    //ctx.beginPath();
+    ctx.beginPath();
 
     for (i = 0; i < len; i++) {
       for (j = 0, len2 = parts[i].length; j < len2; j++) {
         p = parts[i][j];
-        //ctx[j ? "lineTo" : "moveTo"](p.x, p.y);
-        await this.useWorker({
-          commands: [{ type: j ? "lineTo" : "moveTo", args: [p.x, p.y] }],
-        });
+        ctx[j ? "lineTo" : "moveTo"](p.x, p.y);
       }
       if (closed) {
-        await this.useWorker({ commands: [{ type: "closePath" }] });
-        //ctx.closePath();
+        ctx.closePath();
       }
     }
 
-    await this._fillStroke(ctx, layer);
+    this._fillStroke(ctx, layer);
 
     // TODO optimization: 1 fill/stroke for all features with equal style instead of 1 for each feature
   },
 
-  _updateCircle: async function (layer) {
+  _updateCircle: function (layer) {
     if (!this._drawing || layer._empty()) {
       return;
     }
 
-    await this.useWorker({
-      commands: [
-        {
-          type: "_udpateCircle",
-          args: [layer._point, layer._radius, layer._radiusY, layer.options],
-        },
-      ],
-    });
+    var p = layer._point,
+      ctx = this._ctx,
+      r = Math.max(Math.round(layer._radius), 1),
+      s = (Math.max(Math.round(layer._radiusY), 1) || r) / r;
+
+    if (s !== 1) {
+      ctx.save();
+      ctx.scale(1, s);
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y / s, r, 0, Math.PI * 2, false);
+
+    if (s !== 1) {
+      ctx.restore();
+    }
+
+    this._fillStroke(ctx, layer);
   },
 
-  _fillStroke: async function (ctx, layer) {
+  _fillStroke: function (ctx, layer) {
     var options = layer.options;
 
     if (options.fill) {
-      //ctx.globalAlpha = options.fillOpacity;
-      //ctx.fillStyle = options.fillColor || options.color;
-      await this.useWorker({
-        commands: [
-          {
-            type: "globalAlpha",
-            args: [options.fillOpacity],
-          },
-          {
-            type: "fillStyle",
-            args: [options.fillColor || options.color],
-          },
-          {
-            type: "fill",
-            args: [options.fillRule || "evenodd"],
-          },
-        ],
-      });
+      ctx.globalAlpha = options.fillOpacity;
+      ctx.fillStyle = options.fillColor || options.color;
+      ctx.fill(options.fillRule || "evenodd");
     }
 
     if (options.stroke && options.weight !== 0) {
-      //if (ctx.setLineDash) {
-      await this.useWorker({
-        commands: [
-          {
-            type: "setLineDash",
-            args: [(layer.options && layer.options._dashArray) || []],
-          },
-        ],
-      });
-      //ctx.setLineDash((layer.options && layer.options._dashArray) || []);
-      //}
-      //ctx.globalAlpha = options.opacity;
-      //ctx.lineWidth = options.weight;
-      //ctx.strokeStyle = options.color;
-      //ctx.lineCap = options.lineCap;
-      //ctx.lineJoin = options.lineJoin;
-      await this.useWorker({
-        commands: [
-          {
-            type: "globalAlpha",
-            args: [options.opacity],
-          },
-          {
-            type: "lineWidth",
-            args: [options.weight],
-          },
-          {
-            type: "strokeStyle",
-            args: [options.color],
-          },
-          {
-            type: "lineCap",
-            args: [options.lineCap],
-          },
-          {
-            type: "lineJoin",
-            args: [options.lineJoin],
-          },
-          {
-            type: "stroke",
-          },
-        ],
-      });
-      //ctx.stroke();
+      if (ctx.setLineDash) {
+        ctx.setLineDash((layer.options && layer.options._dashArray) || []);
+      }
+      ctx.globalAlpha = options.opacity;
+      ctx.lineWidth = options.weight;
+      ctx.strokeStyle = options.color;
+      ctx.lineCap = options.lineCap;
+      ctx.lineJoin = options.lineJoin;
+      ctx.stroke();
     }
   },
 
@@ -630,6 +521,6 @@ export var WorkerCanvas = Renderer.extend({
 
 // @factory L.canvas(options?: Renderer options)
 // Creates a Canvas renderer with the given options.
-export function workerCanvasRenderer(options) {
-  return Browser.canvas ? new WorkerCanvas(options) : null;
+export function canvas(options) {
+  return Browser.canvas ? new Canvas(options) : null;
 }

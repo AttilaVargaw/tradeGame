@@ -19,7 +19,7 @@ export default function App(): JSX.Element {
       .catch((err) => message(`A problem has happened ${JSON.stringify(err)}`));
 
     return () => {
-      gameLoopCleanup.current && gameLoopCleanup.current();
+      gameLoopCleanup.current?.();
     };
   }, []);
 

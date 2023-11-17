@@ -8,8 +8,9 @@ import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
 import { GameMap } from "./GameMap";
 import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
+
 
 const Container = styled.div`
   display: flex;

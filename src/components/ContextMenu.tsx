@@ -7,10 +7,10 @@ import { Link, TerminalScreen } from "./terminalScreen";
 import styled from "styled-components";
 import { ContextMenuPosition } from "./hooks/useContextMenuPosition";
 
-const Container = styled.div<{ top: number; left: number }>`
+const Container = styled.div<{ $top: number; $left: number }>`
   position: absolute;
-  left: ${({ left }) => `${left}px`};
-  top: ${({ top }) => `${top}px`};
+  left: ${({ $left }) => `${$left}px`};
+  top: ${({ $top }) => `${$top}px`};
   z-index: 10000;
 `;
 
@@ -52,8 +52,8 @@ export const ContextMenu: FC = () => {
     contextMenuPositionState && (
       <Container
         ref={popoverRef}
-        top={contextMenuPositionState[1]}
-        left={contextMenuPositionState[0]}
+        $top={contextMenuPositionState[1]}
+        $left={contextMenuPositionState[0]}
       >
         <TerminalScreen>
           {contextMenuItems.map(({ disabled, labelKey, onClick }) => (

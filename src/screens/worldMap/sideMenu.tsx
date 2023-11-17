@@ -43,7 +43,7 @@ function VehicleCountButton({ onClick }: { onClick: () => void }) {
   }, [gameState]);
 
   return (
-    <Button black onClick={onClick}>
+    <Button $black onClick={onClick}>
       Vehicles: {vehicleCount}
     </Button>
   );
@@ -69,14 +69,14 @@ function ConvoyCountButton({ onClick }: { onClick: () => void }) {
   }, [gameState]);
 
   return (
-    <Button black onClick={onClick}>
+    <Button $black onClick={onClick}>
       Convoys: {convoyCount}
     </Button>
   );
 }
 
 function AccountingButton() {
-  return <Button black>5556.22 ℳ</Button>;
+  return <Button $black>5556.22 ℳ</Button>;
 }
 
 export default forwardRef<
@@ -118,16 +118,16 @@ export default forwardRef<
       <SevenDigitClock />
       {!currentConvoy && (
         <>
-          <Button black onClick={onEncyklopediaClick}>
+          <Button $black onClick={onEncyklopediaClick}>
             Messages: 2
           </Button>
-          <Button black onClick={onEncyklopediaClick}>
+          <Button $black onClick={onEncyklopediaClick}>
             Trade routes: {tradeRouteNum}
           </Button>
           <AccountingButton />
           <VehicleCountButton onClick={onVehiclesClick} />
           <ConvoyCountButton onClick={onConvoysClick} />
-          <Button onClick={onEncyklopediaClick}>Encyclopedia</Button>
+          <Button  onClick={onEncyklopediaClick}>Encyclopedia</Button>
           <Button onClick={onEncyklopediaClick}>Command Staff</Button>
           <Button onClick={onEncyklopediaClick}>Human Rescources</Button>
         </>

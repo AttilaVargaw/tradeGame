@@ -47,7 +47,7 @@ export function SevenDigitClock() {
 
   return (
     <div>
-      <Button black>
+      <Button $black>
         <Container>
           {[...time].map((c, i) => (
             <Character key={i}>{c}</Character>

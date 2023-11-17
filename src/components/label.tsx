@@ -14,7 +14,7 @@ export const Container = styled.div<{ type?: styles }>`
     if (type === "led")
       return css`
         color: lightgreen;
-        background: #111;
+        background: #111 !important;
         border: 2px solid grey;
 
         text-shadow: 0 0 0.5px lightgreen, 0 0 1px lightgreen,
@@ -29,7 +29,7 @@ export const Container = styled.div<{ type?: styles }>`
       return css`
         font: bold 200px arial, sans-serif;
         color: whitesmoke;
-        background: black;
+        background: black !important;
         -webkit-text-stroke: 1px grey;
         border-left: 0.5em solid white;
         border-right: 0.5em solid white;

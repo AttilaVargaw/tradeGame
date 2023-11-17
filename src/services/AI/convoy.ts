@@ -9,13 +9,13 @@ export function ConvoyAI() {
         const tradeRoute = await GameState.getTradeRoute(route);
 
         if (route) {
-          const { cityAPosX, cityAPosY, cityBPosX, cityBPosY } = tradeRoute[0];
+          const [{ cityAPosX, cityAPosY, cityBPosX, cityBPosY }] = tradeRoute;
           if (cityAPosX === posX && cityAPosY === posY) {
-            GameState.setConvoyGoal(ID, cityBPosX, cityBPosY);
+            await GameState.setConvoyGoal(ID, cityBPosX, cityBPosY);
           } else if (cityBPosX === posX && cityBPosY === posY) {
-            GameState.setConvoyGoal(ID, cityAPosX, cityAPosY);
-          } else if(!goalX && !goalY) {
-            GameState.setConvoyGoal(ID, cityBPosX, cityBPosY);
+            await GameState.setConvoyGoal(ID, cityAPosX, cityAPosY);
+          } else if (!goalX && !goalY) {
+            await GameState.setConvoyGoal(ID, cityBPosX, cityBPosY);
           }
         }
       })

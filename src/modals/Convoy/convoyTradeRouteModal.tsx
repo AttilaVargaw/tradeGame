@@ -9,6 +9,7 @@ import {
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { DBEvents } from "@Services/GameState/dbTypes";
+import { Toggle } from "@Components/toggle";
 
 export function ConvoyTradeRouteModal() {
   const [tradeRoutes, setTraderoutes] = useState<TradeRouteAsGeoJSONView[]>();
@@ -52,42 +53,69 @@ export function ConvoyTradeRouteModal() {
     return <Label type="led">{currentConvoy?.name || ""}</Label>;
   }, [currentConvoy]);
 
+  const activateTradeRoute = useCallback(() => {
+    if (currentlySelectedTradeRoute) {
+      setTradeRouteActive((value) => {
+        return !value;
+      });
+    } else {
+      setTradeRouteActive(false);
+    }
+  }, [currentlySelectedTradeRoute]);
+
   const selectTradeRoute = useCallback(
     (ID: number | null) => () => {
       if (currentConvoyID) {
         gameState.setConvoyTradeRoute(currentConvoyID, ID);
+        if (!ID) {
+          activateTradeRoute();
+        }
       }
     },
-    []
+    [gameState, currentConvoyID, activateTradeRoute]
   );
+
+  const [isTradeRouteActive, setTradeRouteActive] = useState(false);
 
   const body = useCallback(() => {
     return (
       <>
         <Label type="painted">Traderoutes</Label>
-        <TerminalScreen>
-          {tradeRoutes?.map(({ name, ID }) => (
-            <div key={ID}>
-              <Link onClick={selectTradeRoute(ID)}>
-                {name}
-                {currentlySelectedTradeRoute === ID && " [X]"}
+        <div style={{ height: "80%" }}>
+          <TerminalScreen>
+            {tradeRoutes?.map(({ name, ID }) => (
+              <div key={ID}>
+                <Link onClick={selectTradeRoute(ID)}>
+                  {name}
+                  {currentlySelectedTradeRoute === ID && " [X]"}
+                </Link>
+              </div>
+            ))}
+            <div>
+              <Link onClick={selectTradeRoute(null)}>
+                Off
+                {!currentlySelectedTradeRoute && " [X]"}
               </Link>
             </div>
-          ))}
-          <div>
-            <Link onClick={selectTradeRoute(null)}>
-              Off
-              {!currentlySelectedTradeRoute && " [X]"}
-            </Link>
-          </div>
-        </TerminalScreen>
+          </TerminalScreen>
+        </div>
       </>
     );
-  }, [currentlySelectedTradeRoute, tradeRoutes]);
+  }, [currentlySelectedTradeRoute, tradeRoutes, selectTradeRoute]);
 
   const footer = useCallback(() => {
-    return <></>;
-  }, []);
+    return (
+      <>
+        <Toggle
+          disabled={!currentlySelectedTradeRoute}
+          onChange={activateTradeRoute}
+          active={isTradeRouteActive}
+        >
+          ON
+        </Toggle>
+      </>
+    );
+  }, [activateTradeRoute, isTradeRouteActive, currentlySelectedTradeRoute]);
 
-  return <Modal body={body} footer={footer} header={header}></Modal>;
+  return <Modal body={body} footer={footer} header={header} />;
 }
