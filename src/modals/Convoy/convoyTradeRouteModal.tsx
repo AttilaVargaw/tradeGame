@@ -1,6 +1,6 @@
 import { Label } from "@Components/label";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
 import {
   GameStateContext,
@@ -49,7 +49,7 @@ export function ConvoyTradeRouteModal() {
     return () => subscription.unsubscribe();
   }, [gameState, currentConvoyID]);
 
-  const header = useCallback(() => {
+  const header = useMemo(() => {
     return <Label type="led">{currentConvoy?.name || ""}</Label>;
   }, [currentConvoy]);
 
@@ -77,8 +77,8 @@ export function ConvoyTradeRouteModal() {
 
   const [isTradeRouteActive, setTradeRouteActive] = useState(false);
 
-  const body = useCallback(() => {
-    return (
+  const body = useMemo(
+    () => (
       <>
         <Label type="painted">Traderoutes</Label>
         <div style={{ height: "80%" }}>
@@ -100,10 +100,11 @@ export function ConvoyTradeRouteModal() {
           </TerminalScreen>
         </div>
       </>
-    );
-  }, [currentlySelectedTradeRoute, tradeRoutes, selectTradeRoute]);
+    ),
+    [currentlySelectedTradeRoute, tradeRoutes, selectTradeRoute]
+  );
 
-  const footer = useCallback(() => {
+  const footer = useMemo(() => {
     return (
       <>
         <Toggle

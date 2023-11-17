@@ -34,9 +34,9 @@ export default function Modal({
   header,
   footer,
 }: {
-  body: () => JSX.Element;
-  header: () => JSX.Element;
-  footer: () => JSX.Element;
+  body?: JSX.Element;
+  header?: JSX.Element;
+  footer?: JSX.Element;
 }) {
   const [, setCurrentModal] = useCurrentModal();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,9 +58,9 @@ export default function Modal({
 
   return (
     <Container ref={containerRef}>
-      <Header style={{ alignSelf: "start" }}>{header()}</Header>
-      <Body>{body()}</Body>
-      <Footer style={{ alignSelf: "end" }}>{footer()}</Footer>
+      <Header style={{ alignSelf: "start" }}>{header}</Header>
+      <Body>{body}</Body>
+      <Footer style={{ alignSelf: "end" }}>{footer}</Footer>
     </Container>
   );
 }

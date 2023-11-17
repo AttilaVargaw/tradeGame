@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import Container from "react-bootstrap/esm/Container";
@@ -49,21 +50,17 @@ export const ConvoyItem = ({
   );
 };
 
-function Header() {
-  return (
-    <Label type="led" style={{ width: "100%" }}>
-      Convoys
-    </Label>
-  );
-}
+const Header = (
+  <Label type="led" style={{ width: "100%" }}>
+    Convoys
+  </Label>
+);
 
-function Footer() {
-  return (
-    <Container>
-      {/*<Button onClick={() => setSelectedPage(CityModalSubPages.warehouse)}>Warehouse</Button>*/}
-    </Container>
-  );
-}
+const Footer = (
+  <Container>
+    {/*<Button onClick={() => setSelectedPage(CityModalSubPages.warehouse)}>Warehouse</Button>*/}
+  </Container>
+);
 
 export const ConvoyModal = () => {
   const gameState = useContext(GameStateContext);
@@ -127,7 +124,7 @@ export const ConvoyModal = () => {
     }
   }, [gameState, newConvoyData]);
 
-  const body = useCallback(() => {
+  const body = useMemo(() => {
     if (!currentConvoy) {
       return (
         <>

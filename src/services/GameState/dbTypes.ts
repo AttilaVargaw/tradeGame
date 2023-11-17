@@ -72,11 +72,13 @@ export enum DBEvents {
   vehicleGoalSet,
   convoyGoalSet,
   convoyUpdated,
+  convoyDock,
+  convoyUnDock,
 }
 
 export type DBEvent = {
   type: DBEvents;
-  data?: any;
+  data?: unknown;
 };
 
 export type CityPositionProperty = {

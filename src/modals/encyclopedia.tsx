@@ -43,7 +43,7 @@ export const EncyclopediaModal = () => {
 
   return (
     <Modal
-      body={() => (
+      body={
         <TerminalScreen dangerouslySetInnerHTML={article} ref={terminalRef}>
           {folders &&
             folders.map(({ ID, name }) => (
@@ -52,9 +52,8 @@ export const EncyclopediaModal = () => {
               </Link>
             ))}
         </TerminalScreen>
-      )}
-      footer={() => <></>}
-      header={() => <Label type="painted">Encyclopedia</Label>}
+      }
+      header={<Label type="painted">Encyclopedia</Label>}
     ></Modal>
   );
 };

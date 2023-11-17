@@ -1,9 +1,7 @@
 import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
+import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import {
-  currentCityObservable,
-  currentSelectedCity,
-} from "@Components/hooks/useCurrentSelectedCity";
+import { currentCityObservable } from "@Components/hooks/useCurrentSelectedCity";
 
 import {
   currentCitiesObservable,
@@ -27,24 +25,22 @@ const CityColors: { [key: string]: string } = {
   RandomEncounter: "gold",
 };
 
-function useCityMarker() {
-  return useRef(
-    circle([0, 0], {
-      dashOffset: "10",
-      dashArray: "5 10",
-      fillOpacity: 0.5,
-      radius: 10,
-      color: "grey",
-      bubblingMouseEvents: false,
-    })
-  );
+function CityMarker() {
+  return circle([0, 0], {
+    dashOffset: "10",
+    dashArray: "5 10",
+    fillOpacity: 0.5,
+    radius: 10,
+    color: "grey",
+    bubblingMouseEvents: false,
+  });
 }
 
+const currentCitiesMarkerA = CityMarker();
+
+const currentCitiesMarkerB = CityMarker();
+
 export function useCitites() {
-  const currentCitiesMarkerA = useCityMarker();
-
-  const currentCitiesMarkerB = useCityMarker();
-
   const [, setCurrentModal] = useCurrentModal();
 
   const citiesGeoJson =
@@ -87,9 +83,7 @@ export function useCitites() {
         const city = citiesGeoJson.current?.features.find(
           ({ properties }) => properties.ID === ID
         );
-        const marker = (i === 0 ? currentCitiesMarkerA : currentCitiesMarkerB)
-          .current;
-
+        const marker = i === 0 ? currentCitiesMarkerA : currentCitiesMarkerB;
         if (city) {
           marker
             .addTo(cityLayer.current)
@@ -102,7 +96,7 @@ export function useCitites() {
         }
       })
     );
-  }, [currentCitiesMarkerA, currentCitiesMarkerB]);
+  }, []);
 
   const cityLayer = useRef<L.GeoJSON<CityEntity>>(
     L.geoJSON([], {
@@ -118,6 +112,8 @@ export function useCitites() {
           bubblingMouseEvents: false,
         })
           .addEventListener("click", (el) => {
+            currentConvoySubject.next(null);
+
             if (el.originalEvent.shiftKey) {
               currentCitiesObservable.next([
                 currentCitiesObservable.value[0],
@@ -134,7 +130,7 @@ export function useCitites() {
               );
 
               cityA &&
-                currentCitiesMarkerA.current
+                currentCitiesMarkerA
                   .addTo(cityLayer.current)
                   .setLatLng(cityA.geometry.coordinates as LatLngExpression)
                   .setStyle({
@@ -142,15 +138,15 @@ export function useCitites() {
                   });
 
               cityB &&
-                currentCitiesMarkerB.current
+                currentCitiesMarkerB
                   .addTo(cityLayer.current)
                   .setLatLng(cityB.geometry.coordinates as LatLngExpression)
                   .setStyle({
                     color: CityColors[cityB.properties.type],
                   });
 
-              cityLayer.current.addLayer(currentCitiesMarkerA.current);
-              cityLayer.current.addLayer(currentCitiesMarkerB.current);
+              cityLayer.current.addLayer(currentCitiesMarkerA);
+              cityLayer.current.addLayer(currentCitiesMarkerB);
             } else {
               currentCitiesObservable.next([ID, null]);
               // cityLayer.current.removeLayer(currentCitiesMarkerA.current);
@@ -160,14 +156,14 @@ export function useCitites() {
               );
 
               cityA &&
-                currentCitiesMarkerA.current
+                currentCitiesMarkerA
                   .addTo(cityLayer.current)
                   .setLatLng(cityA.geometry.coordinates as LatLngExpression)
                   .setStyle({
                     color: CityColors[cityA.properties.type],
                   });
 
-              cityLayer.current.removeLayer(currentCitiesMarkerB.current);
+              cityLayer.current.removeLayer(currentCitiesMarkerB);
             }
           })
           .addEventListener("dblclick", () => {
@@ -181,6 +177,21 @@ export function useCitites() {
                 currentCityObservable.next(cityID);
                 setCurrentModal("cityInfo");
               }
+            }
+          })
+          .addEventListener("contextmenu", () => {
+            if (currentConvoySubject.value) {
+              const city = citiesGeoJson.current?.features.find(
+                ({ properties }) =>
+                  properties.ID === ID
+              );
+              city &&
+                GameState.setConvoyGoal(
+                  currentConvoySubject.value,
+                  ...(city.geometry.coordinates as [number, number])
+                );
+
+              console.log(city)
             }
           })
           .bindTooltip(type !== "RandomEncounter" ? name : "Random Encounter", {

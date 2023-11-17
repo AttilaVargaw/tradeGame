@@ -1,5 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { TradeRouteProps } from "@Services/GameState/dbTypes";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   GameStateContext,
   TradeRouteAsGeoJSONView,
@@ -9,7 +8,7 @@ import Modal from "./Modal";
 import { Label } from "@Components/label";
 import { TerminalScreen } from "@Components/terminalScreen";
 
-export default function TradeRouteModal(): JSX.Element {
+export default function TradeRouteModal(): JSX.Element | false {
   const [routeID] = useSelectedRouteAtom();
 
   const gameState = useContext(GameStateContext);
@@ -24,11 +23,11 @@ export default function TradeRouteModal(): JSX.Element {
     }
   }, [routeID, gameState]);
 
-  const header = useCallback(() => {
+  const header = useMemo(() => {
     return <Label type="led">{routeData?.name || ""}</Label>;
   }, [routeData?.name]);
 
-  const body = useCallback(() => {
+  const body = useMemo(() => {
     return (
       <>
         <Label type="painted">Convoys on this route</Label>
@@ -37,13 +36,5 @@ export default function TradeRouteModal(): JSX.Element {
     );
   }, []);
 
-  const footer = useCallback(() => {
-    return <></>;
-  }, []);
-
-  if (routeData) {
-    return <Modal header={header} body={body} footer={footer} />;
-  } else {
-    return <></>;
-  }
+  return !!routeData && <Modal header={header} body={body} />;
 }

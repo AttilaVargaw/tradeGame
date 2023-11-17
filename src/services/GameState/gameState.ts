@@ -123,10 +123,10 @@ const init = async () => {
   await db.execute(creatorSQL);
 
   dbObservable.next({ type: DBEvents.initialized });
-  dbObservable.next({ type: DBEvents.tradeRouteUpdate })
-  dbObservable.next({ type: DBEvents.convoyUpdated })
-  dbObservable.next({ type: DBEvents.cityWarehouseUpdate })
-  dbObservable.next({ type: DBEvents.cityPopulationUpdate })
+  dbObservable.next({ type: DBEvents.tradeRouteUpdate });
+  dbObservable.next({ type: DBEvents.convoyUpdated });
+  dbObservable.next({ type: DBEvents.cityWarehouseUpdate });
+  dbObservable.next({ type: DBEvents.cityPopulationUpdate });
 };
 
 async function CreateConvoy(name: string) {
@@ -278,7 +278,12 @@ const getVehicleType = (ID: number) => {
 const getConvoys = () => {
   return db.select<ConvoyData[]>(
     select({
-      attributes: [[Tables.Convoy, ["name", "ID", "route", "posY", "posX", "goalX", "goalY"]]],
+      attributes: [
+        [
+          Tables.Convoy,
+          ["name", "ID", "route", "posY", "posX", "goalX", "goalY", "dockedTo"],
+        ],
+      ],
       table: Tables.Convoy,
     })
   );
@@ -909,12 +914,23 @@ async function UpdateConvoys(dt: number) {
 
   const ret = await Promise.all(
     convoys.map(
-      async ({ goalX, goalY, ID, posX, posY, goalVectorY, goalVectorX }) => {
+      async ({
+        goalX,
+        goalY,
+        ID,
+        posX,
+        posY,
+        goalVectorY,
+        goalVectorX,
+        dockedTo,
+      }) => {
         if (goalX && goalY && goalVectorY && goalVectorX) {
           const [convoy] = await db.select<ConvoyUpdateData[]>(
             getQuery("getConvoySpeed"),
             [dt, ID]
           );
+
+          dockedTo && dockConvoyToCity(ID, null)
 
           const angle = Math.atan2(goalVectorY, goalVectorX);
 
@@ -938,6 +954,15 @@ async function UpdateConvoys(dt: number) {
           if (stop) {
             updateRows.push(["goalX", null]);
             updateRows.push(["goalY", null]);
+
+            !dockedTo &&
+              getCities().then((cities) =>
+                cities.some(({ posX: cityX, posY: cityY, ID: cityID }) => {
+                  goalX === cityX &&
+                    goalY === cityY &&
+                    dockConvoyToCity(ID, cityID);
+                })
+              );
           }
 
           await db.execute(
@@ -960,7 +985,35 @@ async function UpdateConvoys(dt: number) {
   return ret;
 }
 
+async function getDockedConvoysForCity(cityID: number) {
+  const convoysData = await db.select<ConvoyData[]>(
+    select({
+      attributes: [[Tables.Convoy, "ID"], [Tables.Convoy, "name"]],
+      table: Tables.Convoy,
+      where: [{ A: [Tables.Convoy, "dockedTo"], value: cityID, operator: "=" }],
+    })
+  );
+
+  return convoysData;
+}
+
+async function dockConvoyToCity(convoyID: number, cityID: number | null) {
+   await db.select<VehicleData[]>(
+    update({
+      table: Tables.Convoy,
+      where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
+      updateRows: [["dockedTo", cityID]],
+    })
+  );
+
+  dbObservable.next({
+    type: cityID ? DBEvents.convoyDock : DBEvents.convoyUnDock,
+  });
+}
+
 export const GameState = {
+  dockConvoyToCity,
+  getDockedConvoysForCity,
   UpdateConvoys,
   initialized,
   setIndustrialBuildingNumber,
@@ -1006,7 +1059,7 @@ export const GameState = {
   getVehicleGoalsAsGeoJson,
   setVehicleGoal,
   setConvoyTradeRoute,
-  getCities
+  getCities,
 };
 
 export const GameStateContext = createContext(GameState);

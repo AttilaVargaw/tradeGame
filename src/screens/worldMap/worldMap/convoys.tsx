@@ -1,37 +1,34 @@
-import { ClickableTooltip } from "@Components/ClickableTooltip";
 import {
   currentConvoyObservable,
   currentConvoySubject,
 } from "@Components/hooks/useCurrentConvoy";
 import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
-import { GameStateContext } from "@Services/GameState/gameState";
+import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
+import { DBEvents } from "@Services/GameState/dbTypes";
+import { GameState } from "@Services/GameState/gameState";
 import L, { LatLngExpression, circle } from "leaflet";
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+
+const currentConvoyMarker = circle([0, 0], {
+  dashOffset: "10",
+  dashArray: "2 5",
+  fillOpacity: 0.5,
+  radius: 6,
+  color: "yellow",
+  bubblingMouseEvents: false,
+});
 
 export function useConvoyLayer() {
-  const gameState = useContext(GameStateContext);
-
-  const currentConvoyMarker = useRef(
-    circle([0, 0], {
-      dashOffset: "10",
-      dashArray: "2 5",
-      fillOpacity: 0.5,
-      radius: 6,
-      color: "green",
-      bubblingMouseEvents: false,
-    })
-  );
-
   useEffect(() => {
-    gameRedrawSubject.subscribe((event) => {
+    const subscription =  gameRedrawSubject.subscribe((event) => {
       switch (event) {
         case RedrawType.Convoys:
-          gameState.getConvoysAsGeoJson().then((convoys) => {
+          GameState.getConvoysAsGeoJson().then((convoys) => {
             convoyLayer.current.clearLayers();
             convoyLayer.current.addData(convoys);
 
             if (currentConvoySubject.value) {
-              currentConvoyMarker.current
+              currentConvoyMarker
                 .addTo(convoyLayer.current)
                 .setLatLng(
                   convoys.features.find(
@@ -39,18 +36,26 @@ export function useConvoyLayer() {
                   )?.geometry.coordinates as LatLngExpression
                 );
             }
-            gameState.getConvoyGoalsAsGeoJson().then((lines) => {
+            GameState.getConvoyGoalsAsGeoJson().then((lines) => {
               convoyLayer.current.addData(lines);
             });
           });
       }
     });
-  }, [gameState]);
+
+    GameState.dbObservable.subscribe((event) => {
+      if(event.type === DBEvents.convoyDock || event.type === DBEvents.convoyUnDock) {
+        console.log(event.type === DBEvents.convoyDock ? "docked" : "undocked")
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, []);
 
   useEffect(() => {
     const subscription = currentConvoyObservable.subscribe((currentConvoy) => {
       if (!currentConvoy) {
-        convoyLayer.current.removeLayer(currentConvoyMarker.current);
+        convoyLayer.current.removeLayer(currentConvoyMarker);
       }
     });
 
@@ -64,17 +69,17 @@ export function useConvoyLayer() {
         properties: { ID, name },
       }) => {
         return circle(coordinates as LatLngExpression, {
-          color: "green",
+          color: "yellow",
           radius: 4,
           bubblingMouseEvents: false,
         })
           .addEventListener("click", (event) => {
-            console.log("test2", currentConvoySubject);
-            currentConvoyMarker.current
+            currentConvoyMarker
               .addTo(convoyLayer.current)
               .setLatLng(coordinates as LatLngExpression);
 
             currentConvoySubject.next(ID);
+            currentCitiesObservable.next([null, null])
           })
           .bindTooltip(
             new L.Tooltip({

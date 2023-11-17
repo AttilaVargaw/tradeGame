@@ -15,7 +15,7 @@ import { VehiclesLayer } from "./vehicles";
 import { useCitites } from "./cities";
 import { useTradeRoutes } from "../routeLayer";
 import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
-import { currentConvoyObservable, currentConvoySubject, useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
 
 const bounds = [
   [0, 0],
