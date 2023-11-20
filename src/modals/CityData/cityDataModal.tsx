@@ -1,17 +1,17 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { GameStateContext } from "@Services/GameState/gameState";
 import CityIndustry from "./cityIndustry";
 import CityPopulation from "./cityPopulation";
 import CityWarehouseForm from "./cityWarehouseForm";
 import { Label } from "@Components/label";
-import { Button } from "@Components/button";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { CityEntity } from "@Services/GameState/tables/City";
 import CityPersonel from "./cityPersonel";
 import Modal from "../Modal";
 import styled from "styled-components";
 import CityVehicles from "./cityVehicles";
+import { Toggle } from "@Components/toggle";
+import { getCity } from "@Services/GameState/gameState";
 
 enum CityModalSubPages {
   popularity,
@@ -27,12 +27,11 @@ const Footer = styled.div`
   display: grid;
   flex-direction: row;
   grid-auto-columns: 1fr;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
 `;
 
 export default function CityDataModal(): JSX.Element | null {
   const [cityID] = useCurrentSelectedCity();
-  const gameState = useContext(GameStateContext);
 
   const [cityData, setCityData] = useState<CityEntity>();
 
@@ -42,9 +41,9 @@ export default function CityDataModal(): JSX.Element | null {
 
   useEffect(() => {
     if (cityID) {
-      gameState.getCity(cityID).then(setCityData);
+      getCity(cityID).then(setCityData);
     }
-  }, [cityID, gameState]);
+  }, [cityID]);
 
   const body = useMemo(
     () =>
@@ -69,45 +68,45 @@ export default function CityDataModal(): JSX.Element | null {
     () =>
       cityData && (
         <Footer>
-          <Button
-            $active={selectedPage === CityModalSubPages.warehouse}
-            onClick={() => setSelectedPage(CityModalSubPages.warehouse)}
+          <Toggle
+            active={selectedPage === CityModalSubPages.warehouse}
+            onChange={() => setSelectedPage(CityModalSubPages.warehouse)}
           >
             Warehouse
-          </Button>
-          <Button
-            $active={selectedPage === CityModalSubPages.popularity}
-            onClick={() => setSelectedPage(CityModalSubPages.popularity)}
+          </Toggle>
+          <Toggle
+            active={selectedPage === CityModalSubPages.popularity}
+            onChange={() => setSelectedPage(CityModalSubPages.popularity)}
             disabled
           >
             Relations
-          </Button>
-          <Button
-            $active={selectedPage === CityModalSubPages.industry}
-            onClick={() => setSelectedPage(CityModalSubPages.industry)}
+          </Toggle>
+          <Toggle
+            active={selectedPage === CityModalSubPages.industry}
+            onChange={() => setSelectedPage(CityModalSubPages.industry)}
           >
             Industry
-          </Button>
-          <Button
-            $active={selectedPage === CityModalSubPages.personel}
-            onClick={() => setSelectedPage(CityModalSubPages.personel)}
+          </Toggle>
+          <Toggle
+            active={selectedPage === CityModalSubPages.personel}
+            onChange={() => setSelectedPage(CityModalSubPages.personel)}
           >
             Personel
-          </Button>
+          </Toggle>
           {cityData.fullPopulation > 0 && (
-            <Button
-              $active={selectedPage === CityModalSubPages.population}
-              onClick={() => setSelectedPage(CityModalSubPages.population)}
+            <Toggle
+              active={selectedPage === CityModalSubPages.population}
+              onChange={() => setSelectedPage(CityModalSubPages.population)}
             >
               Population
-            </Button>
+            </Toggle>
           )}
-          <Button
-            $active={selectedPage === CityModalSubPages.vehicles}
-            onClick={() => setSelectedPage(CityModalSubPages.vehicles)}
+          <Toggle
+            active={selectedPage === CityModalSubPages.vehicles}
+            onChange={() => setSelectedPage(CityModalSubPages.vehicles)}
           >
             Vehicles
-          </Button>
+          </Toggle>
         </Footer>
       ),
     [cityData, selectedPage]

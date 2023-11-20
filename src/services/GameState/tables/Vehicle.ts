@@ -10,12 +10,14 @@ export type VehicleData = {
   goalY?: number;
   goalX?: number;
   speed: number;
+  entity: number;
 };
 
 export default {
   name: "Vehicle",
   createData: [
     { name: "name", type: "TEXT" },
+    { name: "entity", type: "INTEGER" },
     {
       name: "type",
       type: "TEXT",
@@ -33,7 +35,7 @@ export default {
     },
   ],
   initData: [
-    { convoy: 1, name: "Test Vehicle", type: 8, posX: 3300, posY: 1020 },
-    { name: "Test Vehicle 2", type: 1, posX: 3310, posY: 1040 },
+    { convoy: 1, name: "Test Vehicle", type: 8, posX: 3300, posY: 1020, entity: 10 },
+    { name: "Test Vehicle 2", type: 1, posX: 3310, posY: 1040, entity: 11 },
   ],
 } as TableData<VehicleData>;

@@ -8,7 +8,11 @@ import {
   currentSelectedCities,
 } from "@Components/hooks/useSelectedCities";
 import { CityPositionProperty } from "@Services/GameState/dbTypes";
-import { GameState } from "@Services/GameState/gameState";
+import {
+  addTradeRoute,
+  getCities,
+  setConvoyGoal,
+} from "@Services/GameState/gameState";
 import { CityEntity } from "@Services/GameState/tables/City";
 import { addToContextMenu } from "@Services/contextMenu";
 import L, { LatLngExpression, circle } from "leaflet";
@@ -47,7 +51,7 @@ export function useCitites() {
     useRef<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
 
   useEffect(() => {
-    GameState.getCities().then((cities) => {
+    getCities().then((cities) => {
       citiesGeoJson.current = {
         type: "FeatureCollection",
         features: cities.map(({ posX, posY, name, type, ID }) => ({
@@ -69,7 +73,7 @@ export function useCitites() {
       const [cityA, cityB] = currentCitiesObservable.value;
 
       if (cityA && cityB) {
-        GameState.addTradeRoute(currentCitiesObservable.value);
+        addTradeRoute(currentCitiesObservable.value);
         ContextMenuPosition.next(null);
       }
     };
@@ -182,16 +186,15 @@ export function useCitites() {
           .addEventListener("contextmenu", () => {
             if (currentConvoySubject.value) {
               const city = citiesGeoJson.current?.features.find(
-                ({ properties }) =>
-                  properties.ID === ID
+                ({ properties }) => properties.ID === ID
               );
               city &&
-                GameState.setConvoyGoal(
+                setConvoyGoal(
                   currentConvoySubject.value,
                   ...(city.geometry.coordinates as [number, number])
                 );
 
-              console.log(city)
+              console.log(city);
             }
           })
           .bindTooltip(type !== "RandomEncounter" ? name : "Random Encounter", {

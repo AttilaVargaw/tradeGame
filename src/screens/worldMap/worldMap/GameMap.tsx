@@ -1,5 +1,8 @@
-import { useContext, useEffect, useRef } from "react";
-import { GameStateContext } from "@Services/GameState/gameState";
+import { useEffect, useRef } from "react";
+import {
+  getConvoysAsGeoJson,
+  setConvoyGoal,
+} from "@Services/GameState/gameState";
 import L, {
   CRS,
   LatLngBoundsExpression,
@@ -31,8 +34,6 @@ const StyledMapContainer = styled.div`
 const center = [1000, 3300] as LatLngExpression;
 
 export function GameMap(): JSX.Element {
-  const gameState = useContext(GameStateContext);
-
   useKeypressHandler();
   useContextMenuHandler();
 
@@ -46,7 +47,7 @@ export function GameMap(): JSX.Element {
     return () => {
       window.removeEventListener("resize", ResizeHandler);
     };
-  }, [gameState]);
+  }, []);
 
   const renderer = useRef(canvas());
 
@@ -89,7 +90,7 @@ export function GameMap(): JSX.Element {
         })
         .addEventListener("contextmenu", ({ latlng: { lat, lng } }) => {
           if (currentConvoySubject.value) {
-            gameState.setConvoyGoal(currentConvoySubject.value, lat, lng);
+            setConvoyGoal(currentConvoySubject.value, lat, lng);
           }
         });
     } else {
@@ -111,13 +112,13 @@ export function GameMap(): JSX.Element {
           { hideSingleBase: false }
         )
         .addTo(mapInstance.current);
-  }, [cityLayer, convoyLayer, gameState, tradeRoutes]);
+  }, [cityLayer, convoyLayer, tradeRoutes]);
 
   useEffect(() => {
-    gameState.getConvoysAsGeoJson().then((convoys) => {
+    getConvoysAsGeoJson().then((convoys) => {
       convoyLayer.current.addData(convoys);
     });
-  }, [convoyLayer, gameState]);
+  }, [convoyLayer]);
 
   return <StyledMapContainer ref={map} />;
 }

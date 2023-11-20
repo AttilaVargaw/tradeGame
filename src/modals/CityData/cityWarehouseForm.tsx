@@ -11,21 +11,20 @@ import Container from "react-bootstrap/esm/Container";
 import Form from "react-bootstrap/esm/Form";
 import Row from "react-bootstrap/esm/Row";
 import { Item, WarehouseItem } from "@Services/GameState/dbTypes";
-import { GameStateContext } from "@Services/GameState/gameState";
 import debugModeContext from "../../debugModeContext";
 import { Button } from "@Components/button";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import {
+  addCityWarehouseItem,
+  getCityWarehouse,
+  getNotAvailableItems,
+  updateCityWarehouseItem,
+} from "@Services/GameState/gameState";
 
 export default function CityWarehouseForm() {
   const debugMode = useContext(debugModeContext);
-  const {
-    updateCityWarehouseItem,
-    getNotAvailableItems,
-    getCityWarehouse,
-    addCityWarehouseItem,
-  } = useContext(GameStateContext);
 
-  const [cityID, ] = useCurrentSelectedCity()
+  const [cityID] = useCurrentSelectedCity();
 
   const [add, setAdd] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
@@ -46,7 +45,7 @@ export default function CityWarehouseForm() {
       });
       getCityWarehouse(cityID).then(setWarehouse);
     }
-  }, [cityID, getCityWarehouse, getNotAvailableItems]);
+  }, [cityID]);
 
   const addItem = useCallback(async () => {
     if (newItem.ID && cityID) {
@@ -66,13 +65,7 @@ export default function CityWarehouseForm() {
 
       setAdd(false);
     }
-  }, [
-    newItem,
-    addCityWarehouseItem,
-    cityID,
-    getCityWarehouse,
-    getNotAvailableItems,
-  ]);
+  }, [newItem, cityID]);
 
   const setNewItemNumber = useCallback(
     ({ currentTarget: { value } }: ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +91,7 @@ export default function CityWarehouseForm() {
           await getCityWarehouse(cityID).then(setWarehouse);
         }
       },
-    [cityID, updateCityWarehouseItem, getCityWarehouse]
+    [cityID]
   );
 
   return (

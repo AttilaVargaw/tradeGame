@@ -1,31 +1,34 @@
 import { Label } from "@Components/label";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
-import {
-  GameStateContext,
-  TradeRouteAsGeoJSONView,
-} from "@Services/GameState/gameState";
+
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import { Toggle } from "@Components/toggle";
+import {
+  TradeRouteAsGeoJSONView,
+  setConvoyTradeRoute,
+  getTradeRoute,
+  getConvoy,
+  dbObservable,
+} from "@Services/GameState/gameState";
 
 export function ConvoyTradeRouteModal() {
   const [tradeRoutes, setTraderoutes] = useState<TradeRouteAsGeoJSONView[]>();
   const [currentConvoy, setConvoyData] = useState<ConvoyData>();
   const [currentConvoyID] = useCurrentConvoy();
-  const gameState = useContext(GameStateContext);
   const [currentlySelectedTradeRoute, setCurrentlySelectedTradeRoute] =
     useState<number>();
 
   useEffect(() => {
     function updateTraderouteList() {
       if (currentConvoyID) {
-        gameState.getConvoy(currentConvoyID).then((convoyData) => {
+        getConvoy(currentConvoyID).then((convoyData) => {
           setConvoyData(convoyData);
           if (convoyData.route) {
-            gameState.getTradeRoute(convoyData.route).then((ret) => {
+            getTradeRoute(convoyData.route).then((ret) => {
               if (ret.length > 0) {
                 setCurrentlySelectedTradeRoute(ret[0].ID);
               }
@@ -35,19 +38,19 @@ export function ConvoyTradeRouteModal() {
           }
         });
       }
-      gameState.getTradeRoute().then(setTraderoutes);
+      getTradeRoute().then(setTraderoutes);
     }
 
     updateTraderouteList();
 
-    const subscription = gameState.dbObservable.subscribe(({ type }) => {
+    const subscription = dbObservable.subscribe(({ type }) => {
       if (type === DBEvents.convoyUpdated) {
         updateTraderouteList();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [gameState, currentConvoyID]);
+  }, [currentConvoyID]);
 
   const header = useMemo(() => {
     return <Label type="led">{currentConvoy?.name || ""}</Label>;
@@ -66,13 +69,13 @@ export function ConvoyTradeRouteModal() {
   const selectTradeRoute = useCallback(
     (ID: number | null) => () => {
       if (currentConvoyID) {
-        gameState.setConvoyTradeRoute(currentConvoyID, ID);
+        setConvoyTradeRoute(currentConvoyID, ID);
         if (!ID) {
           activateTradeRoute();
         }
       }
     },
-    [gameState, currentConvoyID, activateTradeRoute]
+    [currentConvoyID, activateTradeRoute]
   );
 
   const [isTradeRouteActive, setTradeRouteActive] = useState(false);

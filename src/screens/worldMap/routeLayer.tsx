@@ -1,10 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { DBEvents } from "@Services/GameState/dbTypes";
-import { GameState } from "@Services/GameState/gameState";
+import { dbObservable, getTradeRoutesAsGeoJson } from "@Services/GameState/gameState";
 import L, { PathOptions, tooltip } from "leaflet";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
@@ -36,15 +32,15 @@ export function useTradeRoutes() {
   );
 
   useEffect(() => {
-    GameState.getTradeRoutesAsGeoJson().then((tradeRoutes) => {
+    getTradeRoutesAsGeoJson().then((tradeRoutes) => {
       routeLayer.current.clearLayers().addData(tradeRoutes);
     });
 
-    return GameState.dbObservable.subscribe(({ type }) => {
+    return dbObservable.subscribe(({ type }) => {
       switch (type) {
         case DBEvents.tradeRouteAdded:
         case DBEvents.tradeRouteUpdate:
-          GameState.getTradeRoutesAsGeoJson().then((tradeRoutes) => {
+          getTradeRoutesAsGeoJson().then((tradeRoutes) => {
             routeLayer.current.clearLayers().addData(tradeRoutes);
           });
           break;

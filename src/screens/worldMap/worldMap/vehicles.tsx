@@ -1,4 +1,8 @@
-import { GameState } from "@Services/GameState/gameState";
+import { gameRedrawSubject } from "@Components/hooks/useGameLoop";
+import {
+  getVehicleGoalsAsGeoJson,
+  getVehiclesAsGeoJson,
+} from "@Services/GameState/gameState";
 import L, { LatLngExpression, circle, tooltip } from "leaflet";
 
 const tradeRouteStyle = {
@@ -10,10 +14,6 @@ const tradeRouteStyle = {
 };
 
 export function VehiclesLayer() {
-  GameState.getVehicleGoalsAsGeoJson().then((vehicles) => {
-    vehicleLayer.addData(vehicles);
-  });
-
   const vehicleLayer = L.geoJSON([], {
     pointToLayer: ({ geometry: { coordinates }, properties: { ID, name } }) =>
       circle(coordinates as LatLngExpression, {
@@ -26,10 +26,26 @@ export function VehiclesLayer() {
           permanent: true,
           direction: "top",
           interactive: true,
-          
         })
       ),
   });
+
+  function update() {
+    vehicleLayer.clearLayers();
+    getVehicleGoalsAsGeoJson().then((vehicles) => {
+      vehicleLayer.addData(vehicles);
+    });
+
+    getVehiclesAsGeoJson().then((vehicles) => vehicleLayer.addData(vehicles));
+  }
+
+  gameRedrawSubject.subscribe((event) => {
+    //switch(event) {
+    //case RedrawType.
+    //}
+  });
+
+  update();
 
   return vehicleLayer;
 }

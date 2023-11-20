@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 
 import { IndustrialBuilding } from "@Services/GameState/dbTypes";
-import { GameStateContext } from "@Services/GameState/gameState";
+
 import debugModeContext from "../../debugModeContext";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { ResourceChange } from "@Services/GameState/tables/common";
@@ -11,6 +11,13 @@ import { Input, Select } from "@Components/input";
 import { Td, Th, Tr } from "@Components/grid";
 import { Toggle } from "@Components/toggle";
 import { styled } from "styled-components";
+import {
+  addIndustrialBuildings,
+  getAllIndustrialBuildings,
+  getCityIndustrialBuildings,
+  getCityIndustrialResourceChanges,
+  setIndustrialBuildingNumber,
+} from "@Services/GameState/gameState";
 
 const Container = styled.div`
   display: flex;
@@ -35,17 +42,13 @@ export default function CityIndustry() {
   >([]);
   const [reload, setReload] = useState(false);
 
-  const gameState = useContext(GameStateContext);
-
   useEffect(() => {
     if (cityID) {
-      gameState
-        .getCityIndustrialResourceChanges(cityID)
-        .then(setAggregatedInputOutput);
-      gameState.getAllIndustrialBuildings().then(setAllIndustrialBuildings);
-      gameState.getCityIndustrialBuildings(cityID).then(setIndustrialBuildings);
+      getCityIndustrialResourceChanges(cityID).then(setAggregatedInputOutput);
+      getAllIndustrialBuildings().then(setAllIndustrialBuildings);
+      getCityIndustrialBuildings(cityID).then(setIndustrialBuildings);
     }
-  }, [reload, gameState, cityID]);
+  }, [reload, cityID]);
 
   const setNewBuildingDropdown = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) => {
@@ -56,18 +59,18 @@ export default function CityIndustry() {
 
   const addNewBuilding = useCallback(async () => {
     if (cityID) {
-      await gameState.addIndustrialBuildings(1, newBuilding, cityID);
+      await addIndustrialBuildings(1, newBuilding, cityID);
       setReload(!reload);
     }
-  }, [newBuilding, cityID, gameState, reload]);
+  }, [newBuilding, cityID, reload]);
 
   const setBuildingNumber = useCallback(
     (ID: number) =>
       async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-        await gameState.setIndustrialBuildingNumber(ID, Number.parseInt(value));
+        await setIndustrialBuildingNumber(ID, Number.parseInt(value));
         setReload(!reload);
       },
-    [reload, gameState]
+    [reload]
   );
 
   const [aggeratedView, setAggeratedView] = useState(false);

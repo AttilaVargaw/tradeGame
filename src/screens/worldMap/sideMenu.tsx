@@ -3,17 +3,15 @@ import { Button } from "@Components/button";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { DBEvents } from "@Services/GameState/dbTypes";
-import { GameStateContext } from "@Services/GameState/gameState";
-import {
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 import styled, { CSSProperties } from "styled-components";
 import { ConvoySideMenu } from "./convoySideMenu";
-import {} from "@Services/GameState/gameState";
+import {
+  GetConvoiyCount,
+  GetTraderouteCount,
+  GetVehicleCount,
+  dbObservable,
+} from "@Services/GameState/gameState";
 
 const Container = styled.div`
   position: fixed;
@@ -28,19 +26,17 @@ const Container = styled.div`
 `;
 
 function VehicleCountButton({ onClick }: { onClick: () => void }) {
-  const gameState = useContext(GameStateContext);
-
   const [vehicleCount, setVehicleCount] = useState(0);
 
   useEffect(() => {
-    gameState.dbObservable.subscribe((type) => {
+    dbObservable.subscribe((type) => {
       if (type.type === DBEvents.newVehicleBought) {
-        gameState.GetVehicleCount().then(setVehicleCount);
+        GetVehicleCount().then(setVehicleCount);
       }
     });
 
-    gameState.GetVehicleCount().then(setVehicleCount);
-  }, [gameState]);
+    GetVehicleCount().then(setVehicleCount);
+  }, []);
 
   return (
     <Button $black onClick={onClick}>
@@ -50,23 +46,21 @@ function VehicleCountButton({ onClick }: { onClick: () => void }) {
 }
 
 function ConvoyCountButton({ onClick }: { onClick: () => void }) {
-  const gameState = useContext(GameStateContext);
-
   const [convoyCount, setConvoyCount] = useState(0);
 
   useEffect(() => {
-    const subscribtion = gameState.dbObservable.subscribe((type) => {
+    const subscribtion = dbObservable.subscribe((type) => {
       if (type.type === DBEvents.newConvoyCreated) {
-        gameState.GetConvoiyCount().then(setConvoyCount);
+        GetConvoiyCount().then(setConvoyCount);
       } else if (type.type === DBEvents.tradeRouteUpdate) {
         console.log(type.data);
       }
     });
 
-    gameState.GetConvoiyCount().then(setConvoyCount);
+    GetConvoiyCount().then(setConvoyCount);
 
     return () => subscribtion.unsubscribe();
-  }, [gameState]);
+  }, []);
 
   return (
     <Button $black onClick={onClick}>
@@ -87,7 +81,6 @@ export default forwardRef<
 >(function SideMenu({ style }, ref) {
   const [, setCurrentModal] = useCurrentModal();
   const [currentConvoy] = useCurrentConvoy();
-  const gameState = useContext(GameStateContext);
 
   const onConvoysClick = useCallback(() => {
     setCurrentModal("convoys");
@@ -104,14 +97,14 @@ export default forwardRef<
   const [tradeRouteNum, setTradeRouteNum] = useState(0);
 
   useEffect(() => {
-    gameState.GetTraderouteCount().then(setTradeRouteNum);
+    GetTraderouteCount().then(setTradeRouteNum);
 
-    gameState.dbObservable.subscribe(({ type }) => {
+    dbObservable.subscribe(({ type }) => {
       if (type === DBEvents.tradeRouteAdded) {
-        gameState.GetTraderouteCount().then(setTradeRouteNum);
+        GetTraderouteCount().then(setTradeRouteNum);
       }
     });
-  }, [gameState]);
+  }, []);
 
   return (
     <Container ref={ref} style={style}>
@@ -127,7 +120,7 @@ export default forwardRef<
           <AccountingButton />
           <VehicleCountButton onClick={onVehiclesClick} />
           <ConvoyCountButton onClick={onConvoysClick} />
-          <Button  onClick={onEncyklopediaClick}>Encyclopedia</Button>
+          <Button onClick={onEncyklopediaClick}>Encyclopedia</Button>
           <Button onClick={onEncyklopediaClick}>Command Staff</Button>
           <Button onClick={onEncyklopediaClick}>Human Rescources</Button>
         </>

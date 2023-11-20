@@ -1,13 +1,18 @@
 import {
   ChangeEventHandler,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
 import Container from "react-bootstrap/esm/Container";
-import { GameStateContext } from "@Services/GameState/gameState";
+import {
+  CreateConvoy,
+  addVehicleToConvoy,
+  dbObservable,
+  getConvoylessVehicles,
+  getConvoys,
+} from "@Services/GameState/gameState";
 import { Input, Select } from "@Components/input";
 import { Label } from "@Components/label";
 import Modal from "../Modal";
@@ -63,16 +68,15 @@ const Footer = (
 );
 
 export const ConvoyModal = () => {
-  const gameState = useContext(GameStateContext);
-
   const [convoysData, setConvoyData] = useState<ConvoyData[]>([]);
   const [currentConvoy] = useCurrentConvoy();
   const [availableCommandVehicles, setAvailableCommandVehicles] = useState<
     VehicleData[]
   >([]);
+
   useEffect(() => {
-    gameState.getConvoys().then(setConvoyData);
-    gameState.getConvoylessVehicles().then((commandVehicles) => {
+    getConvoys().then(setConvoyData);
+    getConvoylessVehicles().then((commandVehicles) => {
       setAvailableCommandVehicles(commandVehicles);
       if (commandVehicles.length > 0) {
         const { ID, name } = commandVehicles[0];
@@ -83,15 +87,15 @@ export const ConvoyModal = () => {
         });
       }
     });
-  }, [gameState]);
+  }, []);
 
   useEffect(() => {
-    const subscription = gameState.dbObservable.subscribe(() =>
-      gameState.getConvoys().then(setConvoyData)
+    const subscription = dbObservable.subscribe(() =>
+      getConvoys().then(setConvoyData)
     );
 
     return () => subscription.unsubscribe();
-  }, [gameState]);
+  }, []);
 
   const [newConvoyData, setNewConvoyData] = useState<{
     name: string;
@@ -118,11 +122,11 @@ export const ConvoyModal = () => {
     const { commandVehicle } = newConvoyData;
 
     if (commandVehicle) {
-      gameState.CreateConvoy(newConvoyData.name).then((id) => {
-        gameState.addVehicleToConvoy(id, commandVehicle);
+      CreateConvoy(newConvoyData.name).then((id) => {
+        addVehicleToConvoy(id, commandVehicle);
       });
     }
-  }, [gameState, newConvoyData]);
+  }, [newConvoyData]);
 
   const body = useMemo(() => {
     if (!currentConvoy) {

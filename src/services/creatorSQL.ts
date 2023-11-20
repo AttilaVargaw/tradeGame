@@ -3,7 +3,7 @@ export const creatorSQL = `
     drop table if exists IndustrialBuildings;
     drop table if exists Item;
     drop table if exists Translations;
-    drop table if exists CityWarehouse;
+    drop table if exists Inventory;
 
     BEGIN TRANSACTION;
 
@@ -88,34 +88,35 @@ export const creatorSQL = `
     INSERT INTO IndustrialBuilding VALUES(2,'waterPurificator',NULL);
     INSERT INTO IndustrialBuilding VALUES(3,'hidrophonic farm',NULL);
 
-    CREATE TABLE CityWarehouse (ID INTEGER PRIMARY KEY AUTOINCREMENT, city INTEGER, item INTEGER, number REAL, UNIQUE (city, item));
-    INSERT INTO CityWarehouse VALUES(1,1,1,1005.0);
-    INSERT INTO CityWarehouse VALUES(2,3,3,5.0);
+    CREATE TABLE Inventory (ID INTEGER PRIMARY KEY AUTOINCREMENT, entity INTEGER, item INTEGER, number REAL);
+    INSERT INTO Inventory VALUES(1,1,1,1005.0);
+    INSERT INTO Inventory VALUES(2,3,3,5.0);
+    INSERT INTO Inventory VALUES(3,10,3,5.0);
 
-    CREATE TABLE Item (ID INTEGER PRIMARY KEY AUTOINCREMENT, startPrice INTEGER, endPrice INTEGER, nameKey TEXT, descriptionKey TEXT);
-    INSERT INTO Item VALUES(1,10,10,'water','waterDesc');
-    INSERT INTO Item VALUES(2,10,10,'luxuryFood','luxuryFoodDesc');
-    INSERT INTO Item VALUES(3,10,10,'luxClothes','luxClothesDesc');
-    INSERT INTO Item VALUES(4,10,20,'basicFood','basicFoodDesc');
-    INSERT INTO Item VALUES(5,10,10,'mre','mre');
-    INSERT INTO Item VALUES(6,10,10,'goodFood','goodFoodDesc');
-    INSERT INTO Item VALUES(7,10,10,'basicClothes','basicClothesDesc');
-    INSERT INTO Item VALUES(8,10,10,'workClothes','workClothes');
-    INSERT INTO Item VALUES(9,10,10,'gold','goldDesc');
-    INSERT INTO Item VALUES(10,10,10,'silver','silverDesc');
-    INSERT INTO Item VALUES(11,10,10,'preciousMinerals','preciousMineralsDesc');
-    INSERT INTO Item VALUES(12,10,10,'uraniumOre','uranOreDesc');
-    INSERT INTO Item VALUES(13,20,10,'refinedUranium','refinedUraniumDesc');
-    INSERT INTO Item VALUES(14,10,10,'neoAsbest','neoAsbestDesc');
-    INSERT INTO Item VALUES(15,21,10,'bricks','bricksDesc');
-    INSERT INTO Item VALUES(16,20,20,'metalIngot','metalIngotsDesc');
-    INSERT INTO Item VALUES(17,10,10,'oil','oilDesc');
-    INSERT INTO Item VALUES(18,10,10,'neoLoead','neoLeadDesc');
-    INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss');
-    INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun');
-    INSERT INTO Item VALUES(21,10,10,'medicaments','medicaments');
-    INSERT INTO Item VALUES(22,10,10,'advMedicaments','advMedicaments');
-    INSERT INTO Item VALUES(23,10,10,'appliances','appliancesDesc');
+    CREATE TABLE Item (ID INTEGER PRIMARY KEY AUTOINCREMENT, startPrice INTEGER, endPrice INTEGER, nameKey TEXT, descriptionKey TEXT, category INTEGER);
+    INSERT INTO Item VALUES(1,10,10,'water','waterDesc',0);
+    INSERT INTO Item VALUES(2,10,10,'luxuryFood','luxuryFoodDesc',0);
+    INSERT INTO Item VALUES(3,10,10,'luxClothes','luxClothesDesc',0);
+    INSERT INTO Item VALUES(4,10,20,'basicFood','basicFoodDesc',0);
+    INSERT INTO Item VALUES(5,10,10,'mre','mre',1);
+    INSERT INTO Item VALUES(6,10,10,'goodFood','goodFoodDesc',0);
+    INSERT INTO Item VALUES(7,10,10,'basicClothes','basicClothesDesc',0);
+    INSERT INTO Item VALUES(8,10,10,'workClothes','workClothes',0);
+    INSERT INTO Item VALUES(9,10,10,'gold','goldDesc',2);
+    INSERT INTO Item VALUES(10,10,10,'silver','silverDesc',2);
+    INSERT INTO Item VALUES(11,10,10,'preciousMinerals','preciousMineralsDesc',2);
+    INSERT INTO Item VALUES(12,10,10,'uraniumOre','uranOreDesc',2);
+    INSERT INTO Item VALUES(13,20,10,'refinedUranium','refinedUraniumDesc',2);
+    INSERT INTO Item VALUES(14,10,10,'neoAsbest','neoAsbestDesc',2);
+    INSERT INTO Item VALUES(15,21,10,'bricks','bricksDesc',2);
+    INSERT INTO Item VALUES(16,20,20,'metalIngot','metalIngotsDesc',2);
+    INSERT INTO Item VALUES(17,10,10,'oil','oilDesc',2);
+    INSERT INTO Item VALUES(18,10,10,'neoLoead','neoLeadDesc',2);
+    INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss',1);
+    INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun',1);
+    INSERT INTO Item VALUES(21,10,10,'medicaments','medicaments',0);
+    INSERT INTO Item VALUES(22,10,10,'advMedicaments','advMedicaments',0);
+    INSERT INTO Item VALUES(23,10,10,'appliances','appliancesDesc',0);
 
     CREATE TABLE IndustrialBuildings (ID INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER, IndustrialBuilding INTEGER, city INTEGER);
     INSERT INTO IndustrialBuildings VALUES(1,1,1,1);

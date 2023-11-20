@@ -1,15 +1,15 @@
-import { FC, useCallback, useContext, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import Card from "react-bootstrap/esm/Card";
 import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
 import { VehicleType } from "@Services/GameState/dbTypes";
-import { GameStateContext } from "@Services/GameState/gameState";
 import CardGroup from "react-bootstrap/esm/CardGroup";
 import Placeholder from "@Components/placeholder";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { Button } from "@Components/button";
 import { makeid } from "@Services/utils";
 import { BuyItem } from "./buyItem";
+import { addVehicle, getVehicleType, getVehicleTypes } from "@Services/GameState/gameState";
 
 function GenerateVehicleName() {
   return `${makeid(3)}-${makeid(3)}`;
@@ -19,26 +19,23 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
   ID,
   onBack,
 }) => {
-  const gameState = useContext(GameStateContext);
-
   const [vehicleDescription, setVehicleDescription] = useState<VehicleType>();
 
   const [, setCurrentModal] = useCurrentModal();
 
   useEffect(() => {
-    gameState
-      .getVehicleType(ID)
-      .then((result) => setVehicleDescription(result[0]));
-  }, [ID, gameState, setCurrentModal]);
+    getVehicleType(ID).then((result) => setVehicleDescription(result[0]));
+  }, [ID, setCurrentModal]);
 
   const onOrder = useCallback(() => {
     if (vehicleDescription) {
-      gameState
-        .addVehicle(ID, vehicleDescription.name + " " + GenerateVehicleName())
-        .then(console.log);
+      addVehicle(
+        ID,
+        vehicleDescription.name + " " + GenerateVehicleName()
+      ).then(console.log);
       //setCurrentModal();
     }
-  }, [gameState, ID, vehicleDescription]);
+  }, [ID, vehicleDescription]);
 
   if (!vehicleDescription) {
     return <></>;
@@ -71,8 +68,6 @@ export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
 };
 
 export const VehicleBuyModal = () => {
-  const gameState = useContext(GameStateContext);
-
   const [vehicleDescriptions, setVehicleDescriptions] = useState<VehicleType[]>(
     []
   );
@@ -80,8 +75,8 @@ export const VehicleBuyModal = () => {
   const [currentVehicle, setCurrentVehicle] = useState<number | null>(null);
 
   useEffect(() => {
-    gameState.getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
-  }, [selectedVehicleType, gameState]);
+    getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
+  }, [selectedVehicleType]);
 
   const setVehicleType = useCallback(
     (type: string) => () => {

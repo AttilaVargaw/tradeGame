@@ -21,7 +21,7 @@ export enum Tables {
   IndustrialBuildingDailyRequirement = "IndustrialBuildingDailyRequirement",
   IndustrialBuilding = "IndustrialBuilding",
   PopulationClass = "PopulationClass",
-  CityWarehouse = "CityWarehouse",
+  CityWarehouse = "Inventory",
   Item = "Item",
   CityPopulationClass = "CityPopulationClass",
   IndustrialBuildings = "IndustrialBuildings",

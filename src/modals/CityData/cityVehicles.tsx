@@ -1,24 +1,20 @@
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { Label } from "@Components/label";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { GameState } from "@Services/GameState/gameState";
+import { getDockedConvoysForCity } from "@Services/GameState/gameState";
 import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { VehicleData } from "@Services/GameState/tables/Vehicle";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import { CityVehiclesCrew } from "./cityVehiclesCrew";
+import { Toggle } from "@Components/toggle";
+import { CityVehiclesInventory } from "./cityVehiclesInventory";
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 1em;
-  justify-content: space-between;
-`;
+const Container = styled.div``;
 
-const ElementContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-width: 10em;
-`;
+enum Subpages {
+  Crew,
+  List,
+}
 
 export default function CityVehicles() {
   const [vehicles] = useState<VehicleData[]>([]);
@@ -26,24 +22,56 @@ export default function CityVehicles() {
 
   const [cityID] = useCurrentSelectedCity();
 
-  console.log(convoys, cityID)
+  const [subpage, setSubpage] = useState<Subpages>(Subpages.List);
+  const [currentConvoy, setCurrentConvoy] = useState<number | null>(null);
+
   useEffect(() => {
-    cityID && GameState.getDockedConvoysForCity(cityID).then(setConvoys);
+    cityID && getDockedConvoysForCity(cityID).then(setConvoys);
   }, [cityID]);
 
-  return (
-    <Container style={{ margin: "16pt" }}>
-      <TerminalScreen
-      //dangerouslySetInnerHTML={article}
-      //ref={terminalRef}
-      >
+  const body = useMemo(() => {
+    if (currentConvoy) {
+      return (
+        <>
+          <div
+            style={{
+              width: "100%",
+              display: "grid",
+              gridAutoColumns: "1fr",
+              gridTemplateColumns: "repeat(2, 1fr)",
+            }}
+          >
+            <Toggle
+              onChange={() => setSubpage(Subpages.Crew)}
+              active={subpage === Subpages.Crew}
+            >
+              Crew
+            </Toggle>
+            <Toggle
+              onChange={() => setSubpage(Subpages.List)}
+              active={subpage === Subpages.List}
+            >
+              Inventory
+            </Toggle>
+          </div>
+          {subpage === Subpages.Crew && <CityVehiclesCrew />}
+          {subpage === Subpages.List && <CityVehiclesInventory />}
+        </>
+      );
+    }
+    return (
+      <TerminalScreen>
         {convoys &&
           convoys.map(({ ID, name }) => (
-            <Link onClick={() => undefined} key={ID}>
+            <Link onClick={() => setCurrentConvoy(ID)} key={ID}>
               {name}
             </Link>
           ))}
       </TerminalScreen>
-    </Container>
+    );
+  }, [convoys, currentConvoy, subpage]);
+
+  return (
+    <Container style={{ margin: "16pt", height: "80%" }}>{body}</Container>
   );
 }

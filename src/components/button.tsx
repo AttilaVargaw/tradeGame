@@ -5,6 +5,7 @@ export const Button = styled.div<{
   $active?: boolean;
   disabled?: boolean;
   red?: boolean;
+  $size?: "normal" | "small";
 }>`
   &:hover:not([disabled]) {
     color: greenyellow;
@@ -12,7 +13,7 @@ export const Button = styled.div<{
   }
 
   box-sizing: border-box !important;
-  height: 4rem !important;
+  height: ${({ $size }) => ($size === "normal" ? "3em" : "2em")}!important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -22,8 +23,9 @@ export const Button = styled.div<{
     border-bottom: 0.7em solid #111 !important;
     border-left: 0.7em solid #222 !important;
     border-right: 0.7em solid #222 !important;
-    background: ${({ $black }) => ($black ? "#111!important" : "#777!important")};
-    font-size: 1.4em!important;
+    background: ${({ $black }) =>
+      $black ? "#111!important" : "#777!important"};
+    font-size: 0.9em !important;
   }
 
   background: ${({ $black }) => ($black ? "#111!important" : "grey!important")};
@@ -35,8 +37,8 @@ export const Button = styled.div<{
   outline: black solid 2px !important;
 
   padding: 0.1em !important;
-  font-size: 1.5em !important;
-  font-family: ${({ $black }) => ($black ? "Seven Segment" : "system-ui")};
+  font-size: 1em !important;
+  font-family: ${({ $black }) => ($black ? "Seven Segment" : "helvetica")};
 
   color: ${({ $active, disabled }) => {
     if (!disabled) {

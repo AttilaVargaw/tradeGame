@@ -27,10 +27,10 @@ export const Container = styled.div<{ type?: styles }>`
       `;
     else if (type === "painted")
       return css`
-        font: bold 200px arial, sans-serif;
+        font: bold 200px copperplate;
         color: whitesmoke;
         background: black !important;
-        -webkit-text-stroke: 1px grey;
+        //-webkit-text-stroke: 1px grey;
         border-left: 0.5em solid white;
         border-right: 0.5em solid white;
         border-bottom: 0.1em solid white;
@@ -44,7 +44,7 @@ export const Container = styled.div<{ type?: styles }>`
   }}
 
   text-align: center;
-  font-size: 1.2em;
+  font-size: 1.1em;
 `;
 
 export function Label({

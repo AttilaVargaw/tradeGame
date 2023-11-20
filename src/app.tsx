@@ -1,20 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { WorldMap } from "./screens/worldMap/worldMap/worldMap";
-import { GameState, GameStateContext } from "@Services/GameState/gameState";
+
 import { message } from "@tauri-apps/api/dialog";
 import DebugModeContext from "./debugModeContext";
 import { ContextMenu } from "./components/ContextMenu";
 import { GameLoop } from "@Components/hooks/useGameLoop";
+import { init } from "@Services/GameState/gameState";
 
 export default function App(): JSX.Element {
   const [gameLoaded, setGameLoaded] = useState(false);
   const gameLoopCleanup = useRef<() => void>();
 
   useEffect(() => {
-    GameState.init()
+    init()
       .then(() => {
         setGameLoaded(true);
-        gameLoopCleanup.current = GameLoop(GameState);
+        gameLoopCleanup.current = GameLoop();
       })
       .catch((err) => message(`A problem has happened ${JSON.stringify(err)}`));
 
@@ -24,11 +25,9 @@ export default function App(): JSX.Element {
   }, []);
 
   return (
-    <GameStateContext.Provider value={GameState}>
-      <DebugModeContext.Provider value={true}>
-        {gameLoaded ? <WorldMap /> : <>...Loading</>}
-        <ContextMenu />
-      </DebugModeContext.Provider>
-    </GameStateContext.Provider>
+    <DebugModeContext.Provider value={true}>
+      {gameLoaded ? <WorldMap /> : <>...Loading</>}
+      <ContextMenu />
+    </DebugModeContext.Provider>
   );
 }

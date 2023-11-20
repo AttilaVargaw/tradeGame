@@ -1,14 +1,12 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { GameStateContext } from "@Services/GameState/gameState";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Label } from "@Components/label";
 import Modal from "./Modal";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
 import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
+import { GetEncyclopediaArticles } from "@Services/GameState/gameState";
 //import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
 
 export const EncyclopediaModal = () => {
-  const gameState = useContext(GameStateContext);
-
   const [article, setArticle] = useState<string | undefined>();
   const [folders, setFolders] = useState<EncyclopediaData[]>();
 
@@ -17,22 +15,20 @@ export const EncyclopediaModal = () => {
   const [currentFolder, setCurrentFolder] = useState<number | null>(null);
 
   useEffect(() => {
-    gameState
-      .GetEncyclopediaArticles(currentFolder)
-      .then((encyclopediaArticles) => {
-        console.log(encyclopediaArticles);
-        if (encyclopediaArticles[0].folder) {
-          setArticle(undefined);
-          setFolders(encyclopediaArticles);
-        } else {
-          setArticle(
-            `<h1>${encyclopediaArticles[0].name}</h1>` +
-              encyclopediaArticles[0].body
-          );
-          setFolders(undefined);
-        }
-      });
-  }, [gameState, currentFolder]);
+    GetEncyclopediaArticles(currentFolder).then((encyclopediaArticles) => {
+      console.log(encyclopediaArticles);
+      if (encyclopediaArticles[0].folder) {
+        setArticle(undefined);
+        setFolders(encyclopediaArticles);
+      } else {
+        setArticle(
+          `<h1>${encyclopediaArticles[0].name}</h1>` +
+            encyclopediaArticles[0].body
+        );
+        setFolders(undefined);
+      }
+    });
+  }, [currentFolder]);
 
   const onFolderClick = useCallback(
     (ID: number) => () => {

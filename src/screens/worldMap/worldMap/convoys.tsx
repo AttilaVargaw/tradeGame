@@ -5,7 +5,11 @@ import {
 import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
 import { DBEvents } from "@Services/GameState/dbTypes";
-import { GameState } from "@Services/GameState/gameState";
+import {
+  dbObservable,
+  getConvoyGoalsAsGeoJson,
+  getConvoysAsGeoJson,
+} from "@Services/GameState/gameState";
 import L, { LatLngExpression, circle } from "leaflet";
 import { useEffect, useRef } from "react";
 
@@ -20,10 +24,10 @@ const currentConvoyMarker = circle([0, 0], {
 
 export function useConvoyLayer() {
   useEffect(() => {
-    const subscription =  gameRedrawSubject.subscribe((event) => {
+    const subscription = gameRedrawSubject.subscribe((event) => {
       switch (event) {
         case RedrawType.Convoys:
-          GameState.getConvoysAsGeoJson().then((convoys) => {
+          getConvoysAsGeoJson().then((convoys) => {
             convoyLayer.current.clearLayers();
             convoyLayer.current.addData(convoys);
 
@@ -36,20 +40,23 @@ export function useConvoyLayer() {
                   )?.geometry.coordinates as LatLngExpression
                 );
             }
-            GameState.getConvoyGoalsAsGeoJson().then((lines) => {
+            getConvoyGoalsAsGeoJson().then((lines) => {
               convoyLayer.current.addData(lines);
             });
           });
       }
     });
 
-    GameState.dbObservable.subscribe((event) => {
-      if(event.type === DBEvents.convoyDock || event.type === DBEvents.convoyUnDock) {
-        console.log(event.type === DBEvents.convoyDock ? "docked" : "undocked")
+    dbObservable.subscribe((event) => {
+      if (
+        event.type === DBEvents.convoyDock ||
+        event.type === DBEvents.convoyUnDock
+      ) {
+        console.log(event.type === DBEvents.convoyDock ? "docked" : "undocked");
       }
-    })
+    });
 
-    return () => subscription.unsubscribe()
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -79,7 +86,7 @@ export function useConvoyLayer() {
               .setLatLng(coordinates as LatLngExpression);
 
             currentConvoySubject.next(ID);
-            currentCitiesObservable.next([null, null])
+            currentCitiesObservable.next([null, null]);
           })
           .bindTooltip(
             new L.Tooltip({

@@ -1,5 +1,5 @@
 import { BehaviorSubject, Subject } from "rxjs";
-import type { GameState } from "@Services/GameState/gameState";
+import { UpdateConvoys } from "@Services/GameState/gameState";
 import { ConvoyAI } from "@Services/AI/convoy";
 
 export enum RedrawType {
@@ -17,7 +17,7 @@ const updateFrequency = 30;
 
 const convoyAI = ConvoyAI();
 
-export function GameLoop(gameState: typeof GameState) {
+export function GameLoop() {
   let gameLoopAnimationFrame: number;
   let oldTimeStamp = 0;
   let currentTick = startTick;
@@ -27,7 +27,7 @@ export function GameLoop(gameState: typeof GameState) {
     const dMs = timeStamp - oldTimeStamp;
     const ds = dMs * 0.001;
     const fps = Math.round(1 / ds);
-    fpsCounter.innerHTML = fps.toString();
+    /*fpsCounter.innerHTML = fps.toString();
 
     if (fps < 30) {
       fpsCounter.style.setProperty("color", "red");
@@ -35,7 +35,7 @@ export function GameLoop(gameState: typeof GameState) {
       fpsCounter.style.setProperty("color", "yellow");
     } else {
       fpsCounter.style.setProperty("color", "white");
-    }
+    }*/
 
     if (dMs >= updateFrequency) {
       oldTimeStamp = timeStamp;
@@ -48,7 +48,7 @@ export function GameLoop(gameState: typeof GameState) {
       }
 
       for (let i = 0; i < TickSpeed.value; ++i) {
-        updates = await gameState.UpdateConvoys(ds);
+        updates = await UpdateConvoys(ds);
       }
 
       if (updates.some((value) => value === true)) {

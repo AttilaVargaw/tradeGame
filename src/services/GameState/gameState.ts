@@ -1,4 +1,3 @@
-import { createContext } from "react";
 import { creatorSQL } from "../creatorSQL";
 
 import { appLocalDataDir } from "@tauri-apps/api/path";
@@ -42,10 +41,13 @@ import Vehicle, { VehicleData } from "./tables/Vehicle";
 import Encyclopedia, { EncyclopediaData } from "./tables/Encyclopedia";
 import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDailyRequirement";
 import { Lenght } from "@Services/utils";
+import { Translations } from "./tables/Translations";
 
 let db: Database;
 
-const dbObservable = new BehaviorSubject<DBEvent>({ type: DBEvents.NOP });
+export const dbObservable = new BehaviorSubject<DBEvent>({
+  type: DBEvents.NOP,
+});
 
 function DropTableIfExist(tableName: string) {
   return `drop table if exists ${tableName};`;
@@ -60,7 +62,7 @@ function FillTable<T>({ name, initData }: TableData<T>) {
   return "";
 }
 
-const init = async () => {
+export const init = async () => {
   //db = await Database.load("sqlite:tradegame.db");
   db = await Database.load("sqlite:memory");
   console.log(await appLocalDataDir());
@@ -129,7 +131,7 @@ const init = async () => {
   dbObservable.next({ type: DBEvents.cityPopulationUpdate });
 };
 
-async function CreateConvoy(name: string) {
+export async function CreateConvoy(name: string) {
   const data = await db.execute(
     insert({
       table: Tables.Convoy,
@@ -142,7 +144,7 @@ async function CreateConvoy(name: string) {
   return data.lastInsertId;
 }
 
-const setConvoyGoal = async (
+export const setConvoyGoal = async (
   convoyID: number,
   goalX: number,
   goalY: number
@@ -161,7 +163,11 @@ const setConvoyGoal = async (
   dbObservable.next({ type: DBEvents.convoyGoalSet, data });
 };
 
-const setVehicleGoal = async (ID: number, goalX: number, goalY: number) => {
+export const setVehicleGoal = async (
+  ID: number,
+  goalX: number,
+  goalY: number
+) => {
   const data = await db.execute(
     update({
       table: Tables.Vehicle,
@@ -176,7 +182,10 @@ const setVehicleGoal = async (ID: number, goalX: number, goalY: number) => {
   dbObservable.next({ type: DBEvents.vehicleGoalSet, data });
 };
 
-const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
+export const addVehicleToConvoy = async (
+  convoyID: number,
+  VehicleID: number
+) => {
   const data = await db.execute(
     update({
       table: Tables.Vehicle,
@@ -188,7 +197,7 @@ const addVehicleToConvoy = async (convoyID: number, VehicleID: number) => {
   dbObservable.next({ type: DBEvents.vehicleJoinedConvoy, data });
 };
 
-async function GetVehicleCount() {
+export async function GetVehicleCount() {
   return (
     await db.select<{ "count(ID)": number }[]>(
       select({
@@ -199,7 +208,7 @@ async function GetVehicleCount() {
   )[0]["count(ID)"];
 }
 
-function GetEncyclopediaArticles(parent: number | null) {
+export function GetEncyclopediaArticles(parent: number | null) {
   return db.select<EncyclopediaData[]>(
     select({
       table: Tables.Encyclopedia,
@@ -220,7 +229,7 @@ function GetEncyclopediaArticles(parent: number | null) {
   );
 }
 
-async function GetConvoiyCount() {
+export async function GetConvoiyCount() {
   return (
     await db.select<{ "count(ID)": number }[]>(
       select({
@@ -231,7 +240,7 @@ async function GetConvoiyCount() {
   )[0]["count(ID)"];
 }
 
-async function GetTraderouteCount() {
+export async function GetTraderouteCount() {
   return (
     await db.select<{ "count(ID)": number }[]>(
       select({
@@ -242,7 +251,7 @@ async function GetTraderouteCount() {
   )[0]["count(ID)"];
 }
 
-const addVehicle = async (type: number, name: string) => {
+export const addVehicle = async (type: number, name: string) => {
   const data = await db.execute(
     insert({
       table: Tables.Vehicle,
@@ -253,7 +262,7 @@ const addVehicle = async (type: number, name: string) => {
   dbObservable.next({ type: DBEvents.newVehicleBought, data });
 };
 
-const getVehicleTypes = (type: string) => {
+export const getVehicleTypes = (type: string) => {
   return db.select<VehicleType[]>(
     select({
       table: Tables.VehicleTypes,
@@ -265,7 +274,7 @@ const getVehicleTypes = (type: string) => {
   );
 };
 
-const getVehicleType = (ID: number) => {
+export const getVehicleType = (ID: number) => {
   return db.select<VehicleType[]>(
     select({
       attributes: [[Tables.VehicleTypes, ["name", "desc", "ID", "price"]]],
@@ -275,7 +284,7 @@ const getVehicleType = (ID: number) => {
   );
 };
 
-const getConvoys = () => {
+export const getConvoys = () => {
   return db.select<ConvoyData[]>(
     select({
       attributes: [
@@ -289,7 +298,10 @@ const getConvoys = () => {
   );
 };
 
-const setConvoyTradeRoute = async (ID: number, routeId: number | null) => {
+export const setConvoyTradeRoute = async (
+  ID: number,
+  routeId: number | null
+) => {
   const data = await db.execute(
     update({
       table: Tables.Convoy,
@@ -301,7 +313,7 @@ const setConvoyTradeRoute = async (ID: number, routeId: number | null) => {
   dbObservable.next({ type: DBEvents.convoyUpdated, data });
 };
 
-const getConvoy = async (ID: number) => {
+export const getConvoy = async (ID: number) => {
   return (
     await db.select<ConvoyData[]>(
       select({
@@ -313,7 +325,7 @@ const getConvoy = async (ID: number) => {
   )[0];
 };
 
-const getVehicles = () => {
+export const getVehicles = () => {
   return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["ID", "name", "posY", "posX", "convoy"]]],
@@ -322,7 +334,7 @@ const getVehicles = () => {
   );
 };
 
-const getVehiclesOfConvoy = (ID: number | null) => {
+export const getVehiclesOfConvoy = (ID: number | null) => {
   return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["name", "ID"]]],
@@ -338,7 +350,7 @@ const getVehiclesOfConvoy = (ID: number | null) => {
   );
 };
 
-const getConvoylessVehicles = () => {
+export const getConvoylessVehicles = () => {
   return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["name", "ID"]]],
@@ -357,7 +369,7 @@ export type TradeRouteView = {
   cityBName: string;
 };
 
-const getTradeRoute = (ID?: number) => {
+export const getTradeRoute = (ID?: number) => {
   return db.select<TradeRouteAsGeoJSONView[]>(
     select({
       table: Tables.TradeRoutes,
@@ -420,7 +432,7 @@ export type TradeRouteAsGeoJSONView = {
   cityBName: string;
 };
 
-const getTradeRoutesAsGeoJson = async (ID?: number) => {
+export const getTradeRoutesAsGeoJson = async (ID?: number) => {
   const tradeRoutes = await db.select<TradeRouteAsGeoJSONView[]>(
     select({
       table: Tables.TradeRoutes,
@@ -499,7 +511,7 @@ const getTradeRoutesAsGeoJson = async (ID?: number) => {
   );
 };
 
-const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
+export const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
   if (cityA && cityB) {
     const [start, end] = await Promise.all([cityA, cityB].map(getCity));
 
@@ -514,7 +526,7 @@ const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
   }
 };
 
-const getConvoysAsGeoJson = async () => {
+export const getConvoysAsGeoJson = async () => {
   const convoysData = await db.select<ConvoyData[]>(
     select({
       attributes: [
@@ -541,7 +553,7 @@ const getConvoysAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.Point, ConvoyData>;
 };
 
-const getConvoyGoalsAsGeoJson = async () => {
+export const getConvoyGoalsAsGeoJson = async () => {
   const convoysData = await db.select<ConvoyData[]>(
     select({
       attributes: [
@@ -573,7 +585,7 @@ const getConvoyGoalsAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
 
-const getVehicleGoalsAsGeoJson = async () => {
+export const getVehicleGoalsAsGeoJson = async () => {
   const convoysData = await db.select<VehicleData[]>(
     select({
       attributes: [
@@ -605,7 +617,7 @@ const getVehicleGoalsAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
 
-const getVehiclesAsGeoJson = async () => {
+export const getVehiclesAsGeoJson = async () => {
   const vehicleData = await db.select<VehicleData[]>(
     select({
       attributes: [
@@ -633,7 +645,7 @@ const getVehiclesAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 };
 
-const getCitiesAsGeoJson = async () => {
+export const getCitiesAsGeoJson = async () => {
   const citiesData = await db.select<CityEntity[]>(getQuery("getCities"));
 
   return {
@@ -649,11 +661,11 @@ const getCitiesAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 };
 
-const getCities = () => {
+export const getCities = () => {
   return db.select<CityEntity[]>(getQuery("getCities"));
 };
 
-const getCityIndustrialBuildings = async (ID: number) => {
+export const getCityIndustrialBuildings = async (ID: number) => {
   const industrialBuildings = await db.select<IndustrialBuilding[]>(
     `select IBS.ID, IBS.num as buildingNum, IB.nameKey
         from IndustrialBuilding as IB
@@ -675,7 +687,7 @@ const getCityIndustrialBuildings = async (ID: number) => {
   return industrialBuildings;
 };
 
-const getCity = async (ID: number): Promise<CityEntity> => {
+export const getCity = async (ID: number): Promise<CityEntity> => {
   const [cityData, classes, warehouse] = await Promise.all([
     db.select<CityEntity[]>(getQuery("getCity"), [ID]),
     getPopulation(ID),
@@ -701,7 +713,7 @@ const getCity = async (ID: number): Promise<CityEntity> => {
   };
 };
 
-const getNotExistingCityClasses = async (cityID: number) => {
+export const getNotExistingCityClasses = async (cityID: number) => {
   const [cityPopulationClasses, populationClasses] = await Promise.all([
     db.select<CityPopulationClassData[]>(
       `select CPC.ID, CPC.populationClass
@@ -719,28 +731,32 @@ const getNotExistingCityClasses = async (cityID: number) => {
   );
 };
 
-const addCityClass = (cityID: number, cityClassID: number) => {
+export const addCityClass = (cityID: number, cityClassID: number) => {
   return db.execute(
     `insert into CityPopulationClass (num, populationClass, city) values (0, $1, $2)`,
     [cityClassID, cityID]
   );
 };
 
-const updateCityWarehouseItem = (number: number, ID: number) => {
-  return db.execute(`update CityWarehouse set number = $1 where ID = $2`, [
+export const updateCityWarehouseItem = (number: number, ID: number) => {
+  return db.execute(`update Inventory set number = $1 where ID = $2`, [
     number,
     ID,
   ]);
 };
 
-const addCityWarehouseItem = (item: number, number: number, cityID: number) => {
+export const addCityWarehouseItem = (
+  item: number,
+  number: number,
+  cityID: number
+) => {
   return db.execute(
-    `insert into CityWarehouse (city, item, number) values ($1, $2, $3)`,
+    `insert into Inventory (city, item, number) values ($1, $2, $3)`,
     [cityID, item, number]
   );
 };
 
-const getCityDailyConsumption = (ID: number, classID: number) => {
+export const getCityDailyConsumption = (ID: number, classID: number) => {
   return db.select<DailyRequirement[]>(
     `select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey, T.translation
         from City as C
@@ -754,14 +770,14 @@ const getCityDailyConsumption = (ID: number, classID: number) => {
   );
 };
 
-const setPopulation = (ID: number, num: number) => {
+export const setPopulation = (ID: number, num: number) => {
   return db.execute(`update CityPopulationClass set num = $1 where ID = $2;`, [
     num,
     ID,
   ]);
 };
 
-const getPopulation = (ID: number) => {
+export const getPopulation = (ID: number) => {
   return db.select<PopulationData[]>(
     `select num, PopulationClass.name, PopulationClass.ID
             from City inner join CityPopulationClass on City.ID = CityPopulationClass.city 
@@ -772,11 +788,11 @@ const getPopulation = (ID: number) => {
   );
 };
 
-const getCityWarehouse = (CityID: number) => {
+export const getCityWarehouse = (CityID: number) => {
   return db.select<WarehouseItem[]>(
     `select I.nameKey, I.descriptionKey, CW.number, CW.ID, I.ID as item
                 from City as C
-                inner join CityWarehouse as CW on CW.city = C.ID
+                inner join Inventory as CW on CW.entity = C.ID
                 inner join Item as I on I.ID = CW.item
                 where C.ID = $1`,
     [CityID]
@@ -784,14 +800,14 @@ const getCityWarehouse = (CityID: number) => {
 };
 
 // ?
-const getNotAvailableItems = async (cityID: number) => {
+export const getNotAvailableItems = async (cityID: number) => {
   const [items, warehouse] = await Promise.all([
     db.select<Item[]>(`select I.nameKey, I.descriptionKey, I.ID
         from Item as I`),
     db.select<WarehouseItem[]>(
       `select I.nameKey, I.descriptionKey, CW.number, I.ID
         from City as C
-        inner join CityWarehouse as CW on CW.city = C.ID
+        inner join Inventory as CW on CW.entity = C.ID
         inner join Item as I on I.ID = CW.item
         where C.ID = $1`,
       [cityID]
@@ -807,7 +823,7 @@ const getNotAvailableItems = async (cityID: number) => {
     }));
 };
 
-const getCityIndustryData = (ID: number) => {
+export const getCityIndustryData = (ID: number) => {
   return db.select<IndustryData[]>(
     `select IB.ID as buildingId, IB.nameKey as industrialBuildingNameKey, IBS.num as buildingNum
             from IndustrialBuildingDailyRequirement as IBR
@@ -821,7 +837,7 @@ const getCityIndustryData = (ID: number) => {
 };
 
 // majd ezt befejezni
-const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
+export const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
   return (
     await db.select<(ResourceChange & { buildingNum: number })[]>(
       `select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
@@ -838,7 +854,7 @@ const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
   });
 };
 
-const getCityIndustrialResourceChanges = async (ID: number) => {
+export const getCityIndustrialResourceChanges = async (ID: number) => {
   const aggregated = await db.select<
     (ResourceChange & { buildingNum: number })[]
   >(
@@ -871,13 +887,13 @@ const getCityIndustrialResourceChanges = async (ID: number) => {
   );
 };
 
-const getAllIndustrialBuildings = () => {
+export const getAllIndustrialBuildings = () => {
   return db.select<IndustrialBuilding[]>(
     `select IB.ID, IB.nameKey from IndustrialBuilding as IB`
   );
 };
 
-const addIndustrialBuildings = (
+export const addIndustrialBuildings = (
   num: number,
   industrialBuilding: string,
   city: number
@@ -888,18 +904,18 @@ const addIndustrialBuildings = (
   );
 };
 
-const initialized = () => {
+export const initialized = () => {
   return typeof db !== "undefined";
 };
 
-const setIndustrialBuildingNumber = (ID: number, num: number) => {
+export const setIndustrialBuildingNumber = (ID: number, num: number) => {
   return db.execute(`update IndustrialBuildings set num = $1 where ID = $2;`, [
     num,
     ID,
   ]);
 };
 
-type ConvoyUpdateData = {
+export type ConvoyUpdateData = {
   minSpeed: number;
   dS: number;
   headingX: number;
@@ -909,7 +925,7 @@ type ConvoyUpdateData = {
   goalVectorX: number;
 } & ConvoyData;
 
-async function UpdateConvoys(dt: number) {
+export async function UpdateConvoys(dt: number) {
   const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
 
   const ret = await Promise.all(
@@ -930,7 +946,7 @@ async function UpdateConvoys(dt: number) {
             [dt, ID]
           );
 
-          dockedTo && dockConvoyToCity(ID, null)
+          dockedTo && dockConvoyToCity(ID, null);
 
           const angle = Math.atan2(goalVectorY, goalVectorX);
 
@@ -985,10 +1001,13 @@ async function UpdateConvoys(dt: number) {
   return ret;
 }
 
-async function getDockedConvoysForCity(cityID: number) {
+export async function getDockedConvoysForCity(cityID: number) {
   const convoysData = await db.select<ConvoyData[]>(
     select({
-      attributes: [[Tables.Convoy, "ID"], [Tables.Convoy, "name"]],
+      attributes: [
+        [Tables.Convoy, "ID"],
+        [Tables.Convoy, "name"],
+      ],
       table: Tables.Convoy,
       where: [{ A: [Tables.Convoy, "dockedTo"], value: cityID, operator: "=" }],
     })
@@ -997,8 +1016,8 @@ async function getDockedConvoysForCity(cityID: number) {
   return convoysData;
 }
 
-async function dockConvoyToCity(convoyID: number, cityID: number | null) {
-   await db.select<VehicleData[]>(
+export async function dockConvoyToCity(convoyID: number, cityID: number | null) {
+  await db.execute(
     update({
       table: Tables.Convoy,
       where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
@@ -1011,55 +1030,51 @@ async function dockConvoyToCity(convoyID: number, cityID: number | null) {
   });
 }
 
-export const GameState = {
-  dockConvoyToCity,
-  getDockedConvoysForCity,
-  UpdateConvoys,
-  initialized,
-  setIndustrialBuildingNumber,
-  getNotAvailableItems,
-  getCity,
-  getCityDailyConsumption,
-  getCityIndustryData,
-  getCityWarehouse,
-  updateCityWarehouseItem,
-  init,
-  setPopulation,
-  getNotExistingCityClasses,
-  addCityClass,
-  addCityWarehouseItem,
-  getAllIndustrialBuildings,
-  addIndustrialBuildings,
-  getCityIndustrialBuildings,
-  getCityIndustrialResourceChanges,
-  getCityIndustrialBuildingResourceChanges,
-  getCitiesAsGeoJson,
-  getTradeRoutesAsGeoJson,
-  getConvoyGoalsAsGeoJson,
-  GetTraderouteCount,
-  addTradeRoute,
-  dbObservable: dbObservable.asObservable(),
-  getTradeRoute,
-  getConvoys,
-  getVehiclesOfConvoy,
-  getVehicleTypes,
-  getVehicleType,
-  addVehicle,
-  getConvoylessVehicles,
-  addVehicleToConvoy,
-  CreateConvoy,
-  GetVehicleCount,
-  GetConvoiyCount,
-  getVehicles,
-  GetEncyclopediaArticles,
-  getConvoy,
-  getVehiclesAsGeoJson,
-  setConvoyGoal,
-  getConvoysAsGeoJson,
-  getVehicleGoalsAsGeoJson,
-  setVehicleGoal,
-  setConvoyTradeRoute,
-  getCities,
-};
+async function moveBetweenInventories(convoyID: number, cityID: number | null) {
+  await Promise.all([
+    db.execute(
+      update({
+        table: Tables.CityWarehouse,
+        where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
+        updateRows: [["dockedTo", cityID]],
+      })
+    ),
+    db.execute(
+      update({
+        table: Tables.CityWarehouse,
+        where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
+        updateRows: [["dockedTo", cityID]],
+      })
+    ),
+  ]);
 
-export const GameStateContext = createContext(GameState);
+  dbObservable.next({
+    type: DBEvents.inventoryUpdate,
+  });
+}
+
+export async function getAllItems() {
+  const items = await db.select<(Item & Translations)[]>(
+    select({
+      table: Tables.Item,
+      attributes: [
+        [Tables.Item, "nameKey"],
+        [Tables.Item, "descriptionKey"],
+        [Tables.Item, "ID"],
+        [Tables.Translations, "translation"],
+        [Tables.Translations, "category"],
+      ],
+      join: [
+        {
+          A: Tables.Translations,
+          equation: {
+            A: [Tables.Item, "nameKey"],
+            B: [Tables.Translations, "key"],
+          },
+        },
+      ],
+    })
+  );
+
+  return groupBy(items, "category");
+}
