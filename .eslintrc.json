@@ -10,7 +10,7 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": ["./tsconfig.json", "./webpack.config.js", "./webpack.prod.js"]
+    "project": ["./tsconfig.json"]
   },
   "plugins": ["react", "react-hooks", "@typescript-eslint"],
   "parser": "@typescript-eslint/parser",

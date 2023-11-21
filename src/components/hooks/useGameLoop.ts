@@ -4,6 +4,7 @@ import { ConvoyAI } from "@Services/AI/convoy";
 
 export enum RedrawType {
   Convoys,
+  Vehicles
 }
 export const Tick = new BehaviorSubject(new Date(1899, 1, 1).getTime());
 export const TickSpeed = new BehaviorSubject(1);

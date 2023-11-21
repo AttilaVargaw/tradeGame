@@ -1,7 +1,8 @@
+import { ID } from "../dbTypes";
 import { TableData } from "./common";
 
 export type ClassDailyRequirement = {
-  ID: number;
+  ID: ID;
   num: number;
   item: number;
   Class: number;

@@ -1,9 +1,10 @@
+import { ID } from "../dbTypes";
 import { TableData } from "./common";
 
 export type ConvoyData = {
   name: string;
   type: string;
-  ID: number;
+  ID: ID;
   posY: number;
   posX: number;
   route: number;

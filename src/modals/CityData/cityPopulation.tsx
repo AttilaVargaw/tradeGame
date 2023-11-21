@@ -19,6 +19,7 @@ import { Input, Select } from "@Components/input";
 import { Button } from "@Components/button";
 import { Label } from "@Components/label";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { ID } from "@Services/GameState/dbTypes";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -74,7 +75,7 @@ export default function CityPopulation() {
   }, [reload, cityID]);
 
   const onSetPopulation = useCallback(
-    (ID: number) =>
+    (ID: ID) =>
       async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         setPopulation(ID, Number.parseInt(value));
         setReload(!reload);

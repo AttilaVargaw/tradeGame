@@ -18,6 +18,7 @@ import {
   getCityIndustrialResourceChanges,
   setIndustrialBuildingNumber,
 } from "@Services/GameState/gameState";
+import { ID } from "@Services/GameState/dbTypes";
 
 const Container = styled.div`
   display: flex;
@@ -65,7 +66,7 @@ export default function CityIndustry() {
   }, [newBuilding, cityID, reload]);
 
   const setBuildingNumber = useCallback(
-    (ID: number) =>
+    (ID: ID) =>
       async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
         await setIndustrialBuildingNumber(ID, Number.parseInt(value));
         setReload(!reload);

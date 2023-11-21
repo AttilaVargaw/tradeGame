@@ -1,9 +1,10 @@
+import { ID } from "../dbTypes";
 import { TableData } from "./common";
 
 export type VehicleData = {
   name: string;
   type: number;
-  ID: number;
+  ID: ID;
   convoy: number;
   posY: number;
   posX: number;

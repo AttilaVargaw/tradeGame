@@ -1,10 +1,11 @@
+import { ID } from "../dbTypes";
 import { TableData } from "./common";
 
 export type CityPopulationClassData = {
   num: number;
   populationClass: number;
   city: number;
-  ID: number;
+  ID: ID;
 };
 
 export type CityPopulationClassTableName = "CityPopulationClass";

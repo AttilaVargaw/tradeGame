@@ -1,5 +1,6 @@
 import {
   ConvoyInsertData,
+  ID,
   TradeRouteInsertData,
   VehicleInsertData,
 } from "./GameState/dbTypes";
@@ -57,7 +58,7 @@ type Attr = {
 function InputToString(input: string | number | null) {
   switch (typeof input) {
     case "string":
-      return `"${input}"`;
+      return /(\+|-).*/.test(input) ? input : `"${input}"`;
     case "number":
       return `${input}`;
     case "undefined":
@@ -96,7 +97,7 @@ export function create<TABLE = string>(
     .map(attrToCreateQuery)
     .join(",")});`;
 }
-
+//bug with 0
 function whereEquationToString({
   operator = "=",
   A: [table, attr],
@@ -166,7 +167,7 @@ export function update({
   where,
   toBind = false,
 }: {
-  updateRows: [string, string | number | null][];
+  updateRows: [string, string | number | null | ID][];
   table: Tables;
   where?: WhereEquitation[];
   join?: Join[];

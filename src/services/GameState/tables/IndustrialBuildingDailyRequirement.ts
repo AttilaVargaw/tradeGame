@@ -1,3 +1,4 @@
+import { ID } from "../dbTypes";
 import { TableData } from "./common";
 
 export type IndustrialBuildingDailyRequirementName =
@@ -7,7 +8,7 @@ export type IndustrialBuildingDailyRequirementData = {
   industrialBuilding: number;
   item: number;
   num: number;
-  ID: number;
+  ID: ID;
 };
 
 export default {

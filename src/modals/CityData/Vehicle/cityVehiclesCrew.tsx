@@ -1,6 +1,6 @@
 import { Label } from "@Components/label";
 import styled from "styled-components";
-import { ItemTranswerRow } from "./warehouseItem";
+import { ItemTranswerRow } from "../warehouseItem";
 
 const Container = styled.div`
   display: grid;

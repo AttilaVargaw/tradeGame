@@ -9,7 +9,7 @@ import { CityEntity } from "@Services/GameState/tables/City";
 import CityPersonel from "./cityPersonel";
 import Modal from "../Modal";
 import styled from "styled-components";
-import CityVehicles from "./cityVehicles";
+import CityVehicles from "./Vehicle/cityVehicles";
 import { Toggle } from "@Components/toggle";
 import { getCity } from "@Services/GameState/gameState";
 
@@ -40,9 +40,7 @@ export default function CityDataModal(): JSX.Element | null {
   );
 
   useEffect(() => {
-    if (cityID) {
-      getCity(cityID).then(setCityData);
-    }
+    cityID && getCity(cityID).then(setCityData);
   }, [cityID]);
 
   const body = useMemo(

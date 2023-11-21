@@ -22,6 +22,7 @@ import {
   CityPositionProperty,
   DBEvent,
   VehicleType,
+  ID,
 } from "./dbTypes";
 import { getQuery } from "./queryManager";
 import groupBy from "lodash-es/groupBy";
@@ -63,7 +64,7 @@ function FillTable<T>({ name, initData }: TableData<T>) {
 }
 
 export const init = async () => {
-  //db = await Database.load("sqlite:tradegame.db");
+  //db = await Database.load("sqlite:tradegame.db");ű
   db = await Database.load("sqlite:memory");
   console.log(await appLocalDataDir());
 
@@ -145,7 +146,7 @@ export async function CreateConvoy(name: string) {
 }
 
 export const setConvoyGoal = async (
-  convoyID: number,
+  convoyID: ID,
   goalX: number,
   goalY: number
 ) => {
@@ -164,7 +165,7 @@ export const setConvoyGoal = async (
 };
 
 export const setVehicleGoal = async (
-  ID: number,
+  ID: ID,
   goalX: number,
   goalY: number
 ) => {
@@ -183,8 +184,8 @@ export const setVehicleGoal = async (
 };
 
 export const addVehicleToConvoy = async (
-  convoyID: number,
-  VehicleID: number
+  convoyID: ID,
+  VehicleID: ID
 ) => {
   const data = await db.execute(
     update({
@@ -274,7 +275,7 @@ export const getVehicleTypes = (type: string) => {
   );
 };
 
-export const getVehicleType = (ID: number) => {
+export const getVehicleType = (ID: ID) => {
   return db.select<VehicleType[]>(
     select({
       attributes: [[Tables.VehicleTypes, ["name", "desc", "ID", "price"]]],
@@ -299,13 +300,13 @@ export const getConvoys = () => {
 };
 
 export const setConvoyTradeRoute = async (
-  ID: number,
-  routeId: number | null
+  ID: ID,
+  routeID: ID | null
 ) => {
   const data = await db.execute(
     update({
       table: Tables.Convoy,
-      updateRows: [["route", routeId]],
+      updateRows: [["route", routeID]],
       where: [{ A: [Tables.Convoy, "ID"], value: ID }],
     })
   );
@@ -313,7 +314,7 @@ export const setConvoyTradeRoute = async (
   dbObservable.next({ type: DBEvents.convoyUpdated, data });
 };
 
-export const getConvoy = async (ID: number) => {
+export const getConvoy = async (ID: ID) => {
   return (
     await db.select<ConvoyData[]>(
       select({
@@ -334,7 +335,7 @@ export const getVehicles = () => {
   );
 };
 
-export const getVehiclesOfConvoy = (ID: number | null) => {
+export const getVehiclesOfConvoy = (ID: ID | null) => {
   return db.select<VehicleData[]>(
     select({
       attributes: [[Tables.Vehicle, ["name", "ID"]]],
@@ -362,9 +363,9 @@ export const getConvoylessVehicles = () => {
 
 export type TradeRouteView = {
   name: string;
-  ID: number;
-  cityAID: number;
-  cityBID: number;
+  ID: ID;
+  cityAID: ID;
+  cityBID: ID;
   cityAName: string;
   cityBName: string;
 };
@@ -425,9 +426,9 @@ export type TradeRouteAsGeoJSONView = {
   cityAPosY: number;
   cityBPosY: number;
   name: string;
-  ID: number;
-  cityAID: number;
-  cityBID: number;
+  ID: ID;
+  cityAID: ID;
+  cityBID: ID;
   cityAName: string;
   cityBName: string;
 };
@@ -665,7 +666,7 @@ export const getCities = () => {
   return db.select<CityEntity[]>(getQuery("getCities"));
 };
 
-export const getCityIndustrialBuildings = async (ID: number) => {
+export const getCityIndustrialBuildings = async (ID: ID) => {
   const industrialBuildings = await db.select<IndustrialBuilding[]>(
     `select IBS.ID, IBS.num as buildingNum, IB.nameKey
         from IndustrialBuilding as IB
@@ -687,11 +688,14 @@ export const getCityIndustrialBuildings = async (ID: number) => {
   return industrialBuildings;
 };
 
-export const getCity = async (ID: number): Promise<CityEntity> => {
-  const [cityData, classes, warehouse] = await Promise.all([
-    db.select<CityEntity[]>(getQuery("getCity"), [ID]),
+export const getCity = async (ID: ID): Promise<CityEntity> => {
+  const cityData = (
+    await db.select<CityEntity[]>(getQuery("getCity"), [ID])
+  )[0];
+
+  const [classes, warehouse] = await Promise.all([
     getPopulation(ID),
-    getCityWarehouse(ID),
+    getEntityInventory(cityData.entity),
   ]);
 
   await Promise.all(
@@ -702,7 +706,7 @@ export const getCity = async (ID: number): Promise<CityEntity> => {
   );
 
   return {
-    ...cityData[0],
+    ...cityData,
     classes,
     industry: {
       industrialBuildings: await getCityIndustrialBuildings(ID),
@@ -713,7 +717,7 @@ export const getCity = async (ID: number): Promise<CityEntity> => {
   };
 };
 
-export const getNotExistingCityClasses = async (cityID: number) => {
+export const getNotExistingCityClasses = async (cityID: ID) => {
   const [cityPopulationClasses, populationClasses] = await Promise.all([
     db.select<CityPopulationClassData[]>(
       `select CPC.ID, CPC.populationClass
@@ -731,14 +735,14 @@ export const getNotExistingCityClasses = async (cityID: number) => {
   );
 };
 
-export const addCityClass = (cityID: number, cityClassID: number) => {
+export const addCityClass = (cityID: ID, cityClassID: ID) => {
   return db.execute(
     `insert into CityPopulationClass (num, populationClass, city) values (0, $1, $2)`,
     [cityClassID, cityID]
   );
 };
 
-export const updateCityWarehouseItem = (number: number, ID: number) => {
+export const updateCityWarehouseItem = (number: number, ID: ID) => {
   return db.execute(`update Inventory set number = $1 where ID = $2`, [
     number,
     ID,
@@ -748,7 +752,7 @@ export const updateCityWarehouseItem = (number: number, ID: number) => {
 export const addCityWarehouseItem = (
   item: number,
   number: number,
-  cityID: number
+  cityID: ID
 ) => {
   return db.execute(
     `insert into Inventory (city, item, number) values ($1, $2, $3)`,
@@ -756,7 +760,7 @@ export const addCityWarehouseItem = (
   );
 };
 
-export const getCityDailyConsumption = (ID: number, classID: number) => {
+export const getCityDailyConsumption = (ID: ID, classID: ID) => {
   return db.select<DailyRequirement[]>(
     `select CDR.num as dailyRequirement, CPC.num, CDR.item, I.nameKey, PC.name, CDR.ID as dailyRequirementID, I.descriptionKey, T.translation
         from City as C
@@ -770,14 +774,14 @@ export const getCityDailyConsumption = (ID: number, classID: number) => {
   );
 };
 
-export const setPopulation = (ID: number, num: number) => {
+export const setPopulation = (ID: ID, num: number) => {
   return db.execute(`update CityPopulationClass set num = $1 where ID = $2;`, [
     num,
     ID,
   ]);
 };
 
-export const getPopulation = (ID: number) => {
+export const getPopulation = (ID: ID) => {
   return db.select<PopulationData[]>(
     `select num, PopulationClass.name, PopulationClass.ID
             from City inner join CityPopulationClass on City.ID = CityPopulationClass.city 
@@ -788,19 +792,19 @@ export const getPopulation = (ID: number) => {
   );
 };
 
-export const getCityWarehouse = (CityID: number) => {
+export const getEntityInventory = (entityID: ID) => {
   return db.select<WarehouseItem[]>(
     `select I.nameKey, I.descriptionKey, CW.number, CW.ID, I.ID as item
                 from City as C
                 inner join Inventory as CW on CW.entity = C.ID
                 inner join Item as I on I.ID = CW.item
                 where C.ID = $1`,
-    [CityID]
+    [entityID]
   );
 };
 
 // ?
-export const getNotAvailableItems = async (cityID: number) => {
+export const getNotAvailableItems = async (cityID: ID) => {
   const [items, warehouse] = await Promise.all([
     db.select<Item[]>(`select I.nameKey, I.descriptionKey, I.ID
         from Item as I`),
@@ -823,7 +827,7 @@ export const getNotAvailableItems = async (cityID: number) => {
     }));
 };
 
-export const getCityIndustryData = (ID: number) => {
+export const getCityIndustryData = (ID: ID) => {
   return db.select<IndustryData[]>(
     `select IB.ID as buildingId, IB.nameKey as industrialBuildingNameKey, IBS.num as buildingNum
             from IndustrialBuildingDailyRequirement as IBR
@@ -837,7 +841,7 @@ export const getCityIndustryData = (ID: number) => {
 };
 
 // majd ezt befejezni
-export const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
+export const getCityIndustrialBuildingResourceChanges = async (ID: ID) => {
   return (
     await db.select<(ResourceChange & { buildingNum: number })[]>(
       `select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
@@ -854,7 +858,7 @@ export const getCityIndustrialBuildingResourceChanges = async (ID: number) => {
   });
 };
 
-export const getCityIndustrialResourceChanges = async (ID: number) => {
+export const getCityIndustrialResourceChanges = async (ID: ID) => {
   const aggregated = await db.select<
     (ResourceChange & { buildingNum: number })[]
   >(
@@ -872,7 +876,7 @@ export const getCityIndustrialResourceChanges = async (ID: number) => {
     ([key, coll]) => {
       const { descriptionKey, ID, num, buildingNum } = coll[0] as {
         descriptionKey: string;
-        ID: number;
+        ID: ID;
         num: number;
         buildingNum: number;
       };
@@ -908,7 +912,7 @@ export const initialized = () => {
   return typeof db !== "undefined";
 };
 
-export const setIndustrialBuildingNumber = (ID: number, num: number) => {
+export const setIndustrialBuildingNumber = (ID: ID, num: number) => {
   return db.execute(`update IndustrialBuildings set num = $1 where ID = $2;`, [
     num,
     ID,
@@ -1001,7 +1005,7 @@ export async function UpdateConvoys(dt: number) {
   return ret;
 }
 
-export async function getDockedConvoysForCity(cityID: number) {
+export async function getDockedConvoysForCity(cityID: ID) {
   const convoysData = await db.select<ConvoyData[]>(
     select({
       attributes: [
@@ -1016,7 +1020,10 @@ export async function getDockedConvoysForCity(cityID: number) {
   return convoysData;
 }
 
-export async function dockConvoyToCity(convoyID: number, cityID: number | null) {
+export async function dockConvoyToCity(
+  convoyID: ID,
+  cityID: ID | null
+) {
   await db.execute(
     update({
       table: Tables.Convoy,
@@ -1030,20 +1037,36 @@ export async function dockConvoyToCity(convoyID: number, cityID: number | null) 
   });
 }
 
-async function moveBetweenInventories(convoyID: number, cityID: number | null) {
+console.log(
+  update({
+    table: Tables.CityWarehouse,
+    where: [{ A: [Tables.Convoy, "ID"], value: 0, operator: "=" }],
+    updateRows: [["amount", "amount - 5"]],
+  })
+);
+
+export async function moveBetweenInventories(
+  inventoryAID: ID,
+  inventoryBID: ID,
+  amount: number
+) {
   await Promise.all([
     db.execute(
       update({
         table: Tables.CityWarehouse,
-        where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
-        updateRows: [["dockedTo", cityID]],
+        where: [
+          { A: [Tables.Convoy, "ID"], value: inventoryAID, operator: "=" },
+        ],
+        updateRows: [["amount - ", amount]],
       })
     ),
     db.execute(
       update({
         table: Tables.CityWarehouse,
-        where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
-        updateRows: [["dockedTo", cityID]],
+        where: [
+          { A: [Tables.Convoy, "ID"], value: inventoryBID, operator: "=" },
+        ],
+        updateRows: [["amount + ", amount]],
       })
     ),
   ]);

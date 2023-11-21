@@ -1,4 +1,4 @@
-import { gameRedrawSubject } from "@Components/hooks/useGameLoop";
+import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import {
   getVehicleGoalsAsGeoJson,
   getVehiclesAsGeoJson,
@@ -39,13 +39,14 @@ export function VehiclesLayer() {
     getVehiclesAsGeoJson().then((vehicles) => vehicleLayer.addData(vehicles));
   }
 
-  gameRedrawSubject.subscribe((event) => {
-    //switch(event) {
-    //case RedrawType.
-    //}
+  const redrawSubscription = gameRedrawSubject.subscribe((event) => {
+    switch (event) {
+      case RedrawType.Vehicles:
+        update();
+    }
   });
 
   update();
 
-  return vehicleLayer;
+  return { destructor: () => redrawSubscription.unsubscribe(), vehicleLayer };
 }

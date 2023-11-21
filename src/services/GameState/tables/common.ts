@@ -1,7 +1,9 @@
+import { ID } from "../dbTypes";
+
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
 
 export type ResourceChange = {
-  ID: number;
+  ID: ID;
   item: string;
   num: number;
   nameKey: string;

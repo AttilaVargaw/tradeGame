@@ -1,24 +1,26 @@
 import { ResourceChange } from "./tables/common";
 
+export type ID = number;
+
 export type DailyRequirement = {
   num: number;
-  itemID: number;
+  itemID: ID;
   nameKey: string;
-  ID: number;
-  dailyRequirementID: number;
+  ID: ID;
+  dailyRequirementID: ID;
   dailyRequirement: number;
   descriptionKey: number;
   translation: string;
 };
 
 export type Item = {
-  ID: number;
+  ID: ID;
   nameKey: string;
   descriptionKey: string;
 };
 
 export type PopulationData = {
-  ID: number;
+  ID: ID;
   num: number;
   name: string;
   dailyRequirement: DailyRequirement[];
@@ -27,26 +29,26 @@ export type PopulationData = {
 export type IndustrialBuilding = {
   buildingNum: number;
   nameKey: string;
-  ID: number;
+  ID: ID;
   inputOutputData: ResourceChange[];
 };
 
 export type WarehouseItem = {
-  ID: number;
+  ID: ID;
   number: number;
   city: string;
   nameKey: string;
   dailyRequirement: number;
-  itemID: number;
+  itemID: ID;
 };
 
 export type PopulationClass = {
-  ID: number;
+  ID: ID;
   name: string;
 };
 
 export type TradeRoute = {
-  cityID: number[];
+  cityID: ID[];
   start: number[];
   end: number[];
   inBetween: number[][];
@@ -56,7 +58,7 @@ export type TradeRoute = {
 export type TradeRouteProps = {
   cities: number[];
   name: string;
-  ID: number;
+  ID: ID;
 };
 
 export enum DBEvents {
@@ -85,13 +87,13 @@ export type DBEvent = {
 export type CityPositionProperty = {
   name: string;
   type: string;
-  ID: number;
+  ID: ID;
 };
 
 export type VehicleType = {
   name: string;
   desc: string;
-  ID: number;
+  ID: ID;
   price: number;
   type: string;
 };

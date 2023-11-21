@@ -6,6 +6,6 @@ export const TickSpeed = new BehaviorSubject(1);
 
 const startTick = new Date(1899, 1, 1).getTime();
 //let prevTick = Date.now();
-let currentTick = startTick;
-let interval = 0;
+const currentTick = startTick;
+const interval = 0;
 

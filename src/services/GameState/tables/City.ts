@@ -1,4 +1,4 @@
-import { IndustrialBuilding, PopulationData, WarehouseItem } from "../dbTypes";
+import { ID, IndustrialBuilding, PopulationData, WarehouseItem } from "../dbTypes";
 import { ResourceChange, TableData } from "./common";
 
 export type CityTableName = "City";
@@ -10,7 +10,7 @@ export type IndustryData = {
 
 export type CityEntity = {
   classes: PopulationData[];
-  ID: number;
+  ID: ID;
   posX: number;
   posY: number;
   type: string;
@@ -18,15 +18,16 @@ export type CityEntity = {
   fullPopulation: number;
   industry: IndustryData;
   warehouse: WarehouseItem[];
+  entity: number;
 };
 
 export type CityData = {
-  ID: number;
+  ID: ID;
   posX: number;
   posY: number;
   type: number;
   name: string;
-  entity?: number;
+  entity: number;
   industrialBuildings?: number;
 };
 

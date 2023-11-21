@@ -17,6 +17,7 @@ import { CityEntity } from "@Services/GameState/tables/City";
 import { addToContextMenu } from "@Services/contextMenu";
 import L, { LatLngExpression, circle } from "leaflet";
 import { useRef } from "react";
+import { ID } from "@Services/GameState/dbTypes";
 import { useEffect } from "react";
 
 const CityColors: { [key: string]: string } = {
@@ -172,7 +173,7 @@ export function useCitites() {
           })
           .addEventListener("dblclick", () => {
             if (citiesGeoJson.current) {
-              const cityID: number | undefined =
+              const cityID: ID | undefined =
                 citiesGeoJson.current?.features.find(
                   ({ properties: { ID: ID2 } }) => ID === ID2
                 )?.properties.ID;

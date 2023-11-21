@@ -4,6 +4,7 @@ import Modal from "./Modal";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
 import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
 import { GetEncyclopediaArticles } from "@Services/GameState/gameState";
+import { ID } from "@Services/GameState/dbTypes";
 //import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
 
 export const EncyclopediaModal = () => {
@@ -31,7 +32,7 @@ export const EncyclopediaModal = () => {
   }, [currentFolder]);
 
   const onFolderClick = useCallback(
-    (ID: number) => () => {
+    (ID: ID) => () => {
       setCurrentFolder(ID);
     },
     []

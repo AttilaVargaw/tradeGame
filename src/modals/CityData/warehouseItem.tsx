@@ -4,6 +4,7 @@ import { Transfer } from "./transfer";
 import { Button } from "@Components/button";
 import { useCallback, useState } from "react";
 import { Input } from "@Components/input";
+import { ID } from "@Services/GameState/dbTypes";
 
 const ElementContainer = styled.div`
   min-width: 10em;
@@ -22,8 +23,8 @@ export function ItemTranswerRow({
   label: string;
   aNum: number;
   bNum: number;
-  aID: number;
-  bID: number;
+  aID: ID;
+  bID: ID;
   interchange: (idA: number, idB: number, num: number) => void;
 }) {
   const [num, setNum] = useState(1);

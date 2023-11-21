@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
-import { DBEvents } from "@Services/GameState/dbTypes";
+import { DBEvents, ID } from "@Services/GameState/dbTypes";
 import { dbObservable, getTradeRoutesAsGeoJson } from "@Services/GameState/gameState";
 import L, { PathOptions, tooltip } from "leaflet";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
 export type RouteLayerProps = {
-  // onRouteClick: (ID: number) => void;
+  // onRouteClick: (ID: ID) => void;
 };
 
 const tradeRouteStyle: PathOptions = {
@@ -24,7 +24,7 @@ export function useTradeRoutes() {
   const [, setCurrentModal] = useCurrentModal();
 
   const routeClick = useCallback(
-    (ID: number) => () => {
+    (ID: ID) => () => {
       setSelectedTradeRoute(ID);
       setCurrentModal("tradeRoute");
     },
@@ -49,7 +49,7 @@ export function useTradeRoutes() {
   }, []);
 
   const routeLayer = useRef(
-    L.geoJSON<{ ID: number }>([], {
+    L.geoJSON<{ ID: ID }>([], {
       style: tradeRouteStyle,
       onEachFeature: ({ properties: { ID } }, layer) => {
         layer

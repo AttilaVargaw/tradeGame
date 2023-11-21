@@ -24,6 +24,8 @@ import { GridItem } from "@Components/grid";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { ConvoyInfo } from "./convoyInfo";
 import { Button } from "@Components/button";
+import { ID } from "@Services/GameState/dbTypes";
+
 
 /*enum ConvoyModalSubpages {
   list,
@@ -37,7 +39,7 @@ export const ConvoyItem = ({
 }: {
   name: string;
   icon?: string;
-  id: number;
+  id: ID;
 }) => {
   const [, setCurrentConvoy] = useCurrentConvoy();
 

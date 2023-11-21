@@ -79,7 +79,7 @@ export function GameMap(): JSX.Element {
           convoyLayer.current,
           background,
           cityLayer.current,
-          vehicleLayer,
+          vehicleLayer.vehicleLayer,
           tradeRoutes.current,
         ],
         doubleClickZoom: false,
@@ -105,20 +105,16 @@ export function GameMap(): JSX.Element {
           },
           {
             cities: cityLayer.current,
-            vehicles: vehicleLayer,
+            vehicles: vehicleLayer.vehicleLayer,
             convoys: convoyLayer.current,
             tradeRoutes: tradeRoutes.current,
           },
           { hideSingleBase: false }
         )
         .addTo(mapInstance.current);
-  }, [cityLayer, convoyLayer, tradeRoutes]);
 
-  useEffect(() => {
-    getConvoysAsGeoJson().then((convoys) => {
-      convoyLayer.current.addData(convoys);
-    });
-  }, [convoyLayer]);
+      return () => vehicleLayer.destructor()
+  }, [cityLayer, convoyLayer, tradeRoutes]);
 
   return <StyledMapContainer ref={map} />;
 }

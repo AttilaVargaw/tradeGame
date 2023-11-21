@@ -16,10 +16,11 @@ import { Button } from "@Components/button";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import {
   addCityWarehouseItem,
-  getCityWarehouse,
+  getEntityInventory,
   getNotAvailableItems,
   updateCityWarehouseItem,
 } from "@Services/GameState/gameState";
+import { ID } from "@Services/GameState/dbTypes";
 
 export default function CityWarehouseForm() {
   const debugMode = useContext(debugModeContext);
@@ -43,7 +44,7 @@ export default function CityWarehouseForm() {
           number: 0,
         });
       });
-      getCityWarehouse(cityID).then(setWarehouse);
+      getEntityInventory(cityID).then(setWarehouse);
     }
   }, [cityID]);
 
@@ -53,7 +54,7 @@ export default function CityWarehouseForm() {
 
       await Promise.all([
         await getNotAvailableItems(cityID),
-        await getCityWarehouse(cityID),
+        await getEntityInventory(cityID),
       ]).then(([notAmiableItems, cityWarehouse]) => {
         setItems(notAmiableItems);
         setWarehouse(cityWarehouse);
@@ -82,13 +83,13 @@ export default function CityWarehouseForm() {
   );
 
   const updateItemNumber = useCallback(
-    (ID: number) =>
+    (ID: ID) =>
       async ({
         currentTarget: { value },
       }: React.ChangeEvent<HTMLInputElement>) => {
         if (cityID) {
           await updateCityWarehouseItem(Number(value), ID);
-          await getCityWarehouse(cityID).then(setWarehouse);
+          await getEntityInventory(cityID).then(setWarehouse);
         }
       },
     [cityID]

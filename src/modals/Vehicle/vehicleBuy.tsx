@@ -9,13 +9,18 @@ import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { Button } from "@Components/button";
 import { makeid } from "@Services/utils";
 import { BuyItem } from "./buyItem";
-import { addVehicle, getVehicleType, getVehicleTypes } from "@Services/GameState/gameState";
+import {
+  addVehicle,
+  getVehicleType,
+  getVehicleTypes,
+} from "@Services/GameState/gameState";
+import { ID } from "@Services/GameState/dbTypes";
 
 function GenerateVehicleName() {
   return `${makeid(3)}-${makeid(3)}`;
 }
 
-export const OrderPage: FC<{ ID: number; onBack: () => void }> = ({
+export const OrderPage: FC<{ ID: ID; onBack: () => void }> = ({
   ID,
   onBack,
 }) => {
@@ -86,7 +91,7 @@ export const VehicleBuyModal = () => {
   );
 
   const onOrderClick = useCallback(
-    (ID: number) => () => {
+    (ID: ID) => () => {
       setCurrentVehicle(ID);
     },
     []

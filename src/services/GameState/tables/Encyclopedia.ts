@@ -1,8 +1,9 @@
+import { ID } from "../dbTypes";
 import { TableData } from "./common";
 
 export type EncyclopediaData = {
   name: string;
-  ID: number;
+  ID: ID;
   body: string;
   parent?: number | null;
   folder?: boolean;

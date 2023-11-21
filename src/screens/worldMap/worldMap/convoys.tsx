@@ -4,9 +4,7 @@ import {
 } from "@Components/hooks/useCurrentConvoy";
 import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
-import { DBEvents } from "@Services/GameState/dbTypes";
 import {
-  dbObservable,
   getConvoyGoalsAsGeoJson,
   getConvoysAsGeoJson,
 } from "@Services/GameState/gameState";
@@ -24,35 +22,32 @@ const currentConvoyMarker = circle([0, 0], {
 
 export function useConvoyLayer() {
   useEffect(() => {
+    function Update() {
+      getConvoysAsGeoJson().then((convoys) => {
+        convoyLayer.current.clearLayers();
+        convoyLayer.current.addData(convoys);
+
+        if (currentConvoySubject.value) {
+          currentConvoyMarker
+            .addTo(convoyLayer.current)
+            .setLatLng(
+              convoys.features.find(
+                (el) => el.properties.ID === currentConvoySubject.value
+              )?.geometry.coordinates as LatLngExpression
+            );
+        }
+        getConvoyGoalsAsGeoJson().then((lines) => {
+          convoyLayer.current.addData(lines);
+        });
+      });
+    }
+
+    Update();
+
     const subscription = gameRedrawSubject.subscribe((event) => {
       switch (event) {
         case RedrawType.Convoys:
-          getConvoysAsGeoJson().then((convoys) => {
-            convoyLayer.current.clearLayers();
-            convoyLayer.current.addData(convoys);
-
-            if (currentConvoySubject.value) {
-              currentConvoyMarker
-                .addTo(convoyLayer.current)
-                .setLatLng(
-                  convoys.features.find(
-                    (el) => el.properties.ID === currentConvoySubject.value
-                  )?.geometry.coordinates as LatLngExpression
-                );
-            }
-            getConvoyGoalsAsGeoJson().then((lines) => {
-              convoyLayer.current.addData(lines);
-            });
-          });
-      }
-    });
-
-    dbObservable.subscribe((event) => {
-      if (
-        event.type === DBEvents.convoyDock ||
-        event.type === DBEvents.convoyUnDock
-      ) {
-        console.log(event.type === DBEvents.convoyDock ? "docked" : "undocked");
+          Update();
       }
     });
 
@@ -71,11 +66,8 @@ export function useConvoyLayer() {
 
   const convoyLayer = useRef<L.GeoJSON>(
     L.geoJSON([], {
-      pointToLayer: ({
-        geometry: { coordinates },
-        properties: { ID, name },
-      }) => {
-        return circle(coordinates as LatLngExpression, {
+      pointToLayer: ({ geometry: { coordinates }, properties: { ID, name } }) =>
+        circle(coordinates as LatLngExpression, {
           color: "yellow",
           radius: 4,
           bubblingMouseEvents: false,
@@ -96,8 +88,7 @@ export function useConvoyLayer() {
               direction: "top",
               interactive: true,
             })
-          );
-      },
+          ),
     })
   );
 

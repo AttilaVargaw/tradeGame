@@ -14,6 +14,7 @@ import {
   getConvoy,
   dbObservable,
 } from "@Services/GameState/gameState";
+import { ID } from "@Services/GameState/dbTypes";
 
 export function ConvoyTradeRouteModal() {
   const [tradeRoutes, setTraderoutes] = useState<TradeRouteAsGeoJSONView[]>();
@@ -67,7 +68,7 @@ export function ConvoyTradeRouteModal() {
   }, [currentlySelectedTradeRoute]);
 
   const selectTradeRoute = useCallback(
-    (ID: number | null) => () => {
+    (ID: ID | null) => () => {
       if (currentConvoyID) {
         setConvoyTradeRoute(currentConvoyID, ID);
         if (!ID) {
