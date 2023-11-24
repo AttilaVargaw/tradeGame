@@ -1,15 +1,16 @@
+import L, { LatLngExpression, circle } from "leaflet";
+import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import {
   currentConvoyObservable,
   currentConvoySubject,
 } from "@Components/hooks/useCurrentConvoy";
-import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
-import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
 import {
   getConvoyGoalsAsGeoJson,
   getConvoysAsGeoJson,
-} from "@Services/GameState/gameState";
-import L, { LatLngExpression, circle } from "leaflet";
+} from "@Services/GameState/tables/Convoy/convoyQueries";
 import { useEffect, useRef } from "react";
+
+import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
 
 const currentConvoyMarker = circle([0, 0], {
   dashOffset: "10",

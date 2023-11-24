@@ -1,29 +1,30 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-
-import { IndustrialBuilding } from "@Services/GameState/dbTypes";
-
-import debugModeContext from "../../debugModeContext";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { ResourceChange } from "@Services/GameState/tables/common";
-import { Button } from "@Components/button";
-import { Label } from "@Components/label";
 import { Input, Select } from "@Components/input";
-import { Td, Th, Tr } from "@Components/grid";
-import { Toggle } from "@Components/toggle";
-import { styled } from "styled-components";
 import {
   addIndustrialBuildings,
   getAllIndustrialBuildings,
   getCityIndustrialBuildings,
   getCityIndustrialResourceChanges,
   setIndustrialBuildingNumber,
-} from "@Services/GameState/gameState";
-import { ID } from "@Services/GameState/dbTypes";
+} from "@Services/GameState/tables/City/cityQueries";
+import { useCallback, useContext, useEffect, useState } from "react";
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+import { Button } from "@Components/button";
+import { ID } from "@Services/GameState/dbTypes";
+import { IndustrialBuilding } from "@Services/GameState/dbTypes";
+import { Label } from "@Components/label";
+import { ResourceChange } from "@Services/GameState/tables/common";
+import { Toggle } from "@Components/toggle";
+import { WarehouseRow } from "../../components/WarehouseRow";
+import debugModeContext from "../../debugModeContext";
+import { styled } from "styled-components";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+
+const Container = styled.div<{ $aggeratedView: boolean }>`
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-template-columns: ${({ $aggeratedView }) =>
+    $aggeratedView ? "repeat(3, 1fr)" : "repeat(4, 1fr)"};
+  gap: 0.5em;
 `;
 
 export default function CityIndustry() {
@@ -45,9 +46,11 @@ export default function CityIndustry() {
 
   useEffect(() => {
     if (cityID) {
-      getCityIndustrialResourceChanges(cityID).then(setAggregatedInputOutput);
+      getCityIndustrialResourceChanges(cityID.ID).then(
+        setAggregatedInputOutput
+      );
       getAllIndustrialBuildings().then(setAllIndustrialBuildings);
-      getCityIndustrialBuildings(cityID).then(setIndustrialBuildings);
+      getCityIndustrialBuildings(cityID.ID).then(setIndustrialBuildings);
     }
   }, [reload, cityID]);
 
@@ -60,7 +63,7 @@ export default function CityIndustry() {
 
   const addNewBuilding = useCallback(async () => {
     if (cityID) {
-      await addIndustrialBuildings(1, newBuilding, cityID);
+      await addIndustrialBuildings(1, newBuilding, cityID.ID);
       setReload(!reload);
     }
   }, [newBuilding, cityID, reload]);
@@ -77,83 +80,58 @@ export default function CityIndustry() {
   const [aggeratedView, setAggeratedView] = useState(false);
 
   return (
-    <Container>
-      <Tr>
-        <Th>
-          <Toggle
-            style={{ padding: "1em" }}
-            active={aggeratedView}
-            onChange={setAggeratedView}
-          >
-            Aggregated
-          </Toggle>
-        </Th>
-        <Th>{!aggeratedView && <Label type="painted">Level</Label>}</Th>
-        <Th>
-          <Label type="painted">Daily requirements</Label>
-        </Th>
-        <Th>
-          <Label type="painted">Daily production</Label>
-        </Th>
-      </Tr>
+    <Container $aggeratedView={aggeratedView}>
+      <Toggle active={aggeratedView} onChange={setAggeratedView}>
+        Aggregated
+      </Toggle>
+      {!aggeratedView && <Label type="painted">Level</Label>}
+      <Label type="painted">Daily requirements</Label>
+      <Label type="painted">Daily production</Label>
       {!aggeratedView &&
         industrialBuildings.map(
           ({ nameKey, buildingNum, inputOutputData, ID }) => (
-            <Tr key={ID}>
-              <Td>
-                <Label type="painted">{nameKey}</Label>
-              </Td>
+            <>
+              <Label type="painted">{nameKey}</Label>
               {
-                <Td>
+                <div>
                   {debugMode ? (
                     <Input
-                      style={{
-                        paddingTop: ".5em",
-                        paddingBottom: ".5em",
-                        width: "80%",
-                      }}
                       min={0}
                       type="number"
                       value={buildingNum}
                       onChange={setBuildingNumber(ID)}
+                      style={{ width: "100%" }}
                     />
                   ) : (
                     <Label type="led">{buildingNum}</Label>
                   )}
-                </Td>
+                </div>
               }
-
               {inputOutputData.length > 0 && (
-                <Td>
+                <div>
                   {inputOutputData
                     .filter(({ num }) => num < 0)
                     .map(({ nameKey, num, ID }) => (
-                      <div key={ID}>
-                        <Label type="painted">{nameKey}</Label>
-                        <Label type="painted">{num}</Label>
-                      </div>
+                      <WarehouseRow key={ID} label={nameKey} number={num} />
                     ))}
-                </Td>
+                </div>
               )}
               {inputOutputData.length > 0 && (
-                <Td>
+                <div>
                   {inputOutputData
                     .filter(({ num }) => num > 0)
                     .map(({ nameKey, num, ID }) => (
-                      <div key={ID}>
-                        <Label type="painted">{nameKey}</Label>
-                        <Label type="painted">{num}</Label>
-                      </div>
+                      <WarehouseRow key={ID} label={nameKey} number={num} />
                     ))}
-                </Td>
+                </div>
               )}
-            </Tr>
+            </>
           )
         )}
 
       {!aggeratedView && debugMode && (
-        <Tr>
-          <Td>
+        <div style={{ display: "inline-flex", justifyContent: "center" }}>
+          <div>
             <Select onChange={setNewBuildingDropdown}>
               {allIndustrialBuildings.map(({ ID, nameKey }) => (
                 <option key={ID} value={ID}>
@@ -161,37 +139,30 @@ export default function CityIndustry() {
                 </option>
               ))}
             </Select>
-          </Td>
-          <Td>
-            <Button onClick={addNewBuilding}>Add</Button>
-          </Td>
-        </Tr>
+          </div>
+          <Button style={{ alignSelf: "center" }} onClick={addNewBuilding}>
+            Add
+          </Button>
+        </div>
       )}
 
       {aggeratedView &&
-        aggregatedInputOutput
-          .filter(({ num }) => num < 0)
-          .map(({ num, nameKey, ID }) => (
-            <Tr key={ID}>
-              <Td>
-                <Label type="painted">{nameKey}</Label>
+        aggregatedInputOutput.map(({ num, nameKey, ID }) => (
+          <>
+            <Label type="painted">{nameKey}</Label>
+            {num < 0 ? (
+              <>
                 <Label type="painted">{num}</Label>
-              </Td>
-            </Tr>
-          ))}
-
-      {aggeratedView &&
-        aggregatedInputOutput
-          .filter(({ num }) => num > 0)
-          .map(({ num, nameKey, ID }) => (
-            <Tr key={ID}>
-              <Td />
-              <Td>
-                <Label type="painted">{nameKey}</Label>
+                <div />
+              </>
+            ) : (
+              <>
+                <div />
                 <Label type="painted">{num}</Label>
-              </Td>
-            </Tr>
-          ))}
+              </>
+            )}
+          </>
+        ))}
     </Container>
   );
 }

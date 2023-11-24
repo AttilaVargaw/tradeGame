@@ -1,10 +1,10 @@
+import { useCallback, useState } from "react";
+
+import { Button } from "@Components/button";
+import { ID } from "@Services/GameState/dbTypes";
+import { Input } from "@Components/input";
 import { Label } from "@Components/label";
 import { styled } from "styled-components";
-import { Transfer } from "./transfer";
-import { Button } from "@Components/button";
-import { useCallback, useState } from "react";
-import { Input } from "@Components/input";
-import { ID } from "@Services/GameState/dbTypes";
 
 const ElementContainer = styled.div`
   min-width: 10em;
@@ -12,7 +12,7 @@ const ElementContainer = styled.div`
   width: 100%;
 `;
 
-export function ItemTranswerRow({
+export function WarehouseTransferItem({
   label,
   bNum,
   aNum,
@@ -35,6 +35,11 @@ export function ItemTranswerRow({
     [aID, bID, interchange, num]
   );
 
+  const onTransfer = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
+    ({ target: { value } }) => setNum(Number.parseInt(value)),
+    []
+  );
+
   return (
     <>
       <ElementContainer>
@@ -54,16 +59,16 @@ export function ItemTranswerRow({
           </Button>
           <Input
             value={num}
-            onChange={useCallback<React.ChangeEventHandler<HTMLInputElement>>(
-              ({ target: { value } }) => setNum(Number.parseInt(value)),
-              []
-            )}
+            onChange={onTransfer}
             style={{ width: "100%" }}
             type="number"
-            onClick={onMove(true)}
             min={1}
           />
-          <Button $size="small" style={{ aspectRatio: 1, alignSelf: "center" }}>
+          <Button
+            onClick={onMove(true)}
+            $size="small"
+            style={{ aspectRatio: 1, alignSelf: "center" }}
+          >
             &gt;
           </Button>
         </div>

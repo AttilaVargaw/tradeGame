@@ -1,8 +1,3 @@
-import { useEffect, useRef } from "react";
-import {
-  getConvoysAsGeoJson,
-  setConvoyGoal,
-} from "@Services/GameState/gameState";
 import L, {
   CRS,
   LatLngBoundsExpression,
@@ -10,15 +5,18 @@ import L, {
   Map,
   canvas,
 } from "leaflet";
-import styled from "styled-components";
-import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
-import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import { useConvoyLayer } from "./convoys";
+import { useEffect, useRef } from "react";
+
 import { VehiclesLayer } from "./vehicles";
-import { useCitites } from "./cities";
-import { useTradeRoutes } from "../routeLayer";
 import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
 import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
+import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
+import styled from "styled-components";
+import { useCitites } from "./cities";
+import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
+import { useConvoyLayer } from "./convoys";
+import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
+import { useTradeRoutes } from "../routeLayer";
 
 const bounds = [
   [0, 0],
@@ -77,9 +75,9 @@ export function GameMap(): JSX.Element {
         crs: CRS.Simple,
         layers: [
           convoyLayer.current,
+          vehicleLayer.vehicleLayer,
           background,
           cityLayer.current,
-          vehicleLayer.vehicleLayer,
           tradeRoutes.current,
         ],
         doubleClickZoom: false,
@@ -113,7 +111,7 @@ export function GameMap(): JSX.Element {
         )
         .addTo(mapInstance.current);
 
-      return () => vehicleLayer.destructor()
+    return () => vehicleLayer.destructor();
   }, [cityLayer, convoyLayer, tradeRoutes]);
 
   return <StyledMapContainer ref={map} />;

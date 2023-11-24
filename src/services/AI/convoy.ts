@@ -1,9 +1,10 @@
 import {
   dockConvoyToCity,
   getConvoys,
-  getTradeRoute,
   setConvoyGoal,
-} from "@Services/GameState/gameState";
+} from "@Services/GameState/tables/Convoy/convoyQueries";
+
+import { getTradeRoute } from "@Services/GameState/queries/tradeRoute";
 
 export function ConvoyAI() {
   async function Udpate() {

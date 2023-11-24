@@ -23,11 +23,11 @@ export enum Tables {
   IndustrialBuildingDailyRequirement = "IndustrialBuildingDailyRequirement",
   IndustrialBuilding = "IndustrialBuilding",
   PopulationClass = "PopulationClass",
-  CityWarehouse = "Inventory",
+  Inventory = "Inventory",
   Item = "Item",
   CityPopulationClass = "CityPopulationClass",
   IndustrialBuildings = "IndustrialBuildings",
-  Encyclopedia = "Encyclopedia"
+  Encyclopedia = "Encyclopedia",
 }
 
 type Attr = {

@@ -1,20 +1,17 @@
 import { FC, useCallback, useEffect, useState } from "react";
-import Card from "react-bootstrap/esm/Card";
-import Col from "react-bootstrap/esm/Col";
-import Row from "react-bootstrap/esm/Row";
-import { VehicleType } from "@Services/GameState/dbTypes";
-import CardGroup from "react-bootstrap/esm/CardGroup";
-import Placeholder from "@Components/placeholder";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { Button } from "@Components/button";
-import { makeid } from "@Services/utils";
-import { BuyItem } from "./buyItem";
 import {
   addVehicle,
   getVehicleType,
   getVehicleTypes,
-} from "@Services/GameState/gameState";
+} from "@Services/GameState/tables/Vehicle/vehiclesQueries";
+
+import { Button } from "@Components/button";
+import { BuyItem } from "./buyItem";
 import { ID } from "@Services/GameState/dbTypes";
+import Placeholder from "@Components/placeholder";
+import { VehicleType } from "@Services/GameState/dbTypes";
+import { makeid } from "@Services/utils";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
 function GenerateVehicleName() {
   return `${makeid(3)}-${makeid(3)}`;
@@ -49,26 +46,26 @@ export const OrderPage: FC<{ ID: ID; onBack: () => void }> = ({
   const { desc, name, price } = vehicleDescription;
 
   return (
-    <Row className="no-gutters">
-      <Col>
+    <div>
+      <div>
         <div style={{ aspectRatio: 1 }}>
-          <Placeholder width="100%" height="100%" />
+          <Placeholder width="100px" height="100px" />
         </div>
-      </Col>
-      <Col>
-        <Card className="h-100">
-          <Card.Body as={Col}>
-            <Card.Title>{name}</Card.Title>
-            <Card.Subtitle>{price.toFixed(2)} ℳ</Card.Subtitle>
-            <Card.Text>{desc}</Card.Text>
-          </Card.Body>
-          <Card.Footer className="d-grid gap-2">
+      </div>
+      <div>
+        <div className="h-100">
+          <div>
+            <div>{name}</div>
+            <div>{price.toFixed(2)} ℳ</div>
+            <div>{desc}</div>
+          </div>
+          <div className="d-grid gap-2">
             <Button onClick={onOrder}>Order</Button>
             <Button onClick={onBack}>Back</Button>
-          </Card.Footer>
-        </Card>
-      </Col>
-    </Row>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -100,7 +97,7 @@ export const VehicleBuyModal = () => {
   return (
     <>
       {!currentVehicle && (
-        <Card>
+        <div>
           <div
             style={{
               width: "100%",
@@ -120,22 +117,29 @@ export const VehicleBuyModal = () => {
             </Button>
             <Button onClick={setVehicleType("tracked")}>Tracked Escorts</Button>
           </div>
-          <Card.Body>
-            <CardGroup className="row row-cols-1 row-cols-md-4">
-              {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (
-                <BuyItem
-                  onClick={onOrderClick(ID)}
-                  type={type}
-                  key={ID}
-                  desc={desc}
-                  price={price}
-                  ID={ID}
-                  name={name}
-                />
-              ))}
-            </CardGroup>
-          </Card.Body>
-        </Card>
+          <div
+            style={{
+              width: "100%",
+              display: "grid",
+              gridAutoColumns: "1fr",
+              gridTemplateColumns: "repeat(8, 1fr)",
+              gap: "1em",
+              paddingTop: "1em",
+            }}
+          >
+            {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (
+              <BuyItem
+                onClick={onOrderClick(ID)}
+                type={type}
+                key={ID}
+                desc={desc}
+                price={price}
+                ID={ID}
+                name={name}
+              />
+            ))}
+          </div>
+        </div>
       )}
       {!!currentVehicle && (
         <OrderPage onBack={() => setCurrentVehicle(null)} ID={currentVehicle} />

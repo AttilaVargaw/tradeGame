@@ -1,5 +1,5 @@
-import { select } from "../simpleQueryBuilder";
 import { Tables } from "./tables/common";
+import { select } from "./utils/simpleQueryBuilder";
 
 export type QueryTypes =
   | "getCities"
@@ -19,7 +19,7 @@ export function getQuery(type: QueryTypes): string {
             type,
             select({
               attributes: [
-                ["City", ["ID", "name", "posX", "posY"]],
+                ["City", ["ID", "name", "posX", "posY", "inventory"]],
                 ["CityTypes", [["name", "type"]]],
               ],
               table: Tables.City,
@@ -40,7 +40,12 @@ export function getQuery(type: QueryTypes): string {
         queries.set(
           type,
           select({
-            attributes: [[Tables.City, ["ID", "name", "posX", "posY", "type"]]],
+            attributes: [
+              [
+                Tables.City,
+                ["ID", "name", "posX", "posY", "type", "inventory"],
+              ],
+            ],
             table: Tables.City,
             where: [{ A: [Tables.City, "ID"], operator: "=", value: "?" }],
           })

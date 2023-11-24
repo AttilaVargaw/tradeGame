@@ -14,8 +14,8 @@ export function Toggle({
   style?: React.CSSProperties;
 }>) {
   const onClick = useCallback(() => {
-    onChange(!active);
-  }, [active, onChange]);
+    !disabled && onChange(!active);
+  }, [active, disabled, onChange]);
 
   return (
     <ToggleBody
@@ -44,7 +44,7 @@ export const ToggleBody = styled.div<{
   flex-direction: column !important;
   justify-content: center !important;
 
-  &:active {
+  &:active&:not([disabled]) {
     border-top: 0.7em solid #444 !important;
     border-bottom: 0.7em solid #111 !important;
     border-left: 0.7em solid #222 !important;

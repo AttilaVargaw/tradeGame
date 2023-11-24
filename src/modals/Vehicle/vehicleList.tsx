@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { getVehicles } from "@Services/GameState/gameState";
-import { VehicleData } from "@Services/GameState/tables/Vehicle";
 import { Link, Screen } from "@Components/terminalScreen";
+import { useEffect, useState } from "react";
+
+import { VehicleData } from "@Services/GameState/tables/Vehicle/Vehicle";
+import { getVehicles } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
 
 export const VehicleListModal = () => {
   const [vehicles, setVehicles] = useState<VehicleData[]>([]);

@@ -1,11 +1,12 @@
+import { useCallback, useEffect, useState } from "react";
+
 import { Button } from "@Components/button";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
 import { TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
-import { getConvoy } from "@Services/GameState/gameState";
-import { ConvoyData } from "@Services/GameState/tables/Convoy";
-import { useCallback, useEffect, useState } from "react";
+import { getConvoy } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 
 export function ConvoySideMenu() {
   const [isTradeRouteActive, setTradeRouteActive] = useState(false);

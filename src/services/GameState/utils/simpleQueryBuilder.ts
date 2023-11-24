@@ -1,23 +1,22 @@
 import {
+  CityAttr,
+  ConvoyAttr,
+  TableData,
+  Tables,
+  TradeRouteAttr,
+  VehicleAttr,
+} from "../tables/common";
+import {
   ConvoyInsertData,
   ID,
   TradeRouteInsertData,
   VehicleInsertData,
-} from "./GameState/dbTypes";
-import { CityData } from "./GameState/tables/City";
-import { JoinEquitation } from "./GameState/tables/JoinEquation";
-import { WhereEquitation } from "./GameState/tables/WhereEquation";
-import {
-  CityAttr,
-  ConvoyAttr,
-  Tables,
-  TradeRouteAttr,
-  VehicleAttr,
-} from "./GameState/tables/common";
-import {
-  VehicleTypeAttr,
-  VehicleTypeData,
-} from "./GameState/tables/vehicleTypes";
+} from "../dbTypes";
+import { VehicleTypeAttr, VehicleTypeData } from "../tables/vehicleTypes";
+
+import { CityData } from "../tables/City/CityTable";
+import { JoinEquitation } from "./JoinEquation";
+import { WhereEquitation } from "./WhereEquation";
 
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
 
@@ -54,6 +53,19 @@ type Attr = {
   referencesOn?: string;
   notNullable?: boolean | null;
 };
+
+export function DropTableIfExist(tableName: string) {
+  return `drop table if exists ${tableName};`;
+}
+
+export function FillTable<T>({ name, initData }: TableData<T>) {
+  if (initData) {
+    return initData
+      .map((attributes) => insert({ table: name, attributes } as InsertEvent))
+      .join("");
+  }
+  return "";
+}
 
 function InputToString(input: string | number | null) {
   switch (typeof input) {
@@ -106,7 +118,7 @@ function whereEquationToString({
   const addQuotations = typeof value && attr !== "ID";
 
   return `${table}.${attr}${operator}${
-    value
+    value !== null
       ? `${addQuotations ? '"' : ""}${value}${addQuotations ? '"' : ""} `
       : "NULL"
   }`;

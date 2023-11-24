@@ -1,9 +1,8 @@
-import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
-import {
-  getVehicleGoalsAsGeoJson,
-  getVehiclesAsGeoJson,
-} from "@Services/GameState/gameState";
 import L, { LatLngExpression, circle, tooltip } from "leaflet";
+import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
+
+import { getConvoylessVehiclesAsGeoJSON } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { getVehicleGoalsAsGeoJson } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
 
 const tradeRouteStyle = {
   color: "grey",
@@ -32,11 +31,13 @@ export function VehiclesLayer() {
 
   function update() {
     vehicleLayer.clearLayers();
+
     getVehicleGoalsAsGeoJson().then((vehicles) => {
       vehicleLayer.addData(vehicles);
     });
-
-    getVehiclesAsGeoJson().then((vehicles) => vehicleLayer.addData(vehicles));
+    getConvoylessVehiclesAsGeoJSON().then((vehicles) => {
+      vehicleLayer.addData(vehicles);
+    });
   }
 
   const redrawSubscription = gameRedrawSubject.subscribe((event) => {

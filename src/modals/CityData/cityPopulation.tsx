@@ -6,21 +6,22 @@ import {
   useMemo,
   useState,
 } from "react";
-
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
 import {
   addCityClass,
   getCity,
   getNotExistingCityClasses,
   setPopulation,
-} from "@Services/GameState/gameState";
-import debugModeContext from "../../debugModeContext";
-import { Input, Select } from "@Components/input";
+} from "@Services/GameState/tables/City/cityQueries";
+
 import { Button } from "@Components/button";
-import { Label } from "@Components/label";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { ID } from "@Services/GameState/dbTypes";
+import { Label } from "@Components/label";
+import { Select } from "@Components/input";
+import { WarehouseRow } from "../../components/WarehouseRow";
+import debugModeContext from "../../debugModeContext";
 import styled from "styled-components";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 const Container = styled.div`
   display: flex;
@@ -59,15 +60,15 @@ export default function CityPopulation() {
 
   useEffect(() => {
     if (cityID) {
-      getNotExistingCityClasses(cityID).then((classes) => {
+      getNotExistingCityClasses(cityID.ID).then((classes) => {
         setNotExistingClasses(classes);
 
         if (classes.length > 0) {
-          setNewCityClass({ city: cityID, populationClass: classes[0].ID });
+          setNewCityClass({ city: cityID.ID, populationClass: classes[0].ID });
         }
       });
 
-      getCity(cityID).then(({ classes, fullPopulation }) => {
+      getCity(cityID.ID).then(({ classes, fullPopulation }) => {
         setClasses(classes);
         setFullPopulation(fullPopulation);
       });
@@ -75,11 +76,10 @@ export default function CityPopulation() {
   }, [reload, cityID]);
 
   const onSetPopulation = useCallback(
-    (ID: ID) =>
-      async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-        setPopulation(ID, Number.parseInt(value));
-        setReload(!reload);
-      },
+    (ID: ID, newValue: number) => {
+      setPopulation(ID, newValue);
+      setReload(!reload);
+    },
     [reload]
   );
 
@@ -121,27 +121,21 @@ export default function CityPopulation() {
           }}
         >
           {classes.map(({ name, num, ID }) => (
-            <div key={ID}>
-              <Label type="painted">{name}</Label>
-              {debugMode ? (
-                <Input
-                  min={0}
-                  type="number"
-                  value={num}
-                  onChange={onSetPopulation(ID)}
-                  style={{
-                    width: "100%",
-                  }}
-                />
-              ) : (
-                <Label>{num || 0}</Label>
-              )}
-            </div>
+            <WarehouseRow
+              key={ID}
+              label={name}
+              number={num}
+              editable={debugMode}
+              id={ID}
+              onChange={onSetPopulation}
+              direction="column"
+            />
           ))}
-          <div>
-            <Label type="painted">Total</Label>
-            <Label type="led">{fullPopulation}</Label>
-          </div>
+          <WarehouseRow
+            label="Total"
+            number={fullPopulation}
+            direction="column"
+          />
         </div>
         {debugMode && notExistingClasses.length > 0 && (
           <div>
@@ -172,14 +166,13 @@ export default function CityPopulation() {
             <Label type="painted">{name}</Label>
             {dailyRequirement.map(
               ({ dailyRequirementID, dailyRequirement, translation }) => (
-                <Row key={dailyRequirementID}>
-                  <Label style={{ width: "50%" }} type="painted">
-                    {translation}
-                  </Label>
-                  <Label style={{ width: "50%" }} type="led">
-                    {multiplyCeil(dailyRequirement, citizenNum)}
-                  </Label>
-                </Row>
+                <WarehouseRow
+                  label={translation}
+                  number={multiplyCeil(dailyRequirement, citizenNum)}
+                  id={dailyRequirementID}
+                  key={dailyRequirementID}
+                  direction="row"
+                />
               )
             )}
           </div>

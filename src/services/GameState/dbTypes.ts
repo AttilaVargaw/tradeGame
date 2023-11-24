@@ -33,13 +33,14 @@ export type IndustrialBuilding = {
   inputOutputData: ResourceChange[];
 };
 
-export type WarehouseItem = {
+export type InventoryItem = {
   ID: ID;
   number: number;
   city: string;
   nameKey: string;
-  dailyRequirement: number;
+  // dailyRequirement: number;
   itemID: ID;
+  translation: string;
 };
 
 export type PopulationClass = {

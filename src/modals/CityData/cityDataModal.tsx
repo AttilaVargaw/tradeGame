@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { CityEntity } from "@Services/GameState/tables/City/CityTable";
 import CityIndustry from "./cityIndustry";
+import CityPersonel from "./cityPersonel";
 import CityPopulation from "./cityPopulation";
+import CityVehicles from "./Vehicle/cityVehicles";
 import CityWarehouseForm from "./cityWarehouseForm";
 import { Label } from "@Components/label";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { CityEntity } from "@Services/GameState/tables/City";
-import CityPersonel from "./cityPersonel";
 import Modal from "../Modal";
-import styled from "styled-components";
-import CityVehicles from "./Vehicle/cityVehicles";
 import { Toggle } from "@Components/toggle";
-import { getCity } from "@Services/GameState/gameState";
+import { getCity } from "@Services/GameState/tables/City/cityQueries";
+import styled from "styled-components";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 enum CityModalSubPages {
   popularity,
@@ -40,7 +40,7 @@ export default function CityDataModal(): JSX.Element | null {
   );
 
   useEffect(() => {
-    cityID && getCity(cityID).then(setCityData);
+    cityID && getCity(cityID.ID).then(setCityData);
   }, [cityID]);
 
   const body = useMemo(

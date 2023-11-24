@@ -1,10 +1,11 @@
 import { BehaviorSubject, Subject } from "rxjs";
-import { UpdateConvoys } from "@Services/GameState/gameState";
+
 import { ConvoyAI } from "@Services/AI/convoy";
+import { UpdateConvoys } from "@Services/GameState/tables/Convoy/convoyQueries";
 
 export enum RedrawType {
   Convoys,
-  Vehicles
+  Vehicles,
 }
 export const Tick = new BehaviorSubject(new Date(1899, 1, 1).getTime());
 export const TickSpeed = new BehaviorSubject(1);
@@ -62,7 +63,7 @@ export function GameLoop() {
     gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
 
     //if (Date.now() - t > 0)
-    //console.log("Used time in the update loop:", Date.now() - t);
+    //("Used time in the update loop:", Date.now() - t);
   }
   gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
   return () => cancelAnimationFrame(gameLoopAnimationFrame);

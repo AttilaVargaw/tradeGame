@@ -1,6 +1,6 @@
 import { Label } from "@Components/label";
 import Modal, { ModalCloseButton } from "../Modal";
-import {  useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { VehicleListModal } from "./vehicleList";
 import { VehicleBuyModal } from "./vehicleBuy";
 import { Button } from "@Components/button";

@@ -6,21 +6,20 @@ import {
   useEffect,
   useState,
 } from "react";
-import Col from "react-bootstrap/esm/Col";
-import Container from "react-bootstrap/esm/Container";
-import Form from "react-bootstrap/esm/Form";
-import Row from "react-bootstrap/esm/Row";
-import { Item, WarehouseItem } from "@Services/GameState/dbTypes";
-import debugModeContext from "../../debugModeContext";
-import { Button } from "@Components/button";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { ID, InventoryItem } from "@Services/GameState/dbTypes";
+import { Input, Select } from "@Components/input";
 import {
   addCityWarehouseItem,
   getEntityInventory,
   getNotAvailableItems,
-  updateCityWarehouseItem,
-} from "@Services/GameState/gameState";
-import { ID } from "@Services/GameState/dbTypes";
+  updateInventoryItem,
+} from "@Services/GameState/queries/inventory";
+
+import { Button } from "@Components/button";
+import { Item } from "@Services/GameState/dbTypes";
+import { WarehouseRow } from "../../components/WarehouseRow";
+import debugModeContext from "../../debugModeContext";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 export default function CityWarehouseForm() {
   const debugMode = useContext(debugModeContext);
@@ -33,28 +32,28 @@ export default function CityWarehouseForm() {
     ID: undefined,
     number: 0,
   });
-  const [warehouse, setWarehouse] = useState<WarehouseItem[]>([]);
+  const [warehouse, setWarehouse] = useState<InventoryItem[]>([]);
 
   useEffect(() => {
     if (cityID) {
-      getNotAvailableItems(cityID).then((items) => {
+      getNotAvailableItems(cityID.ID).then((items) => {
         setItems(items);
         setNewItem({
           ID: items.length > 0 ? items[0].ID : undefined,
           number: 0,
         });
       });
-      getEntityInventory(cityID).then(setWarehouse);
+      getEntityInventory(cityID.inventory).then(setWarehouse);
     }
   }, [cityID]);
 
   const addItem = useCallback(async () => {
     if (newItem.ID && cityID) {
-      await addCityWarehouseItem(newItem.ID, newItem.number, cityID);
+      await addCityWarehouseItem(newItem.ID, newItem.number, cityID.ID);
 
       await Promise.all([
-        await getNotAvailableItems(cityID),
-        await getEntityInventory(cityID),
+        await getNotAvailableItems(cityID.ID),
+        await getEntityInventory(cityID.ID),
       ]).then(([notAmiableItems, cityWarehouse]) => {
         setItems(notAmiableItems);
         setWarehouse(cityWarehouse);
@@ -88,63 +87,47 @@ export default function CityWarehouseForm() {
         currentTarget: { value },
       }: React.ChangeEvent<HTMLInputElement>) => {
         if (cityID) {
-          await updateCityWarehouseItem(Number(value), ID);
-          await getEntityInventory(cityID).then(setWarehouse);
+          await updateInventoryItem(Number(value), ID);
+          await getEntityInventory(cityID.ID).then(setWarehouse);
         }
       },
     [cityID]
   );
 
   return (
-    <Container>
-      <Row>
-        <h2>Warehouse</h2>
-      </Row>
-      {warehouse.map(({ number, ID, nameKey }) =>
-        debugMode ? (
-          <Form.Group
-            key={ID}
-            as={Row}
-            style={{ paddingTop: ".5em", paddingBottom: ".5em" }}
-          >
-            <Form.Label sm="4" column>
-              {nameKey}
-            </Form.Label>
-            <Col sm="8">
-              <Form.Control
-                min={0}
-                value={number}
-                type={"number"}
-                onChange={updateItemNumber(ID)}
-              />
-            </Col>
-          </Form.Group>
-        ) : (
-          <Row key={ID}>
-            <h3>{nameKey}</h3> <p>{number}</p>
-          </Row>
-        )
-      )}
-      {debugMode && add && items.length !== 0 && (
-        <Form.Group as={Row}>
-          <Col sm="4">
-            <Form.Select onChange={selectNewItem}>
+    <div>
+      {warehouse.map(({ number, ID, nameKey }) => (
+        <WarehouseRow
+          key={ID}
+          editable={debugMode}
+          label={nameKey}
+          number={number}
+          direction="row"
+        />
+      ))}
+      <div
+        style={{
+          display: "inline-flex",
+          width: "100%",
+          alignItems: "center",
+          gap: "1em",
+        }}
+      >
+        {debugMode && add && items.length !== 0 && (
+          <>
+            <Select onChange={selectNewItem}>
               {items.map(({ ID, nameKey }) => (
                 <option key={ID} value={ID}>
                   {nameKey}
                 </option>
               ))}
-            </Form.Select>
-          </Col>
-          <Col>
-            <Form.Control
+            </Select>
+            <Input
               value={newItem.number}
               type="number"
               min={1}
               onChange={setNewItemNumber}
             />
-          </Col>
-          <Col sm="2">
             <Button
               style={{ width: "100%" }}
               disabled={!!newItem.ID || newItem.number === 0}
@@ -152,11 +135,9 @@ export default function CityWarehouseForm() {
             >
               Add
             </Button>
-          </Col>
-        </Form.Group>
-      )}
-      {debugMode && (
-        <div style={{ marginTop: "1em" }}>
+          </>
+        )}
+        {debugMode && (
           <Button
             disabled={items.length === 0 && add}
             style={{ width: "100%" }}
@@ -164,8 +145,8 @@ export default function CityWarehouseForm() {
           >
             {add ? "close" : "+"}
           </Button>
-        </div>
-      )}
-    </Container>
+        )}
+      </div>
+    </div>
   );
 }

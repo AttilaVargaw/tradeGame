@@ -10,6 +10,7 @@ export const Input = styled.input`
   border-radius: 0.5em;
   margin: 0.2em;
   text-align: end;
+  height: 1em;
 
   :focus,
   :hover {
@@ -36,7 +37,7 @@ export const Select = styled.select`
   border-radius: 0.5em;
   margin: 0.2em;
   text-align: end;
-  height: 3em;
+  height: 2em;
 
   :focus,
   :hover {

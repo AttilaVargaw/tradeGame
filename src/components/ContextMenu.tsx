@@ -1,11 +1,12 @@
-import { FC, useEffect, useRef, useState } from "react";
 import {
-  contextMenuObservable,
   ContextMenuItemProps,
+  contextMenuObservable,
 } from "@Services/contextMenu";
+import { FC, useEffect, useRef, useState } from "react";
 import { Link, TerminalScreen } from "./terminalScreen";
-import styled from "styled-components";
+
 import { ContextMenuPosition } from "./hooks/useContextMenuPosition";
+import styled from "styled-components";
 
 const Container = styled.div<{ $top: number; $left: number }>`
   position: absolute;

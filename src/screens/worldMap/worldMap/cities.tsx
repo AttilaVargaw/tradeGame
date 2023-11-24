@@ -1,24 +1,25 @@
-import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
-import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { currentCityObservable } from "@Components/hooks/useCurrentSelectedCity";
-
+import L, { LatLngExpression, circle } from "leaflet";
 import {
   currentCitiesObservable,
   currentSelectedCities,
 } from "@Components/hooks/useSelectedCities";
-import { CityPositionProperty } from "@Services/GameState/dbTypes";
 import {
-  addTradeRoute,
   getCities,
-  setConvoyGoal,
-} from "@Services/GameState/gameState";
-import { CityEntity } from "@Services/GameState/tables/City";
-import { addToContextMenu } from "@Services/contextMenu";
-import L, { LatLngExpression, circle } from "leaflet";
-import { useRef } from "react";
+  getCity,
+} from "@Services/GameState/tables/City/cityQueries";
+
+import { CityEntity } from "@Services/GameState/tables/City/CityTable";
+import { CityPositionProperty } from "@Services/GameState/dbTypes";
+import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { ID } from "@Services/GameState/dbTypes";
+import { addToContextMenu } from "@Services/contextMenu";
+import { addTradeRoute } from "@Services/GameState/queries/tradeRoute";
+import { currentCityObservable } from "@Components/hooks/useCurrentSelectedCity";
+import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
+import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { useEffect } from "react";
+import { useRef } from "react";
 
 const CityColors: { [key: string]: string } = {
   Mine: "black",
@@ -171,7 +172,7 @@ export function useCitites() {
               cityLayer.current.removeLayer(currentCitiesMarkerB);
             }
           })
-          .addEventListener("dblclick", () => {
+          .addEventListener("dblclick", async () => {
             if (citiesGeoJson.current) {
               const cityID: ID | undefined =
                 citiesGeoJson.current?.features.find(
@@ -179,7 +180,8 @@ export function useCitites() {
                 )?.properties.ID;
 
               if (cityID) {
-                currentCityObservable.next(cityID);
+                const cityData = await getCity(cityID);
+                currentCityObservable.next(cityData);
                 setCurrentModal("cityInfo");
               }
             }
@@ -194,8 +196,6 @@ export function useCitites() {
                   currentConvoySubject.value,
                   ...(city.geometry.coordinates as [number, number])
                 );
-
-              console.log(city);
             }
           })
           .bindTooltip(type !== "RandomEncounter" ? name : "Random Encounter", {

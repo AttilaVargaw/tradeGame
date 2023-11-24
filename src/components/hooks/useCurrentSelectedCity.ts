@@ -1,14 +1,18 @@
-import { useState, useEffect } from "react";
-import { BehaviorSubject } from "rxjs";
+import { useEffect, useState } from "react";
 
-export const currentCityObservable = new BehaviorSubject<number | null>(null);
+import { BehaviorSubject } from "rxjs";
+import { CityEntity } from "@Services/GameState/tables/City/CityTable";
+
+export const currentCityObservable = new BehaviorSubject<CityEntity | null>(
+  null
+);
 
 export const currentSelectedCity = currentCityObservable.asObservable();
 
 //export const setCurrentSelectedCity = currentCityObservable.next;
 
 export function useCurrentSelectedCity() {
-  const [cityID, setCityID] = useState<number | null>(null);
+  const [cityID, setCityID] = useState<CityEntity | null>(null);
 
   useEffect(() => {
     const subscribtion = currentSelectedCity.subscribe(setCityID);
@@ -17,7 +21,7 @@ export function useCurrentSelectedCity() {
   }, []);
 
   return [cityID, setCityID] as [
-    number | null,
-    React.Dispatch<React.SetStateAction<number | null>>
+    CityEntity | null,
+    React.Dispatch<React.SetStateAction<CityEntity | null>>
   ];
 }

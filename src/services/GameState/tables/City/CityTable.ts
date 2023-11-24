@@ -1,5 +1,10 @@
-import { ID, IndustrialBuilding, PopulationData, WarehouseItem } from "../dbTypes";
-import { ResourceChange, TableData } from "./common";
+import {
+  ID,
+  IndustrialBuilding,
+  InventoryItem,
+  PopulationData,
+} from "../../dbTypes";
+import { ResourceChange, TableData } from "../common";
 
 export type CityTableName = "City";
 
@@ -17,8 +22,8 @@ export type CityEntity = {
   name: string;
   fullPopulation: number;
   industry: IndustryData;
-  warehouse: WarehouseItem[];
-  entity: number;
+  warehouse: InventoryItem[];
+  inventory: number;
 };
 
 export type CityData = {
@@ -27,7 +32,7 @@ export type CityData = {
   posY: number;
   type: number;
   name: string;
-  entity: number;
+  inventory: number;
   industrialBuildings?: number;
 };
 
@@ -38,7 +43,7 @@ export default {
     { name: "posY", type: "INTEGER" },
     { name: "type", type: "INTEGER" /*references: "CityTypes"*/ },
     { name: "name", type: "TEXT" },
-    { name: "entity", type: "INTEGER" },
+    { name: "inventory", type: "INTEGER" },
     {
       name: "industrialBuildings",
       // references: "industrialBuildings",
@@ -46,71 +51,83 @@ export default {
     },
   ],
   initData: [
-    { posY: 3300.0, posX: 1000.0, type: 1, name: "East Harbour City", entity: 0 },
+    {
+      posY: 3300.0,
+      posX: 1000.0,
+      type: 1,
+      name: "East Harbour City",
+      inventory: 0,
+    },
     {
       posY: 3000.0,
       posX: 1200.0,
       type: 3,
       name: "Black Hill Military Base",
-      entity: 1
+      inventory: 1,
     },
     {
       posY: 2400.0,
       posX: 1200.0,
       type: 1,
       name: "Yellow Mountain Mining Colony",
-      entity: 2
+      inventory: 2,
     },
     {
       posY: 2600.0,
       posX: 1400.0,
       type: 3,
       name: "Old desolated robotic laboratory",
-      entity: 3
+      inventory: 3,
     },
     {
       posY: 1400.0,
       posX: 850.0,
       type: 4,
       name: "Federal Atomics Laboratory",
-      entity: 4
+      inventory: 4,
     },
     {
       posY: 1200.0,
       posX: 760.0,
       type: 1,
       name: "Mutant city of Todesheim",
-      entity: 5
+      inventory: 5,
     },
     {
       posY: 1600.0,
       posX: 900.0,
       type: 3,
       name: "Old desolated pirate bunker",
-      entity: 6
+      inventory: 6,
     },
-    { posY: 1325.0, posX: 240.0, type: 1, name: "Mutant village" },
+    {
+      posY: 1325.0,
+      posX: 240.0,
+      type: 1,
+      name: "Mutant village",
+      inventory: 10,
+    },
 
     {
       posY: 2640.0,
       posX: 1080.0,
       type: 3,
       name: "Wilhelm Company Head Quarters",
-      entity: 7
+      inventory: 7,
     },
     {
       posY: 2840.0,
       posX: 960.0,
       type: 3,
       name: "Lavasee Military Academy Campus",
-      entity: 8
+      inventory: 8,
     },
     {
       posY: 2440.0,
       posX: 920.0,
       type: 5,
       name: "Federal Agronomic laboratory",
-      entity: 9
+      inventory: 9,
     },
   ],
 } as TableData<CityData>;

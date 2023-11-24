@@ -1,9 +1,8 @@
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { getConvoy } from "@Services/GameState/gameState";
-
-import { ConvoyData } from "@Services/GameState/tables/Convoy";
 import { useEffect, useState } from "react";
-import Container from "react-bootstrap/esm/Container";
+
+import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
+import { getConvoy } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 
 export const ConvoyInfo = () => {
   const [currentConvoy] = useCurrentConvoy();
@@ -16,10 +15,10 @@ export const ConvoyInfo = () => {
   }, [currentConvoy]);
 
   return (
-    <Container style={{ display: "grid" }}>
+    <div style={{ display: "grid" }}>
       <div>{convoyData?.name}</div>
       <div>Assigned route</div>
       <div>{convoyData?.route}</div>
-    </Container>
+    </div>
   );
 };

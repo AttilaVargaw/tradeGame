@@ -11,7 +11,6 @@ import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 
-
 const Container = styled.div`
   display: flex;
   flex-direction: column;

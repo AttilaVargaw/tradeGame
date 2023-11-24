@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  TradeRouteAsGeoJSONView,
-  getTradeRoute,
-} from "@Services/GameState/gameState";
+
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import Modal from "./Modal";
 import { Label } from "@Components/label";
 import { TerminalScreen } from "@Components/terminalScreen";
+import {
+  TradeRouteAsGeoJSONView,
+  getTradeRoute,
+} from "@Services/GameState/queries/tradeRoute";
 
 export default function TradeRouteModal(): JSX.Element | false {
   const [routeID] = useSelectedRouteAtom();

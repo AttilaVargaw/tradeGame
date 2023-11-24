@@ -1,63 +1,19 @@
-import { Label } from "@Components/label";
 import styled from "styled-components";
+import { WarehouseRow } from "../../components/WarehouseRow";
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 1em;
-  justify-content: space-between;
-`;
-
-const ElementContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-width: 10em;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
 `;
 
 export default function CityPersonel() {
-
   return (
-    <Container style={{ margin: "16pt" }}>
-      <ElementContainer>
-        <Label style={{ width: "100%" }} type="painted">
-          Master
-        </Label>
-        <Label style={{ width: "100%" }} type="led">
-          {0}
-        </Label>
-      </ElementContainer>
-      <ElementContainer>
-        <Label style={{ width: "100%" }} type="painted">
-          Mechanist
-        </Label>
-        <Label style={{ width: "100%" }} type="led">
-          {0}
-        </Label>
-      </ElementContainer>
-      <ElementContainer>
-        <Label style={{ width: "100%" }} type="painted">
-          Researcher
-        </Label>
-        <Label style={{ width: "100%" }} type="led">
-          {0}
-        </Label>
-      </ElementContainer>
-      <ElementContainer>
-        <Label style={{ width: "100%" }} type="painted">
-          Guard
-        </Label>
-        <Label style={{ width: "100%" }} type="led">
-          {0}
-        </Label>
-      </ElementContainer>
-      <ElementContainer>
-        <Label style={{ width: "100%" }} type="painted">
-          Cadet
-        </Label>
-        <Label style={{ width: "100%" }} type="led">
-          {0}
-        </Label>
-      </ElementContainer>
+    <Container>
+      <WarehouseRow direction="column" label="Master" number={0} />
+      <WarehouseRow direction="column" label="Mechanist" number={0} />
+      <WarehouseRow direction="column" label="Researcher" number={0} />
+      <WarehouseRow direction="column" label="Guard" number={0} />
+      <WarehouseRow direction="column" label="Cadet" number={0} />
     </Container>
   );
 }

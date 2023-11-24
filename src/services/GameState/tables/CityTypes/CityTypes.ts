@@ -1,4 +1,4 @@
-import { TableData } from "./common";
+import { TableData } from "../common";
 
 export type CityTypes = {
   name:

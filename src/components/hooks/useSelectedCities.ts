@@ -3,7 +3,10 @@ import { BehaviorSubject } from "rxjs";
 
 export type Cities = [number | null, number | null];
 
-export const currentCitiesObservable = new BehaviorSubject<Cities>([null, null]);
+export const currentCitiesObservable = new BehaviorSubject<Cities>([
+  null,
+  null,
+]);
 
 export const currentSelectedCities = currentCitiesObservable.asObservable();
 

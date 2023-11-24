@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { createHtmlPlugin } from "vite-plugin-html";
 import path from "path";
 import checker from "vite-plugin-checker";
+import eslint from "./.eslintrc.json";
 
 export default defineConfig({
   plugins: [
@@ -19,6 +20,7 @@ export default defineConfig({
     }),
     checker({
       typescript: true,
+      // eslint: { lintCommand: 'eslint "./src/**/*.{ts,tsx}"'},
     }),
   ],
   // prevent vite from obscuring rust errors

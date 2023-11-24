@@ -1,5 +1,5 @@
-import { ID } from "../dbTypes";
-import { TableData } from "./common";
+import { ID } from "../../dbTypes";
+import { TableData } from "../common";
 
 export type ConvoyData = {
   name: string;

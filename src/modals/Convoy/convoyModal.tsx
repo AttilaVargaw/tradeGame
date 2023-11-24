@@ -5,27 +5,26 @@ import {
   useMemo,
   useState,
 } from "react";
-import Container from "react-bootstrap/esm/Container";
 import {
   CreateConvoy,
-  addVehicleToConvoy,
-  dbObservable,
   getConvoylessVehicles,
   getConvoys,
-} from "@Services/GameState/gameState";
+} from "@Services/GameState/tables/Convoy/convoyQueries";
 import { Input, Select } from "@Components/input";
-import { Label } from "@Components/label";
-import Modal from "../Modal";
-import { VehicleData } from "@Services/GameState/tables/Vehicle";
-import { ConvoyData } from "@Services/GameState/tables/Convoy";
-import { Screen } from "@Components/terminalScreen";
-import { Link } from "@Components/terminalScreen";
-import { GridItem } from "@Components/grid";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { ConvoyInfo } from "./convoyInfo";
-import { Button } from "@Components/button";
-import { ID } from "@Services/GameState/dbTypes";
 
+import { Button } from "@Components/button";
+import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
+import { ConvoyInfo } from "./convoyInfo";
+import { GridItem } from "@Components/grid";
+import { ID } from "@Services/GameState/dbTypes";
+import { Label } from "@Components/label";
+import { Link } from "@Components/terminalScreen";
+import Modal from "../Modal";
+import { Screen } from "@Components/terminalScreen";
+import { VehicleData } from "@Services/GameState/tables/Vehicle/Vehicle";
+import { addVehicleToConvoy } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
+import { dbObservable } from "@Services/GameState/gameState";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 
 /*enum ConvoyModalSubpages {
   list,
@@ -64,9 +63,9 @@ const Header = (
 );
 
 const Footer = (
-  <Container>
+  <div>
     {/*<Button onClick={() => setSelectedPage(CityModalSubPages.warehouse)}>Warehouse</Button>*/}
-  </Container>
+  </div>
 );
 
 export const ConvoyModal = () => {
@@ -139,7 +138,7 @@ export const ConvoyModal = () => {
               <ConvoyItem id={ID} key={ID} name={name} />
             ))}
           </Screen>
-          <Container style={{ height: "50%" }}>
+          <div style={{ height: "50%" }}>
             <GridItem $col={1} $row={1}>
               <Label style={{ flex: 1 }} type="painted">
                 Name
@@ -165,7 +164,7 @@ export const ConvoyModal = () => {
               </Select>
             </GridItem>
             <Button onClick={onCreate}>Create</Button>
-          </Container>
+          </div>
         </>
       );
     } else {

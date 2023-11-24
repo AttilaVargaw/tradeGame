@@ -1,12 +1,15 @@
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { getDockedConvoysForCity } from "@Services/GameState/gameState";
-import { ConvoyData } from "@Services/GameState/tables/Convoy";
-import { VehicleData } from "@Services/GameState/tables/Vehicle";
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { CityVehiclesCrew } from "./cityVehiclesCrew";
+
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
+import { Link, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
+import { getDockedConvoysForCity } from "@Services/GameState/tables/City/cityQueries";
+import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
+import { VehicleData } from "@Services/GameState/tables/Vehicle/Vehicle";
+
+import { CityVehiclesCrew } from "./cityVehiclesCrew";
 import { CityVehiclesInventory } from "./cityVehiclesInventory";
 
 const Container = styled.div``;
@@ -23,10 +26,10 @@ export default function CityVehicles() {
   const [cityID] = useCurrentSelectedCity();
 
   const [subpage, setSubpage] = useState<Subpages>(Subpages.List);
-  const [currentConvoy, setCurrentConvoy] = useState<number | null>(null);
+  const [currentConvoy, setCurrentConvoy] = useCurrentSelectedConvoyAtom();
 
   useEffect(() => {
-    cityID && getDockedConvoysForCity(cityID).then(setConvoys);
+    cityID && getDockedConvoysForCity(cityID.ID).then(setConvoys);
   }, [cityID]);
 
   const body = useMemo(() => {
@@ -62,14 +65,14 @@ export default function CityVehicles() {
     return (
       <TerminalScreen>
         {convoys &&
-          convoys.map(({ ID, name }) => (
-            <Link onClick={() => setCurrentConvoy(ID)} key={ID}>
-              {name}
+          convoys.map((convoy) => (
+            <Link onClick={() => setCurrentConvoy(convoy)} key={convoy.ID}>
+              {convoy.name}
             </Link>
           ))}
       </TerminalScreen>
     );
-  }, [convoys, currentConvoy, subpage]);
+  }, [convoys, currentConvoy, setCurrentConvoy, subpage]);
 
   return (
     <Container style={{ margin: "16pt", height: "80%" }}>{body}</Container>

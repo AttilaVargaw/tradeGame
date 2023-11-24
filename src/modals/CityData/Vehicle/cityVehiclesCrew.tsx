@@ -1,6 +1,6 @@
 import { Label } from "@Components/label";
 import styled from "styled-components";
-import { ItemTranswerRow } from "../warehouseItem";
+import { WarehouseTransferItem } from "../../../components/WarehouseTransferItem";
 
 const Container = styled.div`
   display: grid;
@@ -15,7 +15,7 @@ export function CityVehiclesCrew() {
       <Label type="painted">City</Label>
       <div></div>
       <Label type="led">test2</Label>
-      <ItemTranswerRow
+      <WarehouseTransferItem
         aID={0}
         bID={0}
         interchange={() => undefined}
@@ -23,7 +23,7 @@ export function CityVehiclesCrew() {
         bNum={0}
         label="Master"
       />
-      <ItemTranswerRow
+      <WarehouseTransferItem
         aID={0}
         bID={0}
         interchange={() => undefined}
@@ -31,7 +31,7 @@ export function CityVehiclesCrew() {
         bNum={0}
         label="Mechanist"
       />
-      <ItemTranswerRow
+      <WarehouseTransferItem
         aID={0}
         bID={0}
         interchange={() => undefined}
@@ -39,7 +39,7 @@ export function CityVehiclesCrew() {
         bNum={0}
         label="Researcher"
       />
-      <ItemTranswerRow
+      <WarehouseTransferItem
         aID={0}
         bID={0}
         interchange={() => undefined}
@@ -47,7 +47,7 @@ export function CityVehiclesCrew() {
         bNum={0}
         label="Guard"
       />
-      <ItemTranswerRow
+      <WarehouseTransferItem
         aID={0}
         bID={0}
         interchange={() => undefined}

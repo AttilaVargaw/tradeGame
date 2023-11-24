@@ -88,8 +88,8 @@ export const creatorSQL = `
     INSERT INTO IndustrialBuilding VALUES(2,'waterPurificator',NULL);
     INSERT INTO IndustrialBuilding VALUES(3,'hidrophonic farm',NULL);
 
-    CREATE TABLE Inventory (ID INTEGER PRIMARY KEY AUTOINCREMENT, entity INTEGER, item INTEGER, number REAL);
-    INSERT INTO Inventory VALUES(1,1,1,1005.0);
+    CREATE TABLE Inventory (ID INTEGER PRIMARY KEY AUTOINCREMENT, inventory INTEGER, item INTEGER, number REAL);
+    INSERT INTO Inventory VALUES(0,0,1,1005.0);
     INSERT INTO Inventory VALUES(2,3,3,5.0);
     INSERT INTO Inventory VALUES(3,10,3,5.0);
 
