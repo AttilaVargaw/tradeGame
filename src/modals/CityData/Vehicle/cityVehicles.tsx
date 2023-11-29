@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { Grid } from "@Components/grid";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
@@ -36,14 +37,7 @@ export default function CityVehicles() {
     if (currentConvoy) {
       return (
         <>
-          <div
-            style={{
-              width: "100%",
-              display: "grid",
-              gridAutoColumns: "1fr",
-              gridTemplateColumns: "repeat(2, 1fr)",
-            }}
-          >
+          <Grid $num={2}>
             <Toggle
               onChange={() => setSubpage(Subpages.Crew)}
               active={subpage === Subpages.Crew}
@@ -56,7 +50,7 @@ export default function CityVehicles() {
             >
               Inventory
             </Toggle>
-          </div>
+          </Grid>
           {subpage === Subpages.Crew && <CityVehiclesCrew />}
           {subpage === Subpages.List && <CityVehiclesInventory />}
         </>

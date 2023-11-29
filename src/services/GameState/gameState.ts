@@ -1,27 +1,27 @@
-import { DBEvent, DBEvents } from "./dbTypes";
-import {
-  DropTableIfExist,
-  FillTable,
-  create,
-  select,
-} from "./utils/simpleQueryBuilder";
-import Encyclopedia, { EncyclopediaData } from "./tables/Encyclopedia";
-
 import { BehaviorSubject } from "rxjs";
+import Database from "tauri-plugin-sql-api";
+
+import { appLocalDataDir } from "@tauri-apps/api/path";
+
+import { creatorSQL } from "../creatorSQL";
+import { DBEvent, DBEvents } from "./dbTypes";
 import City from "./tables/City/CityTable";
 import CityPopulationClass from "./tables/CityPopulationClass";
 import CityTypes from "./tables/CityTypes/CityTypes";
 import ClassDailyRequirements from "./tables/ClassDailyRequirement";
 import Convoy from "./tables/Convoy/Convoy";
-import Database from "tauri-plugin-sql-api";
+import Encyclopedia from "./tables/Encyclopedia";
 import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDailyRequirement";
 import PopulationClasses from "./tables/PopulationClass";
-import { Tables } from "./tables/common";
 import TradeRoutes from "./tables/TradeRoutes";
 import Vehicle from "./tables/Vehicle/Vehicle";
-import { appLocalDataDir } from "@tauri-apps/api/path";
-import { creatorSQL } from "../creatorSQL";
+import { Tables } from "./tables/common";
 import vehicleTypes from "./tables/vehicleTypes";
+import {
+  DropTableIfExist,
+  FillTable,
+  create,
+} from "./utils/simpleQueryBuilder";
 
 export let db: Database;
 
@@ -29,9 +29,10 @@ export const dbObservable = new BehaviorSubject<DBEvent>({
   type: DBEvents.NOP,
 });
 
+const inMemory = false;
+
 export const init = async () => {
-  //db = await Database.load("sqlite:tradegame.db");
-  db = await Database.load("sqlite:memory");
+  db = await Database.load(inMemory ? "sqlite:memory" : "sqlite:tradegame.db");
   console.log(await appLocalDataDir());
 
   const creatorSQL1 =
@@ -98,24 +99,3 @@ export const init = async () => {
   dbObservable.next({ type: DBEvents.cityWarehouseUpdate });
   dbObservable.next({ type: DBEvents.cityPopulationUpdate });
 };
-
-export function GetEncyclopediaArticles(parent: number | null) {
-  return db.select<EncyclopediaData[]>(
-    select({
-      table: Tables.Encyclopedia,
-      attributes: [
-        [Tables.Encyclopedia, "ID"],
-        [Tables.Encyclopedia, "body"],
-        [Tables.Encyclopedia, "name"],
-        [Tables.Encyclopedia, "folder"],
-      ],
-      where: [
-        {
-          A: [Tables.Encyclopedia, "parent"],
-          value: parent,
-          operator: parent === null ? " is " : "=",
-        },
-      ],
-    })
-  );
-}

@@ -1,9 +1,10 @@
-import { DBEvents, ID, InventoryItem, Item } from "../dbTypes";
-import { db, dbObservable } from "../gameState";
+import { groupBy } from "lodash-es";
+
 import { select, update } from "@Services/GameState/utils/simpleQueryBuilder";
 
+import { DBEvents, ID, InventoryItem, Item } from "../dbTypes";
+import { db, dbObservable } from "../gameState";
 import { Tables } from "../tables/common";
-import { groupBy } from "lodash-es";
 
 export async function moveBetweenInventories(
   inventoryAID: ID,
@@ -12,22 +13,12 @@ export async function moveBetweenInventories(
 ) {
   await Promise.all([
     db.execute(
-      update({
-        table: Tables.Inventory,
-        where: [
-          { A: [Tables.Convoy, "ID"], value: inventoryAID, operator: "=" },
-        ],
-        updateRows: [["amount - ", amount]],
-      })
+      "UPDATE Inventory SET number = number + ? WHERE Inventory.inventory=?;",
+      [amount, inventoryBID]
     ),
     db.execute(
-      update({
-        table: Tables.Inventory,
-        where: [
-          { A: [Tables.Convoy, "ID"], value: inventoryBID, operator: "=" },
-        ],
-        updateRows: [["amount + ", amount]],
-      })
+      "UPDATE Inventory SET number = number - ? WHERE Inventory.inventory=?;",
+      [amount, inventoryAID]
     ),
   ]);
 

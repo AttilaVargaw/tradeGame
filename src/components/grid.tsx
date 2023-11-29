@@ -15,7 +15,13 @@ export const GridItem = styled.div<{ $row?: number; $col?: number }>`
       : ""};
 `;
 
-export const Grid = styled.div<{ num: number }>`
+export const Grid = styled.div<{ $num: number }>`
   display: grid;
-  grid-template-columns: repeat((${({ num }) => num}), 1fr);
+  grid-template-columns: repeat(${({ $num }) => $num}, 1fr);
+`;
+
+export const Row = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
 `;

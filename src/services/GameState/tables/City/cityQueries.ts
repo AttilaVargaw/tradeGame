@@ -1,4 +1,4 @@
-import { groupBy } from "lodash-es";
+import { groupBy, isEqual, uniqBy, uniqWith } from "lodash-es";
 
 import { select } from "@Services/GameState/utils/simpleQueryBuilder";
 
@@ -7,6 +7,7 @@ import {
   DailyRequirement,
   ID,
   IndustrialBuilding,
+  InventoryItem,
   PopulationClass,
   PopulationData,
 } from "../../dbTypes";
@@ -53,14 +54,20 @@ export const getCities = () => {
   return db.select<CityEntity[]>(getQuery("getCities"));
 };
 
-export const getCityIndustrialBuildings = async (ID: ID) => {
+const getCityIndustrialBuildingsQuery = `select IBS.ID, IBS.num as buildingNum, IB.nameKey
+from IndustrialBuilding as IB
+inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
+inner join City as C on C.ID = IBS.city
+where C.ID = $1`;
+
+export const getCityIndustrialBuildings = async (id?: ID) => {
+  if (!id) {
+    return [];
+  }
+
   const industrialBuildings = await db.select<IndustrialBuilding[]>(
-    `select IBS.ID, IBS.num as buildingNum, IB.nameKey
-          from IndustrialBuilding as IB
-          inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
-          inner join City as C on C.ID = IBS.city
-          where C.ID = $1`,
-    [ID]
+    getCityIndustrialBuildingsQuery,
+    [id]
   );
 
   await Promise.all(
@@ -75,7 +82,11 @@ export const getCityIndustrialBuildings = async (ID: ID) => {
   return industrialBuildings;
 };
 
-export const getCity = async (ID: ID): Promise<CityEntity> => {
+export const getCity = async (ID?: ID): Promise<CityEntity | null> => {
+  if (!ID) {
+    return null;
+  }
+
   const cityData = (
     await db.select<CityEntity[]>(getQuery("getCity"), [ID])
   )[0];
@@ -192,19 +203,22 @@ export const getCityIndustrialBuildingResourceChanges = async (ID: ID) => {
   });
 };
 
-export const getCityIndustrialResourceChanges = async (ID: ID) => {
+const getCityIndustrialResourceChangesQuery = `select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
+from IndustrialBuildingDailyRequirement as IBR
+inner join IndustrialBuilding as IB on IBR.industrialBuilding = IB.ID 
+inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
+inner join City as C on C.ID = IBS.city
+inner join Item as I on IBR.item = I.ID
+where C.ID = ?`;
+
+export const getCityIndustrialResourceChanges = async (id?: ID) => {
+  if (!id) {
+    return [];
+  }
+
   const aggregated = await db.select<
     (ResourceChange & { buildingNum: number })[]
-  >(
-    `select I.ID, IBR.num, I.nameKey, IBS.num as buildingNum
-              from IndustrialBuildingDailyRequirement as IBR
-              inner join IndustrialBuilding as IB on IBR.industrialBuilding = IB.ID 
-              inner join IndustrialBuildings as IBS on IB.ID = IBS.industrialBuilding
-              inner join City as C on C.ID = IBS.city
-              inner join Item as I on IBR.item = I.ID
-              where C.ID = ${ID}`,
-    [ID]
-  );
+  >(getCityIndustrialResourceChangesQuery, [id]);
 
   return Object.entries(groupBy(aggregated, "nameKey")).map<ResourceChange>(
     ([key, coll]) => {
@@ -248,3 +262,63 @@ export const setIndustrialBuildingNumber = (ID: ID, num: number) => {
     ID,
   ]);
 };
+
+const cityIndustrialRequirementsWithQuantity = `select IBR.num, I.nameKey, City.ID, I.ID from IndustrialBuildingDailyRequirement as IBR
+inner join IndustrialBuilding as IB on IBR.industrialBuilding = IB.ID
+inner join Item as I on IBR.item = I.id
+inner join IndustrialBuildings on IB.ID = IndustrialBuildings.IndustrialBuilding
+inner join City on IndustrialBuildings.city = City.ID
+where City.ID = 1
+`;
+
+export async function getCityRequiredItemsWithQuantity(id?: ID) {
+  if (!id) {
+    return {};
+  }
+
+  const requiredStuff = await db.select<number[]>(
+    "select item from industrialBuildings inner join IndustrialBuildingDailyRequirement on industrialBuildings.industrialBuilding = IndustrialBuildingDailyRequirement.industrialBuilding where city=?;",
+    [id]
+  );
+
+  const requiredClassStuff = await db.select<{ item: number }[]>(
+    `select item from CityPopulationClass as C inner join CityPopulationClass as PC on C.city = PC.city inner join ClassDailyRequirement as CDR 
+  on CDR.Class = PC.id where C.city = ? group by item;`,
+    [id]
+  );
+
+  const itemIDs = uniqWith<number>(
+    [...requiredStuff, ...requiredClassStuff.map((e) => e.item)],
+    isEqual
+  );
+
+  const inventoryID = (
+    await db.select<CityEntity[]>("select inventory from city where id = ?;", [
+      id,
+    ])
+  )[0].inventory;
+
+  const results = await Promise.all(
+    itemIDs.map(async (id) => {
+      return (
+        (
+          await db.select<InventoryItem[]>(
+            "select * from inventory inner join item on inventory.item = item.id where inventory = ? and item.id = ?;",
+            [inventoryID, id]
+          )
+        )[0] ??
+        ({
+          ...(
+            await db.select<InventoryItem[]>(
+              "select * from item where item.id = ?;",
+              [id]
+            )
+          )[0],
+          number: 0,
+        } as InventoryItem)
+      );
+    })
+  );
+
+  return groupBy(results, (e) => e.category);
+}

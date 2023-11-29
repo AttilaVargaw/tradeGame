@@ -6,7 +6,15 @@ import {
   useMemo,
   useState,
 } from "react";
+import styled from "styled-components";
+
+import { Button } from "@Components/button";
+import { Grid } from "@Components/grid";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { Select } from "@Components/input";
+import { Label } from "@Components/label";
 import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
+import { ID } from "@Services/GameState/dbTypes";
 import {
   addCityClass,
   getCity,
@@ -14,14 +22,8 @@ import {
   setPopulation,
 } from "@Services/GameState/tables/City/cityQueries";
 
-import { Button } from "@Components/button";
-import { ID } from "@Services/GameState/dbTypes";
-import { Label } from "@Components/label";
-import { Select } from "@Components/input";
 import { WarehouseRow } from "../../components/WarehouseRow";
 import debugModeContext from "../../debugModeContext";
-import styled from "styled-components";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 const Container = styled.div`
   display: flex;
@@ -47,6 +49,7 @@ export default function CityPopulation() {
   const [notExistingClasses, setNotExistingClasses] = useState<
     PopulationClass[]
   >([]);
+
   const [newCityClass, setNewCityClass] = useState<{
     city?: number;
     populationClass?: number;
@@ -68,9 +71,11 @@ export default function CityPopulation() {
         }
       });
 
-      getCity(cityID.ID).then(({ classes, fullPopulation }) => {
-        setClasses(classes);
-        setFullPopulation(fullPopulation);
+      getCity(cityID.ID).then((city) => {
+        if (city) {
+          setClasses(city.classes);
+          setFullPopulation(city.fullPopulation);
+        }
       });
     }
   }, [reload, cityID]);
@@ -113,13 +118,7 @@ export default function CityPopulation() {
   return (
     <Container>
       <div>
-        <div
-          style={{
-            display: "grid",
-            gridAutoColumns: "1fr",
-            gridTemplateColumns: "repeat(5, 1fr)",
-          }}
-        >
+        <Grid $num={classes.length + 1}>
           {classes.map(({ name, num, ID }) => (
             <WarehouseRow
               key={ID}
@@ -136,7 +135,7 @@ export default function CityPopulation() {
             number={fullPopulation}
             direction="column"
           />
-        </div>
+        </Grid>
         {debugMode && notExistingClasses.length > 0 && (
           <div>
             <Row>

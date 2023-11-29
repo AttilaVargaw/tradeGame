@@ -21,6 +21,14 @@ const Body = styled.div<{ height: string }>`
   z-index: 1000;
 `;
 
+const Container = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 1em;
+`;
+
 export function TopMenu({ height }: { height: string }) {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
@@ -39,20 +47,12 @@ export function TopMenu({ height }: { height: string }) {
 
   return (
     <Body height={height}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-          margin: "1em",
-        }}
-      >
+      <Container>
         <DateDisplay className="glow">
           {date} {time}
         </DateDisplay>
         <DateDisplay className="glow">{5556.22} ℳ</DateDisplay>
-      </div>
+      </Container>
     </Body>
   );
 }

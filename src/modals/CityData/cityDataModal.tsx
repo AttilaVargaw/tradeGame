@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import styled from "styled-components";
 
-import { CityEntity } from "@Services/GameState/tables/City/CityTable";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useDBValue } from "@Components/hooks/useDBValue";
+import { Label } from "@Components/label";
+import { Toggle } from "@Components/toggle";
+import { getCity } from "@Services/GameState/tables/City/cityQueries";
+
+import Modal from "../Modal";
+import CityVehicles from "./Vehicle/cityVehicles";
 import CityIndustry from "./cityIndustry";
 import CityPersonel from "./cityPersonel";
 import CityPopulation from "./cityPopulation";
-import CityVehicles from "./Vehicle/cityVehicles";
 import CityWarehouseForm from "./cityWarehouseForm";
-import { Label } from "@Components/label";
-import Modal from "../Modal";
-import { Toggle } from "@Components/toggle";
-import { getCity } from "@Services/GameState/tables/City/cityQueries";
-import styled from "styled-components";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 enum CityModalSubPages {
   popularity,
@@ -33,38 +34,42 @@ const Footer = styled.div`
 export default function CityDataModal(): JSX.Element | null {
   const [cityID] = useCurrentSelectedCity();
 
-  const [cityData, setCityData] = useState<CityEntity>();
-
   const [selectedPage, setSelectedPage] = useState<CityModalSubPages>(
     CityModalSubPages.population
   );
 
-  useEffect(() => {
-    cityID && getCity(cityID.ID).then(setCityData);
-  }, [cityID]);
+  const cityData = useDBValue(useCallback(() => getCity(cityID?.ID), [cityID]));
 
-  const body = useMemo(
-    () =>
-      cityData && (
-        <>
-          {selectedPage === CityModalSubPages.population &&
-            cityData.fullPopulation > 0 && <CityPopulation />}
-          {selectedPage === CityModalSubPages.industry && cityData.industry && (
-            <CityIndustry />
-          )}
-          {selectedPage === CityModalSubPages.warehouse && (
-            <CityWarehouseForm />
-          )}
-          {selectedPage === CityModalSubPages.personel && <CityPersonel />}
-          {selectedPage === CityModalSubPages.vehicles && <CityVehicles />}
-        </>
-      ),
-    [cityData, selectedPage]
-  );
+  const body = useMemo(() => {
+    if (!cityData) {
+      return <></>;
+    }
+
+    switch (selectedPage) {
+      case CityModalSubPages.population:
+        return cityData.fullPopulation > 0 && <CityPopulation />;
+      case CityModalSubPages.industry:
+        return <CityIndustry />;
+      case CityModalSubPages.warehouse:
+        return <CityWarehouseForm />;
+      case CityModalSubPages.personel:
+        return <CityPersonel />;
+      case CityModalSubPages.vehicles:
+        return <CityVehicles />;
+      case CityModalSubPages.popularity:
+        return <></>;
+      default:
+        <></>;
+    }
+
+    return false;
+  }, [cityData, selectedPage]);
+
+  console.log(body);
 
   const footer = useMemo(
     () =>
-      cityData && (
+      !!cityData && (
         <Footer>
           <Toggle
             active={selectedPage === CityModalSubPages.warehouse}
@@ -112,7 +117,7 @@ export default function CityDataModal(): JSX.Element | null {
 
   const header = useMemo(
     () =>
-      cityData && (
+      !!cityData && (
         <div style={{ width: "100%" }}>
           <Label type="led">{`< ${cityData.name} >`}</Label>
         </div>

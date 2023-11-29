@@ -1,14 +1,20 @@
-import { Label } from "@Components/label";
-import Modal, { ModalCloseButton } from "../Modal";
 import { useMemo, useState } from "react";
-import { VehicleListModal } from "./vehicleList";
-import { VehicleBuyModal } from "./vehicleBuy";
+import styled from "styled-components";
+
 import { Button } from "@Components/button";
+import { Grid } from "@Components/grid";
+import { Label } from "@Components/label";
+
+import Modal, { ModalCloseButton } from "../Modal";
+import { VehicleBuyModal } from "./vehicleBuy";
+import { VehicleListModal } from "./vehicleList";
 
 enum VehicleModalSubPages {
   List,
   Buy,
 }
+
+const Container = styled.div``;
 
 export default function VehicleModal() {
   const [selectedPage, setSelectedPage] = useState(VehicleModalSubPages.List);
@@ -30,9 +36,6 @@ export default function VehicleModal() {
             <Label style={{ flex: 20 }} type="led">{`< ${
               selectedPage === 0 ? "Vehicle list" : "Orders"
             } >`}</Label>
-            <div style={{ flex: 1, margin: "0.5em" }}>
-              <ModalCloseButton />
-            </div>
           </div>
         ),
         [selectedPage]
@@ -40,15 +43,7 @@ export default function VehicleModal() {
       body={body}
       footer={useMemo(
         () => (
-          <div
-            style={{
-              width: "100%",
-              display: "grid",
-              flexDirection: "row",
-              gridAutoColumns: "1fr",
-              gridTemplateColumns: "repeat(5, 1fr)",
-            }}
-          >
+          <Grid $num={2}>
             <Button
               $active={selectedPage === VehicleModalSubPages.Buy}
               onClick={() => setSelectedPage(VehicleModalSubPages.Buy)}
@@ -61,7 +56,7 @@ export default function VehicleModal() {
             >
               List
             </Button>
-          </div>
+          </Grid>
         ),
         [selectedPage]
       )}

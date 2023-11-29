@@ -39,6 +39,7 @@ export type InventoryItem = {
   city: string;
   nameKey: string;
   // dailyRequirement: number;
+  category: number;
   itemID: ID;
   translation: string;
 };

@@ -1,4 +1,14 @@
+import { useCallback, useContext, useState } from "react";
+import { styled } from "styled-components";
+
+import { Button } from "@Components/button";
+import { Row } from "@Components/grid";
+import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useDBValue } from "@Components/hooks/useDBValue";
 import { Input, Select } from "@Components/input";
+import { Label } from "@Components/label";
+import { Toggle } from "@Components/toggle";
+import { ID } from "@Services/GameState/dbTypes";
 import {
   addIndustrialBuildings,
   getAllIndustrialBuildings,
@@ -6,18 +16,9 @@ import {
   getCityIndustrialResourceChanges,
   setIndustrialBuildingNumber,
 } from "@Services/GameState/tables/City/cityQueries";
-import { useCallback, useContext, useEffect, useState } from "react";
 
-import { Button } from "@Components/button";
-import { ID } from "@Services/GameState/dbTypes";
-import { IndustrialBuilding } from "@Services/GameState/dbTypes";
-import { Label } from "@Components/label";
-import { ResourceChange } from "@Services/GameState/tables/common";
-import { Toggle } from "@Components/toggle";
 import { WarehouseRow } from "../../components/WarehouseRow";
 import debugModeContext from "../../debugModeContext";
-import { styled } from "styled-components";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 
 const Container = styled.div<{ $aggeratedView: boolean }>`
   display: grid;
@@ -33,26 +34,24 @@ export default function CityIndustry() {
   const debugMode = useContext(debugModeContext);
 
   const [newBuilding, setNewBuilding] = useState<string>("");
-  const [industrialBuildings, setIndustrialBuildings] = useState<
-    IndustrialBuilding[]
-  >([]);
-  const [allIndustrialBuildings, setAllIndustrialBuildings] = useState<
-    IndustrialBuilding[]
-  >([]);
-  const [aggregatedInputOutput, setAggregatedInputOutput] = useState<
-    ResourceChange[]
-  >([]);
+
   const [reload, setReload] = useState(false);
 
-  useEffect(() => {
-    if (cityID) {
-      getCityIndustrialResourceChanges(cityID.ID).then(
-        setAggregatedInputOutput
-      );
-      getAllIndustrialBuildings().then(setAllIndustrialBuildings);
-      getCityIndustrialBuildings(cityID.ID).then(setIndustrialBuildings);
-    }
-  }, [reload, cityID]);
+  const aggregatedInputOutput = useDBValue(
+    useCallback(
+      () => getCityIndustrialResourceChanges(cityID?.ID),
+      [cityID?.ID]
+    )
+  );
+
+  const allIndustrialBuildings = useDBValue(
+    useCallback(getAllIndustrialBuildings, [])
+  );
+
+  // needs city change event in the future
+  const industrialBuildings = useDBValue(
+    useCallback(() => getCityIndustrialBuildings(cityID?.ID), [cityID?.ID])
+  );
 
   const setNewBuildingDropdown = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) => {
@@ -88,7 +87,7 @@ export default function CityIndustry() {
       <Label type="painted">Daily requirements</Label>
       <Label type="painted">Daily production</Label>
       {!aggeratedView &&
-        industrialBuildings.map(
+        industrialBuildings?.map(
           ({ nameKey, buildingNum, inputOutputData, ID }) => (
             <>
               <Label type="painted">{nameKey}</Label>
@@ -130,10 +129,10 @@ export default function CityIndustry() {
         )}
 
       {!aggeratedView && debugMode && (
-        <div style={{ display: "inline-flex", justifyContent: "center" }}>
+        <Row>
           <div>
             <Select onChange={setNewBuildingDropdown}>
-              {allIndustrialBuildings.map(({ ID, nameKey }) => (
+              {allIndustrialBuildings?.map(({ ID, nameKey }) => (
                 <option key={ID} value={ID}>
                   {nameKey}
                 </option>
@@ -143,12 +142,12 @@ export default function CityIndustry() {
           <Button style={{ alignSelf: "center" }} onClick={addNewBuilding}>
             Add
           </Button>
-        </div>
+        </Row>
       )}
 
       {aggeratedView &&
-        aggregatedInputOutput.map(({ num, nameKey, ID }) => (
-          <>
+        aggregatedInputOutput?.map(({ num, nameKey, ID }) => (
+          <div key={ID}>
             <Label type="painted">{nameKey}</Label>
             {num < 0 ? (
               <>
@@ -161,7 +160,7 @@ export default function CityIndustry() {
                 <Label type="painted">{num}</Label>
               </>
             )}
-          </>
+          </div>
         ))}
     </Container>
   );

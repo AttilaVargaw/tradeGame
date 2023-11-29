@@ -1,15 +1,22 @@
 import { useCallback, useState } from "react";
+import { styled } from "styled-components";
 
 import { Button } from "@Components/button";
-import { ID } from "@Services/GameState/dbTypes";
 import { Input } from "@Components/input";
 import { Label } from "@Components/label";
-import { styled } from "styled-components";
+import { ID } from "@Services/GameState/dbTypes";
+
+import { Row } from "./grid";
 
 const ElementContainer = styled.div`
   min-width: 10em;
   margin: auto;
   width: 100%;
+`;
+
+const StyledButton = styled(Button)`
+  aspect-ratio: 1;
+  align-self: center;
 `;
 
 export function WarehouseTransferItem({
@@ -48,31 +55,22 @@ export function WarehouseTransferItem({
       <ElementContainer>
         <Label type="led">{aNum}</Label>
       </ElementContainer>
-      <ElementContainer>
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          <Button
-            style={{ aspectRatio: 1, alignSelf: "center" }}
-            $size="small"
-            onClick={onMove(false)}
-          >
-            &lt;
-          </Button>
-          <Input
-            value={num}
-            onChange={onTransfer}
-            style={{ width: "100%" }}
-            type="number"
-            min={1}
-          />
-          <Button
-            onClick={onMove(true)}
-            $size="small"
-            style={{ aspectRatio: 1, alignSelf: "center" }}
-          >
-            &gt;
-          </Button>
-        </div>
-      </ElementContainer>
+      <Row>
+        <StyledButton $size="small" onClick={onMove(false)}>
+          &lt;
+        </StyledButton>
+        <Input
+          value={num}
+          onChange={onTransfer}
+          style={{ width: "100%" }}
+          type="number"
+          min={1}
+        />
+        <StyledButton $size="small" onClick={onMove(true)}>
+          &gt;
+        </StyledButton>
+      </Row>
+
       <ElementContainer>
         <Label type="led">{bNum}</Label>
       </ElementContainer>

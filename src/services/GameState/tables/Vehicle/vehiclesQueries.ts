@@ -1,8 +1,12 @@
-import { CityPositionProperty, DBEvents, VehicleType } from "../../dbTypes";
-import { db, dbObservable } from "../../gameState";
-import { insert, select, update } from "@Services/GameState/utils/simpleQueryBuilder";
+import {
+  insert,
+  select,
+  update,
+} from "@Services/GameState/utils/simpleQueryBuilder";
 
+import { CityPositionProperty, DBEvents, VehicleType } from "../../dbTypes";
 import { ID } from "../../dbTypes";
+import { db, dbObservable } from "../../gameState";
 import { Tables } from "../common";
 import { VehicleData } from "./Vehicle";
 
@@ -31,35 +35,39 @@ export const getVehiclesOfConvoy = (ID: ID | null) => {
   );
 };
 
+const getVehicleGoalsAsGeoJsonQuery = select({
+  attributes: [
+    [Tables.Vehicle, "posX"],
+    [Tables.Vehicle, "posY"],
+    [Tables.Vehicle, "ID"],
+    [Tables.Vehicle, "goalY"],
+    [Tables.Vehicle, "goalX"],
+  ],
+  table: Tables.Vehicle,
+  where: [
+    { A: [Tables.Vehicle, "convoy"], value: null, operator: " is " },
+    { A: [Tables.Vehicle, "goalX"], value: null, operator: " is not " },
+    { A: [Tables.Vehicle, "goalY"], value: null, operator: " is not " },
+  ],
+});
+
 export const getVehicleGoalsAsGeoJson = async () => {
   const convoysData = await db.select<VehicleData[]>(
-    select({
-      attributes: [
-        [Tables.Vehicle, "posX"],
-        [Tables.Vehicle, "posY"],
-        [Tables.Vehicle, "ID"],
-        [Tables.Vehicle, "goalY"],
-        [Tables.Vehicle, "goalX"],
-      ],
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
-    })
+    getVehicleGoalsAsGeoJsonQuery
   );
 
   return {
     type: "FeatureCollection",
-    features: convoysData
-      .filter(({ goalX, goalY }) => goalX && goalY)
-      .map(({ goalX, goalY, posX, posY }) => ({
-        type: "Feature",
-        geometry: {
-          coordinates: [
-            [goalX, goalY],
-            [posX, posY],
-          ],
-          type: "LineString",
-        },
-      })),
+    features: convoysData.map(({ goalX, goalY, posX, posY }) => ({
+      type: "Feature",
+      geometry: {
+        coordinates: [
+          [goalX, goalY],
+          [posX, posY],
+        ],
+        type: "LineString",
+      },
+    })),
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
 

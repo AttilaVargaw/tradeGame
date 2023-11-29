@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import {} from "lodash-es";
+
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
+import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
+import { Pager } from "@Components/pager";
 import { DBEvents, InventoryItem } from "@Services/GameState/dbTypes";
-import { dbObservable } from "@Services/GameState/gameState";
-import {
-  getAllItems,
-  moveBetweenInventories,
-} from "@Services/GameState/queries/inventory";
+import { moveBetweenInventories } from "@Services/GameState/queries/inventory";
+import { getCityRequiredItemsWithQuantity } from "@Services/GameState/tables/City/cityQueries";
 
 import { WarehouseTransferItem } from "../../../components/WarehouseTransferItem";
 
@@ -19,44 +21,49 @@ const Container = styled.div`
 `;
 
 export function CityVehiclesInventory() {
-  const [items, setItems] = useState<{
+  const [vehicleItems, setVehicleItems] = useState<{
     [Key: string]: InventoryItem[];
   }>();
+
   const [categories, setCategories] = useState<number>(0);
+
   const [cityID] = useCurrentSelectedCity();
 
-  useEffect(() => {
-    typeof cityID?.inventory !== "undefined" &&
-      getAllItems(cityID.inventory).then(setItems);
+  const [currentConvoy, setCurrentConvoy] = useCurrentSelectedConvoyAtom();
 
-    const subscription = dbObservable.subscribe((event) => {
-      if (event.type === DBEvents.inventoryUpdate && cityID) {
-        getAllItems(cityID.inventory).then(setItems);
-      }
-    });
+  const cityItems = useDBValue(
+    useCallback(
+      () => getCityRequiredItemsWithQuantity(cityID?.ID),
+      [cityID?.ID]
+    ),
+    useMemo(() => [DBEvents.inventoryUpdate], [])
+  );
 
-    return () => subscription.unsubscribe();
-  }, [categories, cityID]);
+  const goals = useMemo(
+    () => ["All", currentConvoy?.name ?? ""],
+    [currentConvoy?.name]
+  );
+
+  const [currentGoal, setCurrentGoal] = useState("");
 
   return (
     <Container>
       <div></div>
       <Label type="painted">City</Label>
       <div></div>
-      <Label type="led">test2</Label>
-      {items?.[categories].map(
-        ({ nameKey, translation, itemID, ID, number }) => (
+      <Pager onChange={setCurrentGoal} pages={goals} />
+      {cityID &&
+        cityItems?.[categories]?.map(({ nameKey, number }) => (
           <WarehouseTransferItem
             interchange={moveBetweenInventories}
-            aID={0}
-            bID={0}
+            aID={cityID.inventory}
+            bID={1}
             aNum={number}
             bNum={0}
-            label={translation}
+            label={nameKey}
             key={nameKey}
           />
-        )
-      )}
+        ))}
     </Container>
   );
 }

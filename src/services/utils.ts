@@ -14,3 +14,11 @@ export function makeid(length: number) {
 export function Lenght(a: number, b: number) {
   return Math.sqrt(a * a + b * b);
 }
+
+export function CallUntilStopped(fn: () => void, delay = 500) {
+  fn();
+
+  const interval = setInterval(fn, delay);
+
+  return () => clearInterval(interval);
+}

@@ -1,24 +1,22 @@
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 
-import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
-import { getConvoy } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { Grid } from "@Components/grid";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useDBValue } from "@Components/hooks/useDBValue";
+import { getConvoy } from "@Services/GameState/tables/Convoy/convoyQueries";
 
 export const ConvoyInfo = () => {
   const [currentConvoy] = useCurrentConvoy();
-  const [convoyData, setConvoyData] = useState<ConvoyData>();
 
-  useEffect(() => {
-    if (currentConvoy) {
-      getConvoy(currentConvoy).then(setConvoyData);
-    }
-  }, [currentConvoy]);
+  const convoyData = useDBValue(
+    useCallback(() => getConvoy(currentConvoy), [currentConvoy])
+  );
 
   return (
-    <div style={{ display: "grid" }}>
+    <Grid $num={3}>
       <div>{convoyData?.name}</div>
       <div>Assigned route</div>
       <div>{convoyData?.route}</div>
-    </div>
+    </Grid>
   );
 };

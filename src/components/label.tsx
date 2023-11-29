@@ -6,9 +6,10 @@ export const Container = styled.div<{ type?: styles }>`
   padding: 0.5em;
   display: flex;
   flex-direction: row;
-  width: 100%f;
+  // width: 100%;
   height: min-content;
   margin: 0.2em;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 
   ${({ type }) => {
     if (type === "led")
@@ -47,6 +48,10 @@ export const Container = styled.div<{ type?: styles }>`
   font-size: 1.1em;
 `;
 
+const LabelContainer = styled.div`
+  width: 0.6em;
+`;
+
 export function Label({
   children,
   type,
@@ -60,9 +65,7 @@ export function Label({
     <Container type={type} {...props}>
       {type === "led"
         ? [...children.toString()].map((c, i) => (
-            <div style={{ width: "0.6em" }} key={i}>
-              {c}
-            </div>
+            <LabelContainer key={i}>{c}</LabelContainer>
           ))
         : children}
     </Container>

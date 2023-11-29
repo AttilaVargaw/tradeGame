@@ -5,6 +5,7 @@ import styled from "styled-components";
 const Container = styled.div`
   height: 100%;
   width: 100%;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 `;
 
 export const Link = styled.span`

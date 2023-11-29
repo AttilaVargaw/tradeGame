@@ -1,18 +1,19 @@
+import { forwardRef, useCallback, useEffect, useState } from "react";
+import styled, { CSSProperties } from "styled-components";
+
+import { SevenDigitClock } from "@Components/SevenDigitClock";
+import { Button } from "@Components/button";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { DBEvents } from "@Services/GameState/dbTypes";
+import { dbObservable } from "@Services/GameState/gameState";
 import {
   GetConvoiyCount,
   GetTraderouteCount,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
-import { forwardRef, useCallback, useEffect, useState } from "react";
-import styled, { CSSProperties } from "styled-components";
-
-import { Button } from "@Components/button";
-import { ConvoySideMenu } from "./convoySideMenu";
-import { DBEvents } from "@Services/GameState/dbTypes";
 import { GetVehicleCount } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
-import { SevenDigitClock } from "@Components/SevenDigitClock";
-import { dbObservable } from "@Services/GameState/gameState";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+
+import { ConvoySideMenu } from "./convoySideMenu";
 
 const Container = styled.div`
   position: fixed;
@@ -24,6 +25,7 @@ const Container = styled.div`
   gap: 1em;
   padding: 1em;
   z-index: 1000;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 `;
 
 function VehicleCountButton({ onClick }: { onClick: () => void }) {

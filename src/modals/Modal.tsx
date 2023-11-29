@@ -1,7 +1,8 @@
+import { useCallback, useEffect, useRef } from "react";
+import styled from "styled-components";
+
 import { Button } from "@Components/button";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { useEffect, useRef } from "react";
-import styled from "styled-components";
 
 export const Container = styled.div`
   z-index: 100000;
@@ -14,6 +15,7 @@ export const Container = styled.div`
   inset: 2em;
   justify-content: space-between;
   padding: 2em;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 `;
 
 export const Body = styled.div`
@@ -34,9 +36,9 @@ export default function Modal({
   header,
   footer,
 }: {
-  body?: JSX.Element;
-  header?: JSX.Element;
-  footer?: JSX.Element;
+  body?: JSX.Element | boolean;
+  header?: JSX.Element | boolean;
+  footer?: JSX.Element | boolean;
 }) {
   const [, setCurrentModal] = useCurrentModal();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,13 +60,26 @@ export default function Modal({
 
   return (
     <Container ref={containerRef}>
-      <Header style={{ alignSelf: "start" }}>{header}</Header>
+      <div style={{ display: "flex", margin: "0.5em" }}>
+        <Header style={{ alignSelf: "start" }}>{header}</Header>
+        <ModalCloseButton
+          onClick={useCallback(() => setCurrentModal(null), [setCurrentModal])}
+        />
+      </div>
       <Body>{body}</Body>
       <Footer style={{ alignSelf: "end" }}>{footer}</Footer>
     </Container>
   );
 }
 
-export function ModalCloseButton() {
-  return <Button>X</Button>;
+export function ModalCloseButton(props: React.ComponentProps<typeof Button>) {
+  return (
+    <Button
+      {...props}
+      style={{ ...props, aspectRatio: 1, borderRadius: "100%" }}
+      $size="normal"
+    >
+      X
+    </Button>
+  );
 }

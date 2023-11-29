@@ -1,15 +1,17 @@
 import { MouseEventHandler, useCallback, useMemo } from "react";
-import SideMenu from "../sideMenu";
-import { useWindowSize } from "../../../components/hooks/useWIndowSize";
-import { ModalRouter } from "@Components/ModalRouter";
 import styled from "styled-components";
-import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
+
+import { ModalRouter } from "@Components/ModalRouter";
 import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import { GameMap } from "./GameMap";
 import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
+import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
+
+import { useWindowSize } from "../../../components/hooks/useWIndowSize";
+import SideMenu from "../sideMenu";
+import { GameMap } from "./GameMap";
 
 const Container = styled.div`
   display: flex;
@@ -27,7 +29,7 @@ export function WorldMap(): JSX.Element {
 
   const { height, width } = useWindowSize();
 
-  const menuWidth = useMemo(() => `${width * 0.18}px`, [width]);
+  const menuWidth = useMemo(() => width * 0.18, [width]);
   const mapWidth = useMemo(() => width * 0.82, [width]);
 
   const sideMenuStyle = useMemo(

@@ -1,9 +1,9 @@
-import { DBEvents, ID, TradeRouteProps } from "../dbTypes";
-import { db, dbObservable } from "../gameState";
 import { insert, select } from "@Services/GameState/utils/simpleQueryBuilder";
 
-import { Tables } from "../tables/common";
+import { DBEvents, ID, TradeRouteProps } from "../dbTypes";
+import { db, dbObservable } from "../gameState";
 import { getCity } from "../tables/City/cityQueries";
+import { Tables } from "../tables/common";
 
 export type TradeRouteView = {
   name: string;
@@ -14,54 +14,113 @@ export type TradeRouteView = {
   cityBName: string;
 };
 
-export const getTradeRoute = (ID?: number) => {
-  return db.select<TradeRouteAsGeoJSONView[]>(
-    select({
-      table: Tables.TradeRoutes,
-      where: ID ? [{ A: [Tables.TradeRoutes, "ID"], value: ID }] : undefined,
-      attributes: [
-        [
-          "CityA",
-          [
-            ["ID", "cityAID"],
-            ["name", "cityAName"],
-            ["posX", "cityAPosX"],
-            ["posY", "cityAPosY"],
-          ],
-        ],
-        [
-          "CityB",
-          [
-            ["ID", "cityBID"],
-            ["name", "cityBName"],
-            ["posX", "cityBPosX"],
-            ["posY", "cityBPosY"],
-          ],
-        ],
-        [Tables.TradeRoutes, ["name", "ID"]],
+const getTradouteByIDQuery = select({
+  table: Tables.TradeRoutes,
+  where: [{ A: [Tables.TradeRoutes, "ID"], value: "?" }],
+  attributes: [
+    [
+      "CityA",
+      [
+        ["ID", "cityAID"],
+        ["name", "cityAName"],
+        ["posX", "cityAPosX"],
+        ["posY", "cityAPosY"],
       ],
-      join: [
-        {
-          A: Tables.City,
-          equation: {
-            A: ["CityA", "ID"],
-            B: [Tables.TradeRoutes, "cityA"],
-            operator: "=",
-          },
-          as: "CityA",
-        },
-        {
-          A: Tables.City,
-          equation: {
-            A: ["CityB", "ID"],
-            B: [Tables.TradeRoutes, "cityB"],
-            operator: "=",
-          },
-          as: "CityB",
-        },
+    ],
+    [
+      "CityB",
+      [
+        ["ID", "cityBID"],
+        ["name", "cityBName"],
+        ["posX", "cityBPosX"],
+        ["posY", "cityBPosY"],
       ],
-    })
-  );
+    ],
+    [Tables.TradeRoutes, ["name", "ID"]],
+  ],
+  join: [
+    {
+      A: Tables.City,
+      equation: {
+        A: ["CityA", "ID"],
+        B: [Tables.TradeRoutes, "cityA"],
+        operator: "=",
+      },
+      as: "CityA",
+    },
+    {
+      A: Tables.City,
+      equation: {
+        A: ["CityB", "ID"],
+        B: [Tables.TradeRoutes, "cityB"],
+        operator: "=",
+      },
+      as: "CityB",
+    },
+  ],
+});
+
+const getTradouteQuery = select({
+  table: Tables.TradeRoutes,
+  attributes: [
+    [
+      "CityA",
+      [
+        ["ID", "cityAID"],
+        ["name", "cityAName"],
+        ["posX", "cityAPosX"],
+        ["posY", "cityAPosY"],
+      ],
+    ],
+    [
+      "CityB",
+      [
+        ["ID", "cityBID"],
+        ["name", "cityBName"],
+        ["posX", "cityBPosX"],
+        ["posY", "cityBPosY"],
+      ],
+    ],
+    [Tables.TradeRoutes, ["name", "ID"]],
+  ],
+  join: [
+    {
+      A: Tables.City,
+      equation: {
+        A: ["CityA", "ID"],
+        B: [Tables.TradeRoutes, "cityA"],
+        operator: "=",
+      },
+      as: "CityA",
+    },
+    {
+      A: Tables.City,
+      equation: {
+        A: ["CityB", "ID"],
+        B: [Tables.TradeRoutes, "cityB"],
+        operator: "=",
+      },
+      as: "CityB",
+    },
+  ],
+});
+
+export const getTradeRoute = async (id?: number | null) => {
+  if (!id) {
+    return [];
+  }
+
+  return db.select<TradeRouteAsGeoJSONView[]>(getTradouteQuery);
+};
+
+export const getTradeRouteByID = async (id?: number | null) => {
+  if (!id) {
+    return null;
+  }
+
+  return (
+    await db.select<TradeRouteAsGeoJSONView[]>(getTradouteByIDQuery, [id])
+  )[0];
 };
 
 export type TradeRouteAsGeoJSONView = {
@@ -163,7 +222,11 @@ export const addTradeRoute = async ([cityA, cityB]: (number | null)[]) => {
     const data = await db.execute(
       insert({
         table: Tables.TradeRoutes,
-        attributes: { cityA, cityB, name: `${start.name}, ${end.name} route` },
+        attributes: {
+          cityA,
+          cityB,
+          name: `${start?.name}, ${end?.name} route`,
+        },
       })
     );
 

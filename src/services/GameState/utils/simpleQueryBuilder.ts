@@ -1,4 +1,11 @@
 import {
+  ConvoyInsertData,
+  ID,
+  TradeRouteInsertData,
+  VehicleInsertData,
+} from "../dbTypes";
+import { CityData } from "../tables/City/CityTable";
+import {
   CityAttr,
   ConvoyAttr,
   TableData,
@@ -6,15 +13,7 @@ import {
   TradeRouteAttr,
   VehicleAttr,
 } from "../tables/common";
-import {
-  ConvoyInsertData,
-  ID,
-  TradeRouteInsertData,
-  VehicleInsertData,
-} from "../dbTypes";
 import { VehicleTypeAttr, VehicleTypeData } from "../tables/vehicleTypes";
-
-import { CityData } from "../tables/City/CityTable";
 import { JoinEquitation } from "./JoinEquation";
 import { WhereEquitation } from "./WhereEquation";
 
@@ -160,7 +159,7 @@ export function select({ attributes, join, where, table }: SelectEvent) {
       : ""
   }${
     (where?.length || 0) > 0
-      ? ` WHERE ${where?.map(whereEquationToString).join(",")}`
+      ? ` WHERE ${where?.map(whereEquationToString).join(" and ")}`
       : ""
   };`;
 }

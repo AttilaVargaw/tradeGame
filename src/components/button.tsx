@@ -7,18 +7,18 @@ export const Button = styled.div<{
   red?: boolean;
   $size?: "normal" | "small";
 }>`
-  &:hover:not([disabled]) {
-    color: greenyellow;
-    cursor: pointer;
+  &:hover&:not([disabled]) {
+    color: greenyellow !important;
+    cursor: pointer !important;
   }
 
   box-sizing: border-box !important;
-  height: ${({ $size }) => ($size === "normal" ? "3em" : "2em")}!important;
+  height: ${({ $size }) => ($size === "normal" ? "3rem" : "2rem")}!important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
 
-  &:active {
+  &:active&:not([disabled]) {
     border-top: 0.7em solid #444 !important;
     border-bottom: 0.7em solid #111 !important;
     border-left: 0.7em solid #222 !important;
@@ -30,14 +30,27 @@ export const Button = styled.div<{
 
   background: ${({ $black }) => ($black ? "#111!important" : "grey!important")};
 
-  border-top: 0.5em solid #777 !important;
-  border-bottom: 0.5em solid #444 !important;
-  border-left: 0.5em solid #555 !important;
-  border-right: 0.5em solid #555 !important;
+  ${({ $active }) =>
+    $active
+      ? css`
+          border-top: 0.7em solid #444 !important;
+          border-bottom: 0.7em solid #111 !important;
+          border-left: 0.7em solid #222 !important;
+          border-right: 0.7em solid #222 !important;
+          background: #777 !important;
+          font-size: 0.9em !important;
+        `
+      : css`
+          border-top: 0.5em solid #777 !important;
+          border-bottom: 0.5em solid #444 !important;
+          border-left: 0.5em solid #555 !important;
+          border-right: 0.5em solid #555 !important;
+          font-size: 1em !important;
+        `}
+
   outline: black solid 2px !important;
 
   padding: 0.1em !important;
-  font-size: 1em !important;
   font-family: ${({ $black }) => ($black ? "Seven Segment" : "helvetica")};
 
   color: ${({ $active, disabled }) => {

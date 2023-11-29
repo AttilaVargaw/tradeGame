@@ -1,13 +1,17 @@
+import {
+  insert,
+  select,
+  update,
+} from "@Services/GameState/utils/simpleQueryBuilder";
+import { Lenght } from "@Services/utils";
+
 import { CityPositionProperty, DBEvents, ID } from "../../dbTypes";
 import { db, dbObservable } from "../../gameState";
-import { insert, select, update } from "@Services/GameState/utils/simpleQueryBuilder";
-
-import { ConvoyData } from "./Convoy";
-import { Lenght } from "@Services/utils";
-import { Tables } from "../common";
-import { VehicleData } from "../Vehicle/Vehicle";
-import { getCities } from "../City/cityQueries";
 import { getQuery } from "../../queryManager";
+import { getCities } from "../City/cityQueries";
+import { VehicleData } from "../Vehicle/Vehicle";
+import { Tables } from "../common";
+import { ConvoyData } from "./Convoy";
 
 export async function CreateConvoy(name: string) {
   const data = await db.execute(
@@ -72,8 +76,12 @@ const getConvoyQuery = select({
   where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
 });
 
-export const getConvoy = async (ID: ID) => {
-  return (await db.select<ConvoyData[]>(getConvoyQuery, [ID]))[0];
+export const getConvoy = async (id: ID | null) => {
+  if (!id) {
+    return;
+  }
+
+  return (await db.select<ConvoyData[]>(getConvoyQuery, [id]))[0];
 };
 
 export async function dockConvoyToCity(convoyID: ID, cityID: ID | null) {
@@ -90,19 +98,13 @@ export async function dockConvoyToCity(convoyID: ID, cityID: ID | null) {
   });
 }
 
+const getConvoysAsGeoJsonQuery = select({
+  attributes: [[Tables.Convoy, ["posX", "posY", "ID", "type", "name"]]],
+  table: Tables.Convoy,
+});
+
 export const getConvoysAsGeoJson = async () => {
-  const convoysData = await db.select<ConvoyData[]>(
-    select({
-      attributes: [
-        [Tables.Convoy, "posX"],
-        [Tables.Convoy, "posY"],
-        [Tables.Convoy, "ID"],
-        [Tables.Convoy, "type"],
-        [Tables.Convoy, "name"],
-      ],
-      table: Tables.Convoy,
-    })
-  );
+  const convoysData = await db.select<ConvoyData[]>(getConvoysAsGeoJsonQuery);
 
   return {
     type: "FeatureCollection",
@@ -117,35 +119,33 @@ export const getConvoysAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.Point, ConvoyData>;
 };
 
+const getConvoyGoalsAsGeoJsonQuery = select({
+  attributes: [[Tables.Convoy, ["posX", "posY", "ID", "goalX", "goalY"]]],
+  table: Tables.Convoy,
+  where: [
+    { A: [Tables.Convoy, "goalX"], value: null, operator: " is not " },
+    { A: [Tables.Convoy, "goalY"], value: null, operator: " is not " },
+  ],
+});
+
 export const getConvoyGoalsAsGeoJson = async () => {
   const convoysData = await db.select<ConvoyData[]>(
-    select({
-      attributes: [
-        [Tables.Convoy, "posX"],
-        [Tables.Convoy, "posY"],
-        [Tables.Convoy, "ID"],
-        [Tables.Convoy, "goalX"],
-        [Tables.Convoy, "goalY"],
-      ],
-      table: Tables.Convoy,
-    })
+    getConvoyGoalsAsGeoJsonQuery
   );
 
   return {
     type: "FeatureCollection",
-    features: convoysData
-      .filter(({ goalX, goalY }) => goalX && goalY)
-      .map(({ goalX, goalY, posX, posY, ID }) => ({
-        properties: { ID },
-        type: "Feature",
-        geometry: {
-          coordinates: [
-            [goalY, goalX],
-            [posY, posX],
-          ],
-          type: "LineString",
-        },
-      })),
+    features: convoysData.map(({ goalX, goalY, posX, posY, ID }) => ({
+      properties: { ID },
+      type: "Feature",
+      geometry: {
+        coordinates: [
+          [goalY, goalX],
+          [posY, posX],
+        ],
+        type: "LineString",
+      },
+    })),
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
 
@@ -289,3 +289,13 @@ export type ConvoyUpdateData = {
   goalVectorY: number;
   goalVectorX: number;
 } & ConvoyData;
+
+export async function getVehiclesOfConvoy(convoyID: ID) {
+  return await db.select<VehicleData[]>(
+    select({
+      table: Tables.Vehicle,
+      attributes: [[Tables.Vehicle, "ID"]],
+      where: [{ A: [Tables.Vehicle, "ID"], value: convoyID }],
+    })
+  );
+}

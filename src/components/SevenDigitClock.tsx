@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "./button";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
-import { Toggle } from "./toggle";
+
+import { Button } from "./button";
+import { Grid } from "./grid";
 import { Tick, TickSpeed } from "./hooks/useGameLoop";
+import { Toggle } from "./toggle";
 
 const Container = styled.div`
   display: flex;
@@ -55,13 +57,7 @@ export function SevenDigitClock() {
           <Character>:00</Character>
         </Container>
       </Button>
-      <div
-        style={{
-          display: "grid",
-          gridAutoColumns: "1fr",
-          gridTemplateColumns: "repeat(4, 1fr)",
-        }}
-      >
+      <Grid $num={4}>
         <Toggle active={speed === 0} onChange={onSpeedToggleClick(0)}>
           &#9208;
         </Toggle>
@@ -74,7 +70,7 @@ export function SevenDigitClock() {
         <Toggle active={speed === 8} onChange={onSpeedToggleClick(8)}>
           &#9197;
         </Toggle>
-      </div>
+      </Grid>
     </div>
   );
 }

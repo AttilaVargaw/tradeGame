@@ -1,11 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { Label } from "@Components/label";
-import Modal from "./Modal";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
-import { GetEncyclopediaArticles } from "@Services/GameState/gameState";
 import { ID } from "@Services/GameState/dbTypes";
+import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
+import { GetEncyclopediaArticles } from "@Services/GameState/tables/Encyclopedia/EncyclopediaQueries";
+
+import Modal from "./Modal";
+
 //import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
+
+const header = <Label type="painted">Encyclopedia</Label>;
 
 export const EncyclopediaModal = () => {
   const [article, setArticle] = useState<string | undefined>();
@@ -38,19 +43,19 @@ export const EncyclopediaModal = () => {
     []
   );
 
-  return (
-    <Modal
-      body={
-        <TerminalScreen dangerouslySetInnerHTML={article} ref={terminalRef}>
-          {folders &&
-            folders.map(({ ID, name }) => (
-              <Link onClick={onFolderClick(ID)} key={ID}>
-                {name}
-              </Link>
-            ))}
-        </TerminalScreen>
-      }
-      header={<Label type="painted">Encyclopedia</Label>}
-    ></Modal>
+  const body = useMemo(
+    () => (
+      <TerminalScreen dangerouslySetInnerHTML={article} ref={terminalRef}>
+        {folders &&
+          folders.map(({ ID, name }) => (
+            <Link onClick={onFolderClick(ID)} key={ID}>
+              {name}
+            </Link>
+          ))}
+      </TerminalScreen>
+    ),
+    [article, folders, onFolderClick]
   );
+
+  return <Modal body={body} header={header}></Modal>;
 };

@@ -1,22 +1,23 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { Label } from "@Components/label";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
+import { Toggle } from "@Components/toggle";
+import { DBEvents } from "@Services/GameState/dbTypes";
+import { ID } from "@Services/GameState/dbTypes";
+import { dbObservable } from "@Services/GameState/gameState";
 import {
   TradeRouteAsGeoJSONView,
   getTradeRoute,
 } from "@Services/GameState/queries/tradeRoute";
+import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
 import {
   getConvoy,
   setConvoyTradeRoute,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
-import { DBEvents } from "@Services/GameState/dbTypes";
-import { ID } from "@Services/GameState/dbTypes";
-import { Label } from "@Components/label";
 import Modal from "../Modal";
-import { Toggle } from "@Components/toggle";
-import { dbObservable } from "@Services/GameState/gameState";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 
 export function ConvoyTradeRouteModal() {
   const [tradeRoutes, setTraderoutes] = useState<TradeRouteAsGeoJSONView[]>();
@@ -30,7 +31,7 @@ export function ConvoyTradeRouteModal() {
       if (currentConvoyID) {
         getConvoy(currentConvoyID).then((convoyData) => {
           setConvoyData(convoyData);
-          if (convoyData.route) {
+          if (convoyData?.route) {
             getTradeRoute(convoyData.route).then((ret) => {
               if (ret.length > 0) {
                 setCurrentlySelectedTradeRoute(ret[0].ID);
