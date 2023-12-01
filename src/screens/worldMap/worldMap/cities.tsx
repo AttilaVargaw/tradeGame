@@ -1,4 +1,4 @@
-import L, { LatLngExpression, circle } from "leaflet";
+import L, { DomEvent, LatLngExpression, circle } from "leaflet";
 import { useEffect } from "react";
 import { useRef } from "react";
 
@@ -117,10 +117,11 @@ export function useCitites() {
           color: CityColors[type],
           bubblingMouseEvents: false,
         })
-          .addEventListener("click", (el) => {
+          .addEventListener("click", (event) => {
+            DomEvent.stopPropagation(event);
             currentConvoySubject.next(null);
 
-            if (el.originalEvent.shiftKey) {
+            if (event.originalEvent.shiftKey) {
               currentCitiesObservable.next([
                 currentCitiesObservable.value[0],
                 ID,

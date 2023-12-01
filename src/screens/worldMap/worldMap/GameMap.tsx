@@ -63,7 +63,9 @@ export function GameMap(): JSX.Element {
 
   useEffect(() => {
     const vehicleLayer = VehiclesLayer();
-    const background = L.imageOverlay("lava_sea.png", bounds);
+    const background = L.imageOverlay("lava_sea.png", bounds, {
+      bubblingMouseEvents: false,
+    });
 
     if (map.current) {
       mapInstance.current = L.map(map.current, {
@@ -85,6 +87,7 @@ export function GameMap(): JSX.Element {
         doubleClickZoom: false,
       })
         .addEventListener("click", () => {
+          console.log(Date.now(), "map")
           currentCitiesObservable.next([null, null]);
           currentConvoySubject.next(null);
           currentSideMenuBehaviorSubject.next("default");

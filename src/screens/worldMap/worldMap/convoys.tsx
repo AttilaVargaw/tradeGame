@@ -1,4 +1,10 @@
-import L, { LatLngExpression, circle } from "leaflet";
+import L, {
+  DomEvent,
+  DomUtil,
+  LatLngExpression,
+  PathOptions,
+  circle,
+} from "leaflet";
 import { useEffect, useRef } from "react";
 
 import {
@@ -13,6 +19,16 @@ import {
 } from "@Services/GameState/tables/Convoy/convoyQueries";
 
 import { currentSideMenuBehaviorSubject } from "./../../SideMenu/currentSideMenu";
+
+const currentRouteStyle: PathOptions = {
+  color: "greenyellow",
+  weight: 5,
+  fillColor: "greenyellow",
+  fillOpacity: 1,
+  lineCap: "square",
+  opacity: 0.5,
+  dashArray: [2, 10],
+};
 
 const currentConvoyMarker = circle([0, 0], {
   dashOffset: "10",
@@ -74,16 +90,8 @@ export function useConvoyLayer() {
           color: "yellow",
           radius: 4,
           bubblingMouseEvents: false,
+          interactive: true,
         })
-          .addEventListener("click", (event) => {
-            currentConvoyMarker
-              .addTo(convoyLayer.current)
-              .setLatLng(coordinates as LatLngExpression);
-
-            currentConvoySubject.next(ID);
-            currentSideMenuBehaviorSubject.next("convoy");
-            currentCitiesObservable.next([null, null]);
-          })
           .bindTooltip(
             new L.Tooltip({
               className: "marker",
@@ -92,7 +100,18 @@ export function useConvoyLayer() {
               direction: "top",
               interactive: true,
             })
-          ),
+          )
+          .addEventListener("click", (event) => {
+            DomEvent.stopPropagation(event);
+
+            currentConvoyMarker
+              .addTo(convoyLayer.current)
+              .setLatLng(coordinates as LatLngExpression);
+
+            currentConvoySubject.next(ID);
+            currentSideMenuBehaviorSubject.next("convoy");
+            currentCitiesObservable.next([null, null]);
+          }),
     })
   );
 
