@@ -1,8 +1,11 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { createHtmlPlugin } from "vite-plugin-html";
 import path from "path";
+
+import { defineConfig } from "vite";
 import checker from "vite-plugin-checker";
+import { createHtmlPlugin } from "vite-plugin-html";
+
+import react from "@vitejs/plugin-react";
+
 import eslint from "./.eslintrc.json";
 
 export default defineConfig({
@@ -51,6 +54,7 @@ export default defineConfig({
     alias: {
       "@Services": path.resolve(__dirname, "./src/services"),
       "@Components": path.resolve(__dirname, "./src/components"),
+      "@Screens": path.resolve(__dirname, "./src/screens"),
     },
   },
 });

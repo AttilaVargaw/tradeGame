@@ -2,13 +2,8 @@ import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { Button } from "./button";
-import { Grid, Row } from "./grid";
+import { Row } from "./grid";
 import { Label } from "./label";
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
 
 const StyledButton = styled(Button)`
   aspect-ratio: 1;
@@ -27,7 +22,7 @@ export function Pager({
   return (
     <Row>
       <StyledButton
-        $size="small"
+        size="small"
         onClick={useCallback(() => {
           if (0 > index - 1) {
             const i = pages.length - 1;
@@ -57,7 +52,7 @@ export function Pager({
             setIndex((i) => ++i);
           }
         }, [index, onChange, pages])}
-        $size="small"
+        size="small"
       >
         &gt;
       </StyledButton>

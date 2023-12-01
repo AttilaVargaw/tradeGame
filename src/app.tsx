@@ -1,11 +1,31 @@
 import { useEffect, useRef, useState } from "react";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+
+import { Button } from "@Components/button";
+import { GameLoop } from "@Components/hooks/useGameLoop";
+import { Label } from "@Components/label";
+import { init } from "@Services/GameState/gameState";
+import { message } from "@tauri-apps/api/dialog";
+
+import { ContextMenu } from "./components/ContextMenu";
+import DebugModeContext from "./debugModeContext";
+import Modal from "./modals/Modal";
 import { WorldMap } from "./screens/worldMap/worldMap/worldMap";
 
-import { message } from "@tauri-apps/api/dialog";
-import DebugModeContext from "./debugModeContext";
-import { ContextMenu } from "./components/ContextMenu";
-import { GameLoop } from "@Components/hooks/useGameLoop";
-import { init } from "@Services/GameState/gameState";
+function ErrorComponent({ error, resetErrorBoundary }: FallbackProps) {
+  return (
+    <Modal
+      body={<>{String(error)}</>}
+      header={
+        <Label color="red" type="painted">
+          Error
+        </Label>
+      }
+      footer={<Button onClick={resetErrorBoundary}>Retry</Button>}
+      hideCloseButton
+    />
+  );
+}
 
 export default function App(): JSX.Element {
   const [gameLoaded, setGameLoaded] = useState(false);
@@ -25,9 +45,11 @@ export default function App(): JSX.Element {
   }, []);
 
   return (
-    <DebugModeContext.Provider value={true}>
-      {gameLoaded ? <WorldMap /> : <>...Loading</>}
-      <ContextMenu />
-    </DebugModeContext.Provider>
+    <ErrorBoundary FallbackComponent={ErrorComponent}>
+      <DebugModeContext.Provider value={true}>
+        {gameLoaded ? <WorldMap /> : <>...Loading</>}
+        <ContextMenu />
+      </DebugModeContext.Provider>
+    </ErrorBoundary>
   );
 }

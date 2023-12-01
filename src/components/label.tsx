@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 
 export type styles = "led" | "painted";
 
-export const Container = styled.div<{ type?: styles }>`
+export const Container = styled.div<{ $type?: styles; $color?: string }>`
   padding: 0.5em;
   display: flex;
   flex-direction: row;
@@ -11,8 +11,8 @@ export const Container = styled.div<{ type?: styles }>`
   margin: 0.2em;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 
-  ${({ type }) => {
-    if (type === "led")
+  ${({ $type, $color }) => {
+    if ($type === "led")
       return css`
         color: lightgreen;
         background: #111 !important;
@@ -26,10 +26,10 @@ export const Container = styled.div<{ type?: styles }>`
         border-radius: 0.5em;
         justify-content: end;
       `;
-    else if (type === "painted")
+    else if ($type === "painted")
       return css`
         font: bold 200px copperplate;
-        color: whitesmoke;
+        color: ${$color ?? "whitesmoke"};
         background: black !important;
         //-webkit-text-stroke: 1px grey;
         border-left: 0.5em solid white;
@@ -55,14 +55,16 @@ const LabelContainer = styled.div`
 export function Label({
   children,
   type,
+  color,
   ...props
 }: {
   type?: styles;
   style?: React.CSSProperties;
   children: string | number;
+  color?: string;
 }) {
   return (
-    <Container type={type} {...props}>
+    <Container $color={color} $type={type} {...props}>
       {type === "led"
         ? [...children.toString()].map((c, i) => (
             <LabelContainer key={i}>{c}</LabelContainer>

@@ -1,6 +1,6 @@
 import { groupBy } from "lodash-es";
 
-import { select, update } from "@Services/GameState/utils/simpleQueryBuilder";
+import { select } from "@Services/GameState/utils/simpleQueryBuilder";
 
 import { DBEvents, ID, InventoryItem, Item } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
@@ -62,30 +62,40 @@ export async function getAllItems(inventoryID: ID) {
     })
   );
 
-  console.log(items, inventoryID);
-
   return groupBy(items, "category");
 }
 
-export const updateInventoryItem = (number: number, ID: ID) => {
-  return db.execute(`update Inventory set number = $1 where ID = $2`, [
-    number,
-    ID,
-  ]);
+export const updateInventoryItem = async (number: number, ID: ID) => {
+  const ret = await db.execute(
+    `update Inventory set number = $1 where ID = $2`,
+    [number, ID]
+  );
+
+  dbObservable.next({ type: DBEvents.inventoryUpdate });
+
+  return ret;
 };
 
-export const addCityWarehouseItem = (
+export const addCityWarehouseItem = async (
   item: number,
   number: number,
   cityID: ID
 ) => {
-  return db.execute(
+  const ret = await db.execute(
     `insert into Inventory (city, item, number) values ($1, $2, $3)`,
     [cityID, item, number]
   );
+
+  dbObservable.next({ type: DBEvents.inventoryUpdate });
+
+  return ret;
 };
 
-export const getEntityInventory = (entityID: ID) => {
+export const getEntityInventory = async (entityID?: ID) => {
+  if (!entityID) {
+    return [];
+  }
+
   return db.select<InventoryItem[]>(
     `select I.nameKey, I.descriptionKey, INV.number, I.ID as ID
         from Inventory as INV
@@ -95,7 +105,11 @@ export const getEntityInventory = (entityID: ID) => {
   );
 };
 
-export const getNotAvailableItems = async (cityID: ID) => {
+export const getNotAvailableItems = async (cityID?: ID) => {
+  if (!cityID) {
+    return [];
+  }
+
   const [items, warehouse] = await Promise.all([
     db.select<Item[]>(`select I.nameKey, I.descriptionKey, I.ID
           from Item as I`),

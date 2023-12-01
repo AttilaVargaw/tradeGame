@@ -1,12 +1,11 @@
-import {
-  ContextMenuItemProps,
-  contextMenuObservable,
-} from "@Services/contextMenu";
 import { FC, useEffect, useRef, useState } from "react";
-import { Link, TerminalScreen } from "./terminalScreen";
+import styled from "styled-components";
+
+import { contextMenuObservable } from "@Services/contextMenu";
 
 import { ContextMenuPosition } from "./hooks/useContextMenuPosition";
-import styled from "styled-components";
+import { useObservableValue } from "./hooks/useObservable";
+import { Link, TerminalScreen } from "./terminalScreen";
 
 const Container = styled.div<{ $top: number; $left: number }>`
   position: absolute;
@@ -16,13 +15,7 @@ const Container = styled.div<{ $top: number; $left: number }>`
 `;
 
 export const ContextMenu: FC = () => {
-  const [contextMenuItems, setContextMenuItems] = useState<
-    ContextMenuItemProps[]
-  >([]);
-
-  useEffect(() => {
-    return contextMenuObservable.subscribe(setContextMenuItems).unsubscribe;
-  }, []);
+  const contextMenuItems = useObservableValue(contextMenuObservable);
 
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +50,7 @@ export const ContextMenu: FC = () => {
         $left={contextMenuPositionState[0]}
       >
         <TerminalScreen>
-          {contextMenuItems.map(({ disabled, labelKey, onClick }) => (
+          {contextMenuItems?.map(({ disabled, labelKey, onClick }) => (
             <Link key={labelKey} onClick={onClick}>
               {labelKey}
             </Link>

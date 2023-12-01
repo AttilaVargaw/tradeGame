@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-import styled from "styled-components";
 
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
-import { Toggle } from "@Components/toggle";
+import { PagerProps } from "@Components/pagerProps";
+import { TogglePager } from "@Components/togglePager";
 import { getCity } from "@Services/GameState/tables/City/cityQueries";
 
 import Modal from "../Modal";
@@ -23,13 +23,32 @@ enum CityModalSubPages {
   vehicles,
 }
 
-const Footer = styled.div`
-  width: 100%;
-  display: grid;
-  flex-direction: row;
-  grid-auto-columns: 1fr;
-  grid-template-columns: repeat(6, 1fr);
-`;
+const pages = [
+  {
+    label: "Warehouse",
+    value: CityModalSubPages.warehouse,
+  },
+  {
+    label: "Relations",
+    value: CityModalSubPages.industry,
+  },
+  {
+    label: "Industry",
+    value: CityModalSubPages.personel,
+  },
+  {
+    label: "Vehicles",
+    value: CityModalSubPages.vehicles,
+  },
+  {
+    label: "Population",
+    value: CityModalSubPages.population,
+  },
+  {
+    label: "Popularity",
+    value: CityModalSubPages.popularity,
+  },
+] as PagerProps<CityModalSubPages>["values"];
 
 export default function CityDataModal(): JSX.Element | null {
   const [cityID] = useCurrentSelectedCity();
@@ -65,52 +84,14 @@ export default function CityDataModal(): JSX.Element | null {
     return false;
   }, [cityData, selectedPage]);
 
-  console.log(body);
-
   const footer = useMemo(
     () =>
       !!cityData && (
-        <Footer>
-          <Toggle
-            active={selectedPage === CityModalSubPages.warehouse}
-            onChange={() => setSelectedPage(CityModalSubPages.warehouse)}
-          >
-            Warehouse
-          </Toggle>
-          <Toggle
-            active={selectedPage === CityModalSubPages.popularity}
-            onChange={() => setSelectedPage(CityModalSubPages.popularity)}
-            disabled
-          >
-            Relations
-          </Toggle>
-          <Toggle
-            active={selectedPage === CityModalSubPages.industry}
-            onChange={() => setSelectedPage(CityModalSubPages.industry)}
-          >
-            Industry
-          </Toggle>
-          <Toggle
-            active={selectedPage === CityModalSubPages.personel}
-            onChange={() => setSelectedPage(CityModalSubPages.personel)}
-          >
-            Personel
-          </Toggle>
-          {cityData.fullPopulation > 0 && (
-            <Toggle
-              active={selectedPage === CityModalSubPages.population}
-              onChange={() => setSelectedPage(CityModalSubPages.population)}
-            >
-              Population
-            </Toggle>
-          )}
-          <Toggle
-            active={selectedPage === CityModalSubPages.vehicles}
-            onChange={() => setSelectedPage(CityModalSubPages.vehicles)}
-          >
-            Vehicles
-          </Toggle>
-        </Footer>
+        <TogglePager
+          selected={selectedPage}
+          onChange={setSelectedPage}
+          values={pages}
+        />
       ),
     [cityData, selectedPage]
   );

@@ -10,7 +10,7 @@ import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
 import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
 
 import { useWindowSize } from "../../../components/hooks/useWIndowSize";
-import SideMenu from "../sideMenu";
+import SideMenu from "../../SideMenu/sideMenu";
 import { GameMap } from "./GameMap";
 
 const Container = styled.div`

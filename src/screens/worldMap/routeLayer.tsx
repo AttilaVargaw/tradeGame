@@ -1,9 +1,10 @@
+import L, { PathOptions, tooltip } from "leaflet";
 import { useCallback, useEffect, useRef } from "react";
+
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { DBEvents, ID } from "@Services/GameState/dbTypes";
 import { dbObservable } from "@Services/GameState/gameState";
-import L, { PathOptions, tooltip } from "leaflet";
-import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { getTradeRoutesAsGeoJson } from "@Services/GameState/queries/tradeRoute";
 
 export type RouteLayerProps = {

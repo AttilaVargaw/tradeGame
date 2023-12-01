@@ -1,28 +1,38 @@
 import { PropsWithChildren, useCallback } from "react";
 import styled, { css } from "styled-components";
 
+export type ToggleProps = PropsWithChildren<{
+  onChange?: (newValue: boolean) => void;
+  onClick?: () => boolean;
+  active: boolean;
+  disabled?: boolean;
+  style?: React.CSSProperties;
+  dangerouslySetInnerHTML?: { __html: string };
+}>;
+
 export function Toggle({
   onChange,
   active = false,
   children,
   disabled,
   style,
-}: PropsWithChildren<{
-  onChange: (newValue: boolean) => void;
-  active: boolean;
-  disabled?: boolean;
-  style?: React.CSSProperties;
-}>) {
-  const onClick = useCallback(() => {
-    !disabled && onChange(!active);
-  }, [active, disabled, onChange]);
+  dangerouslySetInnerHTML,
+  onClick,
+}: ToggleProps) {
+  const onToggleClick = useCallback(() => {
+    if (!disabled) {
+      onChange?.(!active);
+      onClick?.();
+    }
+  }, [active, disabled, onChange, onClick]);
 
   return (
     <ToggleBody
       style={style}
       disabled={disabled}
       $active={active}
-      onClick={onClick}
+      onClick={onToggleClick}
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
     >
       {children}
     </ToggleBody>

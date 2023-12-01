@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import { Button } from "@Components/button";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { Router, RouterProps } from "@Components/router";
 
 export const Container = styled.div`
   z-index: 100000;
@@ -35,10 +36,16 @@ export default function Modal({
   body,
   header,
   footer,
+  subPages,
+  currentSubpage,
+  hideCloseButton = false,
 }: {
   body?: JSX.Element | boolean;
   header?: JSX.Element | boolean;
   footer?: JSX.Element | boolean;
+  subPages?: RouterProps;
+  currentSubpage?: string;
+  hideCloseButton?: boolean;
 }) {
   const [, setCurrentModal] = useCurrentModal();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,15 +65,22 @@ export default function Modal({
     return () => window.removeEventListener("click", ClickEvenListener);
   }, [setCurrentModal]);
 
+  const onCloseButtonCLick = useCallback(
+    () => setCurrentModal(null),
+    [setCurrentModal]
+  );
+
   return (
     <Container ref={containerRef}>
       <div style={{ display: "flex", margin: "0.5em" }}>
         <Header style={{ alignSelf: "start" }}>{header}</Header>
-        <ModalCloseButton
-          onClick={useCallback(() => setCurrentModal(null), [setCurrentModal])}
-        />
+        {!hideCloseButton && <ModalCloseButton onClick={onCloseButtonCLick} />}
       </div>
-      <Body>{body}</Body>
+      {subPages && currentSubpage ? (
+        <Router pages={subPages} value={currentSubpage} />
+      ) : (
+        <Body>{body}</Body>
+      )}
       <Footer style={{ alignSelf: "end" }}>{footer}</Footer>
     </Container>
   );
@@ -76,8 +90,8 @@ export function ModalCloseButton(props: React.ComponentProps<typeof Button>) {
   return (
     <Button
       {...props}
-      style={{ ...props, aspectRatio: 1, borderRadius: "100%" }}
-      $size="normal"
+      style={{ ...props, aspectRatio: 1, borderRadius: "100% 100% 100% 100%" }}
+      size="normal"
     >
       X
     </Button>

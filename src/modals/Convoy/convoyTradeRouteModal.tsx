@@ -1,88 +1,67 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
+import { StackPager } from "@Components/StackPager";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
-import { Link, TerminalScreen } from "@Components/terminalScreen";
+import { PagerLink, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
-import { DBEvents } from "@Services/GameState/dbTypes";
+import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
 import { ID } from "@Services/GameState/dbTypes";
-import { dbObservable } from "@Services/GameState/gameState";
 import {
-  TradeRouteAsGeoJSONView,
-  getTradeRoute,
+  getAllTradeRoute,
+  getTradeRouteByID,
 } from "@Services/GameState/queries/tradeRoute";
-import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
 import {
   getConvoy,
+  setConvoyRouteActive,
   setConvoyTradeRoute,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
 
 import Modal from "../Modal";
 
+export function TradeRouteToLink({
+  ID,
+  name,
+}: Pick<TradeRouteProps, "ID" | "name">) {
+  return {
+    value: ID,
+    label: name,
+  };
+}
+
+const updateEvents = [DBEvents.convoyUpdated];
+
 export function ConvoyTradeRouteModal() {
-  const [tradeRoutes, setTraderoutes] = useState<TradeRouteAsGeoJSONView[]>();
-  const [currentConvoy, setConvoyData] = useState<ConvoyData>();
   const [currentConvoyID] = useCurrentConvoy();
-  const [currentlySelectedTradeRoute, setCurrentlySelectedTradeRoute] =
-    useState<number>();
 
-  useEffect(() => {
-    function updateTraderouteList() {
-      if (currentConvoyID) {
-        getConvoy(currentConvoyID).then((convoyData) => {
-          setConvoyData(convoyData);
-          if (convoyData?.route) {
-            getTradeRoute(convoyData.route).then((ret) => {
-              if (ret.length > 0) {
-                setCurrentlySelectedTradeRoute(ret[0].ID);
-              }
-            });
-          } else {
-            setCurrentlySelectedTradeRoute(undefined);
-          }
-        });
-      }
-      getTradeRoute().then(setTraderoutes);
-    }
+  const tradeRoutes = useDBValue(getAllTradeRoute, updateEvents);
 
-    updateTraderouteList();
+  const currentConvoy = useDBValue(
+    useCallback(() => getConvoy(currentConvoyID), [currentConvoyID]),
+    updateEvents
+  );
 
-    const subscription = dbObservable.subscribe(({ type }) => {
-      if (type === DBEvents.convoyUpdated) {
-        updateTraderouteList();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [currentConvoyID]);
+  const currentTraderoute = useDBValue(
+    useCallback(() => getTradeRouteByID(currentConvoy?.route), [currentConvoy]),
+    updateEvents
+  );
 
   const header = useMemo(() => {
     return <Label type="led">{currentConvoy?.name || ""}</Label>;
   }, [currentConvoy]);
 
-  const activateTradeRoute = useCallback(() => {
-    if (currentlySelectedTradeRoute) {
-      setTradeRouteActive((value) => {
-        return !value;
-      });
-    } else {
-      setTradeRouteActive(false);
-    }
-  }, [currentlySelectedTradeRoute]);
-
-  const selectTradeRoute = useCallback(
-    (ID: ID | null) => () => {
-      if (currentConvoyID) {
-        setConvoyTradeRoute(currentConvoyID, ID);
-        if (!ID) {
-          activateTradeRoute();
-        }
-      }
-    },
-    [currentConvoyID, activateTradeRoute]
+  const activateTradeRoute = useCallback(
+    (active: boolean) =>
+      currentConvoyID && setConvoyRouteActive(currentConvoyID, active),
+    [currentConvoyID]
   );
 
-  const [isTradeRouteActive, setTradeRouteActive] = useState(false);
+  const selectTradeRoute = useCallback(
+    (ID: ID | null) =>
+      currentConvoyID && setConvoyTradeRoute(currentConvoyID, ID),
+    [currentConvoyID]
+  );
 
   const body = useMemo(
     () => (
@@ -90,40 +69,42 @@ export function ConvoyTradeRouteModal() {
         <Label type="painted">Traderoutes</Label>
         <div style={{ height: "80%" }}>
           <TerminalScreen>
-            {tradeRoutes?.map(({ name, ID }) => (
-              <div key={ID}>
-                <Link onClick={selectTradeRoute(ID)}>
-                  {name}
-                  {currentlySelectedTradeRoute === ID && " [X]"}
-                </Link>
-              </div>
-            ))}
+            {tradeRoutes && (
+              <StackPager
+                ItemTemplate={PagerLink}
+                onChange={selectTradeRoute}
+                values={tradeRoutes.map(TradeRouteToLink)}
+                selected={currentTraderoute?.ID}
+              />
+            )}
             <div>
-              <Link onClick={selectTradeRoute(null)}>
+              <PagerLink
+                active={!currentTraderoute}
+                onChange={() => selectTradeRoute(null)}
+              >
                 Off
-                {!currentlySelectedTradeRoute && " [X]"}
-              </Link>
+              </PagerLink>
             </div>
           </TerminalScreen>
         </div>
       </>
     ),
-    [currentlySelectedTradeRoute, tradeRoutes, selectTradeRoute]
+    [tradeRoutes, selectTradeRoute, currentTraderoute]
   );
 
   const footer = useMemo(() => {
     return (
       <>
         <Toggle
-          disabled={!currentlySelectedTradeRoute}
+          disabled={!currentTraderoute}
           onChange={activateTradeRoute}
-          active={isTradeRouteActive}
+          active={!!currentConvoy?.isRouteActive}
         >
           ON
         </Toggle>
       </>
     );
-  }, [activateTradeRoute, isTradeRouteActive, currentlySelectedTradeRoute]);
+  }, [currentTraderoute, activateTradeRoute, currentConvoy?.isRouteActive]);
 
   return <Modal body={body} footer={footer} header={header} />;
 }

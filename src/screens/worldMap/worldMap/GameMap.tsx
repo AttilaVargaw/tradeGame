@@ -6,17 +6,19 @@ import L, {
   canvas,
 } from "leaflet";
 import { useEffect, useRef } from "react";
-
-import { VehiclesLayer } from "./vehicles";
-import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
-import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
-import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
 import styled from "styled-components";
-import { useCitites } from "./cities";
+
 import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import { useConvoyLayer } from "./convoys";
+import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
 import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
+import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
+import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
+
+import { currentSideMenuBehaviorSubject } from "../../SideMenu/currentSideMenu";
 import { useTradeRoutes } from "../routeLayer";
+import { useCitites } from "./cities";
+import { useConvoyLayer } from "./convoys";
+import { VehiclesLayer } from "./vehicles";
 
 const bounds = [
   [0, 0],
@@ -85,6 +87,7 @@ export function GameMap(): JSX.Element {
         .addEventListener("click", () => {
           currentCitiesObservable.next([null, null]);
           currentConvoySubject.next(null);
+          currentSideMenuBehaviorSubject.next("default");
         })
         .addEventListener("contextmenu", ({ latlng: { lat, lng } }) => {
           if (currentConvoySubject.value) {

@@ -1,25 +1,25 @@
 import L, { LatLngExpression, circle } from "leaflet";
+import { useEffect } from "react";
+import { useRef } from "react";
+
+import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
+import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { currentCityBehaviorSubject } from "@Components/hooks/useCurrentSelectedCity";
 import {
   currentCitiesObservable,
   currentSelectedCities,
 } from "@Components/hooks/useSelectedCities";
+import { CityPositionProperty } from "@Services/GameState/dbTypes";
+import { ID } from "@Services/GameState/dbTypes";
+import { addTradeRoute } from "@Services/GameState/queries/tradeRoute";
+import { CityEntity } from "@Services/GameState/tables/City/CityTable";
 import {
   getCities,
   getCity,
 } from "@Services/GameState/tables/City/cityQueries";
-
-import { CityEntity } from "@Services/GameState/tables/City/CityTable";
-import { CityPositionProperty } from "@Services/GameState/dbTypes";
-import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
-import { ID } from "@Services/GameState/dbTypes";
-import { addToContextMenu } from "@Services/contextMenu";
-import { addTradeRoute } from "@Services/GameState/queries/tradeRoute";
-import { currentCityObservable } from "@Components/hooks/useCurrentSelectedCity";
-import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
 import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { useEffect } from "react";
-import { useRef } from "react";
+import { addToContextMenu } from "@Services/contextMenu";
 
 const CityColors: { [key: string]: string } = {
   Mine: "black",
@@ -181,7 +181,7 @@ export function useCitites() {
 
               if (cityID) {
                 const cityData = await getCity(cityID);
-                currentCityObservable.next(cityData);
+                currentCityBehaviorSubject.next(cityData);
                 setCurrentModal("cityInfo");
               }
             }

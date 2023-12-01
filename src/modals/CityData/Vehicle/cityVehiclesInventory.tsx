@@ -1,5 +1,3 @@
-import {} from "lodash-es";
-
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
@@ -20,6 +18,8 @@ const Container = styled.div`
   margin-top: 1em;
 `;
 
+const updateEvents = [DBEvents.inventoryUpdate];
+
 export function CityVehiclesInventory() {
   const [vehicleItems, setVehicleItems] = useState<{
     [Key: string]: InventoryItem[];
@@ -36,7 +36,7 @@ export function CityVehiclesInventory() {
       () => getCityRequiredItemsWithQuantity(cityID?.ID),
       [cityID?.ID]
     ),
-    useMemo(() => [DBEvents.inventoryUpdate], [])
+    updateEvents
   );
 
   const goals = useMemo(

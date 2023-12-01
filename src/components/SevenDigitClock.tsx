@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Button } from "./button";
-import { Grid } from "./grid";
 import { Tick, TickSpeed } from "./hooks/useGameLoop";
-import { Toggle } from "./toggle";
+import { useObservableValue } from "./hooks/useObservable";
+import { PagerProps } from "./pagerProps";
+import { TogglePager } from "./togglePager";
 
 const Container = styled.div`
   display: flex;
@@ -15,41 +16,52 @@ const Character = styled.div`
   width: 0.6em;
 `;
 
+const toggleValues = [
+  {
+    dangerouslySetInnerHTML: { __html: "&#9208;" },
+    value: 0,
+  },
+  {
+    dangerouslySetInnerHTML: { __html: "&#9205;" },
+    value: 1,
+  },
+  {
+    dangerouslySetInnerHTML: { __html: "&#9193;" },
+    value: 2,
+  },
+  {
+    dangerouslySetInnerHTML: { __html: "&#9197;" },
+    value: 3,
+  },
+] as PagerProps<number>["values"];
+
 export function SevenDigitClock() {
   const [time, setTime] = useState("");
 
   const [speed, setSpeed] = useState(1);
 
-  const onSpeedToggleClick = useCallback(
-    (speed: number) => () => {
-      setSpeed(speed);
-      TickSpeed.next(speed);
-    },
-    []
-  );
+  const onSpeedToggleClick = useCallback((speed: number) => {
+    setSpeed(speed);
+    TickSpeed.next(speed);
+  }, []);
+
+  const tick = useObservableValue(Tick);
 
   useEffect(() => {
-    const subscribtion = Tick.subscribe((tick) => {
-      const date = new Date(tick);
-
-      window.requestAnimationFrame(() => {
-        setTime(
-          date.toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            year: "2-digit",
-            month: "2-digit",
-            day: "2-digit",
-          })
-        );
-      });
-    });
-
-    return () => subscribtion.unsubscribe();
-  }, []);
+    tick &&
+      setTime(
+        new Date(tick).toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          year: "2-digit",
+          month: "2-digit",
+          day: "2-digit",
+        })
+      );
+  }, [tick]);
 
   return (
     <div>
-      <Button $black>
+      <Button style={{ height: "4em" }} black>
         <Container>
           {[...time].map((c, i) => (
             <Character key={i}>{c}</Character>
@@ -57,20 +69,11 @@ export function SevenDigitClock() {
           <Character>:00</Character>
         </Container>
       </Button>
-      <Grid $num={4}>
-        <Toggle active={speed === 0} onChange={onSpeedToggleClick(0)}>
-          &#9208;
-        </Toggle>
-        <Toggle active={speed === 1} onChange={onSpeedToggleClick(1)}>
-          &#9205;
-        </Toggle>
-        <Toggle active={speed === 4} onChange={onSpeedToggleClick(4)}>
-          &#9193;
-        </Toggle>
-        <Toggle active={speed === 8} onChange={onSpeedToggleClick(8)}>
-          &#9197;
-        </Toggle>
-      </Grid>
+      <TogglePager
+        selected={speed}
+        onChange={onSpeedToggleClick}
+        values={toggleValues}
+      />
     </div>
   );
 }

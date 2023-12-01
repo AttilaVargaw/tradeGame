@@ -1,17 +1,21 @@
 import { FC, useCallback, useEffect, useState } from "react";
+
+import { Button } from "@Components/button";
+import { Grid } from "@Components/grid";
+import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+import { PagerProps } from "@Components/pagerProps";
+import Placeholder from "@Components/placeholder";
+import { TogglePager } from "@Components/togglePager";
+import { ID } from "@Services/GameState/dbTypes";
+import { VehicleType } from "@Services/GameState/dbTypes";
 import {
   addVehicle,
   getVehicleType,
   getVehicleTypes,
 } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
-
-import { Button } from "@Components/button";
-import { BuyItem } from "./buyItem";
-import { ID } from "@Services/GameState/dbTypes";
-import Placeholder from "@Components/placeholder";
-import { VehicleType } from "@Services/GameState/dbTypes";
 import { makeid } from "@Services/utils";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
+
+import { BuyItem } from "./buyItem";
 
 function GenerateVehicleName() {
   return `${makeid(3)}-${makeid(3)}`;
@@ -69,6 +73,25 @@ export const OrderPage: FC<{ ID: ID; onBack: () => void }> = ({
   );
 };
 
+const toggleValues = [
+  {
+    value: "air",
+    label: "Helicopters",
+  },
+  {
+    value: "airships",
+    label: "Airships",
+  },
+  {
+    value: "wheeled",
+    label: "Wheeled Escorts",
+  },
+  {
+    value: "tracked",
+    label: "Tracked Escorts",
+  },
+] as PagerProps<string>["values"];
+
 export const VehicleBuyModal = () => {
   const [vehicleDescriptions, setVehicleDescriptions] = useState<VehicleType[]>(
     []
@@ -98,35 +121,12 @@ export const VehicleBuyModal = () => {
     <>
       {!currentVehicle && (
         <div>
-          <div
-            style={{
-              width: "100%",
-              display: "grid",
-              gridAutoColumns: "1fr",
-              gridTemplateColumns: "repeat(6, 1fr)",
-            }}
-          >
-            <Button onClick={setVehicleType("air")}>Helicopters</Button>
-            <Button onClick={setVehicleType("air")}>Airships</Button>
-            <Button onClick={setVehicleType("wheeled")}>
-              Wheeled Transporters
-            </Button>
-            <Button onClick={setVehicleType("wheeled")}>Wheeled Escorts</Button>
-            <Button onClick={setVehicleType("tracked")}>
-              Tracked Transporters
-            </Button>
-            <Button onClick={setVehicleType("tracked")}>Tracked Escorts</Button>
-          </div>
-          <div
-            style={{
-              width: "100%",
-              display: "grid",
-              gridAutoColumns: "1fr",
-              gridTemplateColumns: "repeat(8, 1fr)",
-              gap: "1em",
-              paddingTop: "1em",
-            }}
-          >
+          <TogglePager
+            values={toggleValues}
+            onChange={setSelectedVehicleType}
+            selected={selectedVehicleType}
+          />
+          <Grid $num={8} style={{ gap: "1em", paddingTop: "1em" }}>
             {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (
               <BuyItem
                 onClick={onOrderClick(ID)}
@@ -138,7 +138,7 @@ export const VehicleBuyModal = () => {
                 name={name}
               />
             ))}
-          </div>
+          </Grid>
         </div>
       )}
       {!!currentVehicle && (

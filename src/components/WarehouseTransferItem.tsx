@@ -56,7 +56,7 @@ export function WarehouseTransferItem({
         <Label type="led">{aNum}</Label>
       </ElementContainer>
       <Row>
-        <StyledButton $size="small" onClick={onMove(false)}>
+        <StyledButton size="small" onClick={onMove(false)}>
           &lt;
         </StyledButton>
         <Input
@@ -66,7 +66,7 @@ export function WarehouseTransferItem({
           type="number"
           min={1}
         />
-        <StyledButton $size="small" onClick={onMove(true)}>
+        <StyledButton size="small" onClick={onMove(true)}>
           &gt;
         </StyledButton>
       </Row>

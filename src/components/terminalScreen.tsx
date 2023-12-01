@@ -2,6 +2,8 @@ import React from "react";
 import { PropsWithChildren } from "react";
 import styled from "styled-components";
 
+import { PagerItemProps } from "./pagerProps";
+
 const Container = styled.div`
   height: 100%;
   width: 100%;
@@ -20,6 +22,15 @@ export const Link = styled.span`
   text-shadow: 0 0 0.5px blue, 0 0 1px blue, 0 0 1.5px darkblue,
     0 0 2px darkblue, 0 0 2.5px darkblue, 0 0 3px darkblue, 0 0 3.5px darkblue;
 `;
+
+export function PagerLink({ active, onChange, children }: PagerItemProps) {
+  return (
+    <Link onClick={onChange}>
+      {children}
+      {active && " [X]"}
+    </Link>
+  );
+}
 
 export const Screen = styled.div`
   color: lightgreen;
@@ -42,22 +53,19 @@ export const Screen = styled.div`
 export const TerminalScreen = React.forwardRef<
   HTMLDivElement,
   PropsWithChildren<{
-    dangerouslySetInnerHTML?: string;
+    dangerouslySetInnerHTML?: { __html: string };
   }>
 >(({ children, dangerouslySetInnerHTML }, ref) => {
   return (
     <Container>
       <Screen
         ref={ref}
-        dangerouslySetInnerHTML={
-          dangerouslySetInnerHTML
-            ? { __html: dangerouslySetInnerHTML }
-            : undefined
-        }
         style={{ height: "100%" }}
-      >
-        {children}
-      </Screen>
+        {...{
+          dangerouslySetInnerHTML: dangerouslySetInnerHTML,
+          children,
+        }}
+      />
     </Container>
   );
 });

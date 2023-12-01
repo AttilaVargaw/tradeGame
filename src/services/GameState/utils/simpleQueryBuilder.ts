@@ -66,16 +66,18 @@ export function FillTable<T>({ name, initData }: TableData<T>) {
   return "";
 }
 
-function InputToString(input: string | number | null) {
+function InputToString(input: string | number | null | boolean) {
   switch (typeof input) {
     case "string":
-      return /(\+|-).*/.test(input) ? input : `"${input}"`;
+      return /(\+|-|\$\d*|\?).*/.test(input) ? input : `"${input}"`;
     case "number":
       return `${input}`;
     case "undefined":
       return `NULL`;
     case "object":
       return `NULL`;
+    case "boolean":
+      return input ? "1" : "0";
   }
 }
 
@@ -114,7 +116,7 @@ function whereEquationToString({
   A: [table, attr],
   value = null,
 }: WhereEquitation) {
-  const addQuotations = typeof value && attr !== "ID";
+  const addQuotations = typeof value === "string" && attr !== "ID";
 
   return `${table}.${attr}${operator}${
     value !== null
@@ -178,7 +180,7 @@ export function update({
   where,
   toBind = false,
 }: {
-  updateRows: [string, string | number | null | ID][];
+  updateRows: [string, string | number | null | ID | boolean][];
   table: Tables;
   where?: WhereEquitation[];
   join?: Join[];
@@ -193,7 +195,7 @@ export function update({
         ""
   }
   SET ${updateRows
-    .map(([attr, value]) => `${attr} = ${InputToString(value)}`)
+    .map(([attr, value]) => `${attr}=${InputToString(value)}`)
     .join(",")}
   ${
     where?.length || 0 > 0

@@ -1,29 +1,36 @@
 import { useMemo, useState } from "react";
-import styled from "styled-components";
 
-import { Button } from "@Components/button";
-import { Grid } from "@Components/grid";
 import { Label } from "@Components/label";
+import { TogglePager } from "@Components/togglePager";
 
-import Modal, { ModalCloseButton } from "../Modal";
+import Modal from "../Modal";
 import { VehicleBuyModal } from "./vehicleBuy";
 import { VehicleListModal } from "./vehicleList";
 
-enum VehicleModalSubPages {
+enum Subpages {
   List,
   Buy,
 }
 
-const Container = styled.div``;
+const pages = [
+  {
+    label: "Crew",
+    value: Subpages.Buy,
+  },
+  {
+    label: "Vehicles",
+    value: Subpages.List,
+  },
+];
 
 export default function VehicleModal() {
-  const [selectedPage, setSelectedPage] = useState(VehicleModalSubPages.List);
+  const [selectedPage, setSelectedPage] = useState(Subpages.List);
 
   const body = useMemo(() => {
     switch (selectedPage) {
-      case VehicleModalSubPages.Buy:
+      case Subpages.Buy:
         return <VehicleBuyModal />;
-      case VehicleModalSubPages.List:
+      case Subpages.List:
         return <VehicleListModal />;
     }
   }, [selectedPage]);
@@ -32,31 +39,20 @@ export default function VehicleModal() {
     <Modal
       header={useMemo(
         () => (
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <Label style={{ flex: 20 }} type="led">{`< ${
-              selectedPage === 0 ? "Vehicle list" : "Orders"
-            } >`}</Label>
-          </div>
+          <Label type="painted">
+            {selectedPage === 0 ? "Vehicle list" : "Orders"}
+          </Label>
         ),
         [selectedPage]
       )}
       body={body}
       footer={useMemo(
         () => (
-          <Grid $num={2}>
-            <Button
-              $active={selectedPage === VehicleModalSubPages.Buy}
-              onClick={() => setSelectedPage(VehicleModalSubPages.Buy)}
-            >
-              Buy
-            </Button>
-            <Button
-              $active={selectedPage === VehicleModalSubPages.List}
-              onClick={() => setSelectedPage(VehicleModalSubPages.List)}
-            >
-              List
-            </Button>
-          </Grid>
+          <TogglePager
+            selected={selectedPage}
+            onChange={setSelectedPage}
+            values={pages}
+          />
         ),
         [selectedPage]
       )}

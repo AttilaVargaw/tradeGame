@@ -1,14 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useDBValue } from "@Components/hooks/useDBValue";
 import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { Label } from "@Components/label";
 import { TerminalScreen } from "@Components/terminalScreen";
-import {
-  TradeRouteAsGeoJSONView,
-  getTradeRoute,
-  getTradeRouteByID,
-} from "@Services/GameState/queries/tradeRoute";
+import { getTradeRouteByID } from "@Services/GameState/queries/tradeRoute";
 
 import Modal from "./Modal";
 

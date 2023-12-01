@@ -45,14 +45,19 @@ export const EncyclopediaModal = () => {
 
   const body = useMemo(
     () => (
-      <TerminalScreen dangerouslySetInnerHTML={article} ref={terminalRef}>
-        {folders &&
-          folders.map(({ ID, name }) => (
-            <Link onClick={onFolderClick(ID)} key={ID}>
-              {name}
-            </Link>
-          ))}
-      </TerminalScreen>
+      <TerminalScreen
+        {...{
+          dangerouslySetInnerHTML: article ? { __html: article } : undefined,
+          children:
+            folders && !article ?
+            folders.map(({ ID, name }) => (
+              <Link onClick={onFolderClick(ID)} key={ID}>
+                {name}
+              </Link>
+            )) : undefined,
+        }}
+        ref={terminalRef}
+      />
     ),
     [article, folders, onFolderClick]
   );

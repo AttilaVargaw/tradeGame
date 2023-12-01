@@ -1,16 +1,18 @@
 import L, { LatLngExpression, circle } from "leaflet";
-import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
+import { useEffect, useRef } from "react";
+
 import {
   currentConvoyObservable,
   currentConvoySubject,
 } from "@Components/hooks/useCurrentConvoy";
+import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
+import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
 import {
   getConvoyGoalsAsGeoJson,
   getConvoysAsGeoJson,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
-import { useEffect, useRef } from "react";
 
-import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
+import { currentSideMenuBehaviorSubject } from "./../../SideMenu/currentSideMenu";
 
 const currentConvoyMarker = circle([0, 0], {
   dashOffset: "10",
@@ -79,6 +81,7 @@ export function useConvoyLayer() {
               .setLatLng(coordinates as LatLngExpression);
 
             currentConvoySubject.next(ID);
+            currentSideMenuBehaviorSubject.next("convoy");
             currentCitiesObservable.next([null, null]);
           })
           .bindTooltip(

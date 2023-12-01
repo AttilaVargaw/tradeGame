@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { Grid } from "@Components/grid";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { Toggle } from "@Components/toggle";
+import { TogglePager } from "@Components/togglePager";
 import { getDockedConvoysForCity } from "@Services/GameState/tables/City/cityQueries";
 import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
 import { VehicleData } from "@Services/GameState/tables/Vehicle/Vehicle";
@@ -19,6 +18,17 @@ enum Subpages {
   Crew,
   List,
 }
+
+const pages = [
+  {
+    label: "Crew",
+    value: Subpages.Crew,
+  },
+  {
+    label: "Inventory",
+    value: Subpages.List,
+  },
+];
 
 export default function CityVehicles() {
   const [vehicles] = useState<VehicleData[]>([]);
@@ -37,25 +47,17 @@ export default function CityVehicles() {
     if (currentConvoy) {
       return (
         <>
-          <Grid $num={2}>
-            <Toggle
-              onChange={() => setSubpage(Subpages.Crew)}
-              active={subpage === Subpages.Crew}
-            >
-              Crew
-            </Toggle>
-            <Toggle
-              onChange={() => setSubpage(Subpages.List)}
-              active={subpage === Subpages.List}
-            >
-              Inventory
-            </Toggle>
-          </Grid>
+          <TogglePager
+            selected={subpage}
+            onChange={setSubpage}
+            values={pages}
+          />
           {subpage === Subpages.Crew && <CityVehiclesCrew />}
           {subpage === Subpages.List && <CityVehiclesInventory />}
         </>
       );
     }
+
     return (
       <TerminalScreen>
         {convoys &&

@@ -5,26 +5,25 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { Button } from "@Components/button";
+import { GridItem } from "@Components/grid";
+import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+import { useDBValue } from "@Components/hooks/useDBValue";
+import { Input, Select } from "@Components/input";
+import { Label } from "@Components/label";
+import { Link } from "@Components/terminalScreen";
+import { Screen } from "@Components/terminalScreen";
+import { DBEvents, ID } from "@Services/GameState/dbTypes";
 import {
   CreateConvoy,
   getConvoylessVehicles,
   getConvoys,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
-import { Input, Select } from "@Components/input";
-
-import { Button } from "@Components/button";
-import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
-import { ConvoyInfo } from "./convoyInfo";
-import { GridItem } from "@Components/grid";
-import { ID } from "@Services/GameState/dbTypes";
-import { Label } from "@Components/label";
-import { Link } from "@Components/terminalScreen";
-import Modal from "../Modal";
-import { Screen } from "@Components/terminalScreen";
-import { VehicleData } from "@Services/GameState/tables/Vehicle/Vehicle";
 import { addVehicleToConvoy } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
-import { dbObservable } from "@Services/GameState/gameState";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
+
+import Modal from "../Modal";
+import { ConvoyInfo } from "./convoyInfo";
 
 /*enum ConvoyModalSubpages {
   list,
@@ -56,11 +55,7 @@ export const ConvoyItem = ({
   );
 };
 
-const Header = (
-  <Label type="led" style={{ width: "100%" }}>
-    Convoys
-  </Label>
-);
+const Header = <Label type="painted">Convoys</Label>;
 
 const Footer = (
   <div>
@@ -69,34 +64,28 @@ const Footer = (
 );
 
 export const ConvoyModal = () => {
-  const [convoysData, setConvoyData] = useState<ConvoyData[]>([]);
   const [currentConvoy] = useCurrentConvoy();
-  const [availableCommandVehicles, setAvailableCommandVehicles] = useState<
-    VehicleData[]
-  >([]);
+
+  const convoysData = useDBValue(
+    getConvoys,
+    useMemo(() => [DBEvents.convoyUpdated], [])
+  );
+
+  const availableCommandVehicles = useDBValue(
+    getConvoylessVehicles,
+    useMemo(() => [DBEvents.convoyUpdated], [])
+  );
 
   useEffect(() => {
-    getConvoys().then(setConvoyData);
-    getConvoylessVehicles().then((commandVehicles) => {
-      setAvailableCommandVehicles(commandVehicles);
-      if (commandVehicles.length > 0) {
-        const { ID, name } = commandVehicles[0];
+    if (availableCommandVehicles && availableCommandVehicles?.length > 0) {
+      const { ID, name } = availableCommandVehicles[0];
 
-        setNewConvoyData({
-          commandVehicle: ID,
-          name: `Convoy ${name}`,
-        });
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    const subscription = dbObservable.subscribe(() =>
-      getConvoys().then(setConvoyData)
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
+      setNewConvoyData({
+        commandVehicle: ID,
+        name: `Convoy ${name}`,
+      });
+    }
+  }, [availableCommandVehicles]);
 
   const [newConvoyData, setNewConvoyData] = useState<{
     name: string;
@@ -134,7 +123,7 @@ export const ConvoyModal = () => {
       return (
         <>
           <Screen style={{ height: "50%" }}>
-            {convoysData.map(({ ID, name }) => (
+            {convoysData?.map(({ ID, name }) => (
               <ConvoyItem id={ID} key={ID} name={name} />
             ))}
           </Screen>
@@ -156,7 +145,7 @@ export const ConvoyModal = () => {
                 Command vehicle
               </Label>
               <Select style={{ flex: 1 }} onSelect={setCommandVehicle}>
-                {availableCommandVehicles.map(({ ID, name }) => (
+                {availableCommandVehicles?.map(({ ID, name }) => (
                   <option key={ID} value={ID}>
                     {name}
                   </option>

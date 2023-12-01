@@ -1,6 +1,7 @@
-import styled, { css } from "styled-components";
+import { PropsWithChildren } from "react";
+import styled, { CSSProperties, css } from "styled-components";
 
-export const Button = styled.div<{
+export const ButtonBase = styled.div<{
   $black?: boolean;
   $active?: boolean;
   disabled?: boolean;
@@ -74,3 +75,15 @@ export const Button = styled.div<{
             0 0 3px darkgreen, 0 0 3.5px darkgreen;
         `}
 `;
+
+export type ButtonProps = PropsWithChildren<{
+  active?: boolean;
+  black?: boolean;
+  size?: "normal" | "small";
+  onClick?: () => void;
+  style?: CSSProperties;
+}>;
+
+export const Button = ({ active, black, size, ...props }: ButtonProps) => (
+  <ButtonBase {...props} $active={active} $black={black} $size={size} />
+);

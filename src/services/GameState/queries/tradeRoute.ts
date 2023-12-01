@@ -105,11 +105,7 @@ const getTradouteQuery = select({
   ],
 });
 
-export const getTradeRoute = async (id?: number | null) => {
-  if (!id) {
-    return [];
-  }
-
+export const getAllTradeRoute = () => {
   return db.select<TradeRouteAsGeoJSONView[]>(getTradouteQuery);
 };
 
