@@ -40,9 +40,9 @@ export default function Modal({
   currentSubpage,
   hideCloseButton = false,
 }: {
-  body?: JSX.Element | boolean;
-  header?: JSX.Element | boolean;
-  footer?: JSX.Element | boolean;
+  body?: React.ReactElement | boolean;
+  header?: React.ReactElement | boolean;
+  footer?: React.ReactElement | boolean;
   subPages?: RouterProps;
   currentSubpage?: string;
   hideCloseButton?: boolean;

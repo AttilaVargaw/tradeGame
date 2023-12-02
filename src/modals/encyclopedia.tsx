@@ -22,7 +22,6 @@ export const EncyclopediaModal = () => {
 
   useEffect(() => {
     GetEncyclopediaArticles(currentFolder).then((encyclopediaArticles) => {
-      console.log(encyclopediaArticles);
       if (encyclopediaArticles[0].folder) {
         setArticle(undefined);
         setFolders(encyclopediaArticles);
@@ -49,12 +48,13 @@ export const EncyclopediaModal = () => {
         {...{
           dangerouslySetInnerHTML: article ? { __html: article } : undefined,
           children:
-            folders && !article ?
-            folders.map(({ ID, name }) => (
-              <Link onClick={onFolderClick(ID)} key={ID}>
-                {name}
-              </Link>
-            )) : undefined,
+            folders && !article
+              ? folders.map(({ ID, name }) => (
+                  <Link onClick={onFolderClick(ID)} key={ID}>
+                    {name}
+                  </Link>
+                ))
+              : undefined,
         }}
         ref={terminalRef}
       />

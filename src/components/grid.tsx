@@ -25,3 +25,9 @@ export const Row = styled.div`
   justify-content: space-between;
   flex-direction: row;
 `;
+
+export const Col = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+`;

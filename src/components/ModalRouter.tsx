@@ -1,12 +1,12 @@
-import TradeRouteModal from "../modals/tradeRouteModal";
 import CityDataModal from "../modals/CityData/cityDataModal";
 import { ConvoyModal } from "../modals/Convoy/convoyModal";
-import { useCurrentModal } from "./hooks/useCurrentModal";
+import { ConvoyTradeRouteModal } from "../modals/Convoy/convoyTradeRouteModal";
 import VehicleModal from "../modals/Vehicle/vehicleModal";
 import { EncyclopediaModal } from "../modals/encyclopedia";
-import { ConvoyTradeRouteModal } from "../modals/Convoy/convoyTradeRouteModal";
+import TradeRouteModal from "../modals/tradeRouteModal";
+import { useCurrentModal } from "./hooks/useCurrentModal";
 
-export function ModalRouter(): JSX.Element | null {
+export function ModalRouter(): React.ReactElement | null {
   const [currentModal] = useCurrentModal();
 
   switch (currentModal) {

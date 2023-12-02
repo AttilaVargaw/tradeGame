@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
-import { Row } from "@Components/grid";
+import { StackPager } from "@Components/StackPager";
+import { Col, Row } from "@Components/grid";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { useDBValue } from "@Components/hooks/useDBValue";
@@ -68,8 +69,8 @@ export function ConvoySideMenu() {
   }, [convoyData]);
 
   return (
-    <div>
-      <TerminalScreen>
+    <Col>
+      <TerminalScreen rows={10}>
         <LineRowWithDefault
           onLinkClick={openConvoyModals}
           defaultText="none"
@@ -92,6 +93,6 @@ export function ConvoySideMenu() {
       >
         ON
       </Toggle>
-    </div>
+    </Col>
   );
 }

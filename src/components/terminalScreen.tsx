@@ -32,6 +32,15 @@ export function PagerLink({ active, onChange, children }: PagerItemProps) {
   );
 }
 
+export const ScreenText = styled.div`
+  text-shadow: 0 0 0.5px lightgreen, 0 0 1px lightgreen, 0 0 1.5px darkgreen,
+    0 0 2px darkgreen, 0 0 2.5px darkgreen, 0 0 3px darkgreen,
+    0 0 3.5px darkgreen;
+  color: lightgreen;
+  background: #111;
+  font-family: "Seven Segment";
+`;
+
 export const Screen = styled.div`
   color: lightgreen;
   background: #111;
@@ -54,15 +63,17 @@ export const TerminalScreen = React.forwardRef<
   HTMLDivElement,
   PropsWithChildren<{
     dangerouslySetInnerHTML?: { __html: string };
+    style?: React.CSSProperties;
+    rows?: number;
   }>
->(({ children, dangerouslySetInnerHTML }, ref) => {
+>(({ children, dangerouslySetInnerHTML, style, rows }, ref) => {
   return (
     <Container>
       <Screen
         ref={ref}
-        style={{ height: "100%" }}
+        style={{ ...style, height: rows ? `${rows}em` : style?.height }}
         {...{
-          dangerouslySetInnerHTML: dangerouslySetInnerHTML,
+          dangerouslySetInnerHTML,
           children,
         }}
       />

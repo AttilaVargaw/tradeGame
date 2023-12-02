@@ -6,10 +6,7 @@ export type PagerItemProps = PropsWithChildren<{
   style?: CSSProperties;
 }>;
 
-export type PagerProps<
-  T = string,
-  U extends PagerItemProps = PagerItemProps
-> = {
+export type PagerProps<T, U extends PagerItemProps = PagerItemProps> = {
   values: {
     label?: string;
     value: T;
@@ -17,5 +14,5 @@ export type PagerProps<
   }[];
   onChange: (newValue: T) => void;
   selected?: T;
-  ItemTemplate?: (props: U) => JSX.Element;
+  ItemTemplate?: (props: U) => React.ReactElement;
 };

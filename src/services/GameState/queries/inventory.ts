@@ -97,7 +97,7 @@ export const getEntityInventory = async (entityID?: ID) => {
   }
 
   return db.select<InventoryItem[]>(
-    `select I.nameKey, I.descriptionKey, INV.number, I.ID as ID
+    `select I.nameKey, I.descriptionKey, INV.number, INV.weight, I.ID as ID
         from Inventory as INV
         inner join Item as I on I.ID = INV.item
         where INV.inventory = $1`,
@@ -105,8 +105,24 @@ export const getEntityInventory = async (entityID?: ID) => {
   );
 };
 
+export const getEntityInventoryWeight = async (inventoryID?: ID) => {
+  if (typeof inventoryID === "undefined") {
+    return {};
+  }
+
+  return (
+    await db.select<{ weight?: number }[]>(
+      `select sum(I.weight * INV.number) as weight
+        from Inventory as INV
+        inner join Item as I on I.ID = INV.item
+        where INV.inventory = $1;`,
+      [inventoryID]
+    )
+  )[0];
+};
+
 export const getNotAvailableItems = async (cityID?: ID) => {
-  if (!cityID) {
+  if (typeof cityID === "undefined") {
     return [];
   }
 
@@ -130,3 +146,21 @@ export const getNotAvailableItems = async (cityID?: ID) => {
       nameKey,
     }));
 };
+
+export async function getNumberOfInventoryItem(inventory: ID, item: ID) {
+  const result = await db.select<{ number: number; item: ID }[]>(
+    "select number, item from inventory inner join Item on inventory.item = item.id where inventory.inventory = ? and item.id = ?;",
+    [inventory, item]
+  );
+
+  if (result?.length === 0) {
+    await db.execute(
+      "insert into inventory (inventory, item, number) values(?,?,?)",
+      [inventory, item, 0]
+    );
+
+    return { number: 0, item };
+  }
+
+  return result[0];
+}

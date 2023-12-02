@@ -15,7 +15,7 @@ const body = (
   </>
 );
 
-export default function TradeRouteModal(): JSX.Element | false {
+export default function TradeRouteModal(): React.ReactElement | false {
   const [routeID] = useSelectedRouteAtom();
 
   const routeData = useDBValue(

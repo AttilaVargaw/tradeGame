@@ -26,6 +26,7 @@ export function WarehouseTransferItem({
   aID,
   bID,
   interchange,
+  disabled,
 }: {
   label: string;
   aNum: number;
@@ -33,6 +34,7 @@ export function WarehouseTransferItem({
   aID: ID;
   bID: ID;
   interchange: (idA: number, idB: number, num: number) => void;
+  disabled?: boolean;
 }) {
   const [num, setNum] = useState(1);
 
@@ -56,7 +58,11 @@ export function WarehouseTransferItem({
         <Label type="led">{aNum}</Label>
       </ElementContainer>
       <Row>
-        <StyledButton size="small" onClick={onMove(false)}>
+        <StyledButton
+          disabled={aID === -1 || bID === -1}
+          size="small"
+          onClick={onMove(false)}
+        >
           &lt;
         </StyledButton>
         <Input
@@ -66,7 +72,11 @@ export function WarehouseTransferItem({
           type="number"
           min={1}
         />
-        <StyledButton size="small" onClick={onMove(true)}>
+        <StyledButton
+          disabled={aID === -1 || bID === -1}
+          size="small"
+          onClick={onMove(true)}
+        >
           &gt;
         </StyledButton>
       </Row>

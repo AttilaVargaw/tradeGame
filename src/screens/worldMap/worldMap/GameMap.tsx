@@ -33,7 +33,7 @@ const StyledMapContainer = styled.div`
 
 const center = [1000, 3300] as LatLngExpression;
 
-export function GameMap(): JSX.Element {
+export function GameMap(): React.ReactElement {
   useKeypressHandler();
   useContextMenuHandler();
 
@@ -87,7 +87,6 @@ export function GameMap(): JSX.Element {
         doubleClickZoom: false,
       })
         .addEventListener("click", () => {
-          console.log(Date.now(), "map")
           currentCitiesObservable.next([null, null]);
           currentConvoySubject.next(null);
           currentSideMenuBehaviorSubject.next("default");

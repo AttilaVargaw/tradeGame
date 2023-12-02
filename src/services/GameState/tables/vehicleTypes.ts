@@ -1,3 +1,4 @@
+import { ID } from "../dbTypes";
 import type { TableData } from "./common";
 
 export type VehicleTypesName = "VehicleTypes";
@@ -8,6 +9,8 @@ export type VehicleTypeData = {
   price: number;
   type: string;
   speed: number;
+  inventorySize: number;
+  ID: ID;
 };
 
 export type VehicleTypeAttr = "name" | "desc" | "price" | "ID" | "type";
@@ -20,6 +23,7 @@ export default {
     { name: "price", type: "REAL" },
     { name: "type", type: "TEXT" },
     { name: "speed", type: "REAL" },
+    { name: "inventorySize", type: "INTEGER" },
   ],
   initData: [
     {
@@ -28,6 +32,7 @@ export default {
       price: 500000,
       type: "air",
       speed: 300,
+      inventorySize: 500,
     },
     {
       desc: "A medium sized flying machine. It is relatively fast, but very fragile at the same time.",
@@ -35,6 +40,7 @@ export default {
       price: 1500000,
       type: "air",
       speed: 240,
+      inventorySize: 1200,
     },
     {
       desc: "A massive and strong flying machine. It is relatively fast.",
@@ -42,6 +48,7 @@ export default {
       price: 4500000,
       type: "air",
       speed: 180,
+      inventorySize: 3000,
     },
     {
       desc: "A light truck.",
@@ -49,6 +56,7 @@ export default {
       price: 5000,
       type: "wheeled",
       speed: 120,
+      inventorySize: 45000,
     },
     {
       desc: "A heavyweight truck.",
@@ -56,6 +64,7 @@ export default {
       price: 10000,
       type: "wheeled",
       speed: 100,
+      inventorySize: 100000,
     },
     {
       desc: "Light tracked hauler.",
@@ -63,6 +72,7 @@ export default {
       price: 10000,
       type: "tracked",
       speed: 70,
+      inventorySize: 140000,
     },
     {
       desc: "Medium tracked hauler",
@@ -70,6 +80,7 @@ export default {
       price: 10000,
       type: "tracked",
       speed: 60,
+      inventorySize: 190000,
     },
     {
       desc: "Heavy tracked hauler",
@@ -77,13 +88,15 @@ export default {
       price: 10000,
       type: "tracked",
       speed: 50,
+      inventorySize: 250000,
     },
     {
       desc: "Light tracked escort",
-      name: "Medium tracked escort",
+      name: "Light tracked escort",
       price: 10000,
       type: "tracked",
       speed: 60,
+      inventorySize: 1000,
     },
     {
       desc: "Medium tracked escort",
@@ -91,6 +104,7 @@ export default {
       price: 10000,
       type: "tracked",
       speed: 55,
+      inventorySize: 2000,
     },
     {
       desc: "Heavy tracked escort",
@@ -98,6 +112,7 @@ export default {
       price: 50000,
       type: "tracked",
       speed: 50,
+      inventorySize: 4000,
     },
   ],
-} as TableData<VehicleTypeData>;
+} as TableData<Partial<VehicleTypeData>>;

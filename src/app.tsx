@@ -27,7 +27,7 @@ function ErrorComponent({ error, resetErrorBoundary }: FallbackProps) {
   );
 }
 
-export default function App(): JSX.Element {
+export default function App(): React.ReactElement {
   const [gameLoaded, setGameLoaded] = useState(false);
   const gameLoopCleanup = useRef<() => void>();
 

@@ -4,56 +4,53 @@ import styled from "styled-components";
 import { Button } from "./button";
 import { Row } from "./grid";
 import { Label } from "./label";
+import { PagerProps } from "./pagerProps";
 
 const StyledButton = styled(Button)`
   aspect-ratio: 1;
   align-self: center;
 `;
 
-export function Pager({
-  pages,
-  onChange,
-}: {
-  pages: string[];
-  onChange: (next: string) => void;
-}) {
+export function Pager<T>({ values, onChange }: PagerProps<T>) {
   const [index, setIndex] = useState(0);
+
+  const onMinusClick = useCallback(() => {
+    if (0 > index - 1) {
+      const i = values.length - 1;
+
+      onChange(values[i].value);
+      setIndex(i);
+    } else {
+      const i = index - 1;
+
+      onChange(values[i].value);
+      setIndex(i);
+    }
+  }, [index, onChange, values]);
+
+  const onAddClick = useCallback(() => {
+    if (0 > index - 1) {
+      const i = values.length - 1;
+
+      onChange(values[i].value);
+      setIndex(i);
+    } else {
+      const i = index - 1;
+
+      onChange(values[i].value);
+      setIndex(i);
+    }
+  }, [index, onChange, values]);
 
   return (
     <Row>
-      <StyledButton
-        size="small"
-        onClick={useCallback(() => {
-          if (0 > index - 1) {
-            const i = pages.length - 1;
-
-            onChange(pages[i]);
-            setIndex(i);
-          } else {
-            const i = index - 1;
-
-            onChange(pages[i]);
-            setIndex(i);
-          }
-        }, [index, onChange, pages])}
-      >
+      <StyledButton size="small" onClick={onMinusClick}>
         &lt;
       </StyledButton>
       <Label type="led" style={{ width: "100%" }}>
-        {pages[index]}
+        {values[index].label ?? ""}
       </Label>
-      <StyledButton
-        onClick={useCallback(() => {
-          if (pages.length === index + 1) {
-            onChange(pages[0]);
-            setIndex(0);
-          } else {
-            onChange(pages[index + 1]);
-            setIndex((i) => ++i);
-          }
-        }, [index, onChange, pages])}
-        size="small"
-      >
+      <StyledButton onClick={onAddClick} size="small">
         &gt;
       </StyledButton>
     </Row>

@@ -22,7 +22,7 @@ export const getVehicles = () => {
 export const getVehiclesOfConvoy = (ID: ID | null) => {
   return db.select<VehicleData[]>(
     select({
-      attributes: [[Tables.Vehicle, ["name", "ID"]]],
+      attributes: [[Tables.Vehicle, ["name", "ID", "inventory"]]],
       table: Tables.Vehicle,
       join: [
         {
@@ -125,7 +125,9 @@ export const addVehicle = async (type: number, name: string) => {
 export const getVehicleType = (ID: ID) => {
   return db.select<VehicleType[]>(
     select({
-      attributes: [[Tables.VehicleTypes, ["name", "desc", "ID", "price"]]],
+      attributes: [
+        [Tables.VehicleTypes, ["name", "desc", "ID", "price", "inventorySize"]],
+      ],
       table: Tables.VehicleTypes,
       where: [{ A: [Tables.VehicleTypes, "ID"], value: ID }],
     })

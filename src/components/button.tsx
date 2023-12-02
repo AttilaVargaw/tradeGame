@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useCallback } from "react";
 import styled, { CSSProperties, css } from "styled-components";
 
 export const ButtonBase = styled.div<{
@@ -82,8 +82,29 @@ export type ButtonProps = PropsWithChildren<{
   size?: "normal" | "small";
   onClick?: () => void;
   style?: CSSProperties;
+  disabled?: boolean;
 }>;
 
-export const Button = ({ active, black, size, ...props }: ButtonProps) => (
-  <ButtonBase {...props} $active={active} $black={black} $size={size} />
-);
+export const Button = ({
+  active,
+  black,
+  size,
+  onClick,
+  disabled,
+  ...props
+}: ButtonProps) => {
+  const onClick2 = useCallback(
+    () => !disabled && onClick?.(),
+    [disabled, onClick]
+  );
+
+  return (
+    <ButtonBase
+      {...props}
+      $active={active}
+      $black={black}
+      onClick={onClick2}
+      $size={size}
+    />
+  );
+};

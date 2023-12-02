@@ -23,7 +23,7 @@ const PageContainer = styled.div<{ height: number; width: number }>`
   width: ${({ width }) => width}px;
 `;
 
-export function WorldMap(): JSX.Element {
+export function WorldMap(): React.ReactElement {
   useKeypressHandler();
   useContextMenuHandler();
 

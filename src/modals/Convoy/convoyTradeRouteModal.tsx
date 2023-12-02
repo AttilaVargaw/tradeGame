@@ -68,7 +68,7 @@ export function ConvoyTradeRouteModal() {
       <>
         <Label type="painted">Traderoutes</Label>
         <div style={{ height: "80%" }}>
-          <TerminalScreen>
+          <TerminalScreen style={{ height: "100%" }}>
             {tradeRoutes && (
               <StackPager
                 ItemTemplate={PagerLink}

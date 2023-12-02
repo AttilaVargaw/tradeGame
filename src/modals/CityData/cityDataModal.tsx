@@ -1,9 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
+import { LoadingBar } from "@Components/LoadingBar";
 import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
 import { PagerProps } from "@Components/pagerProps";
+import { Router } from "@Components/router";
 import { TogglePager } from "@Components/togglePager";
 import { getCity } from "@Services/GameState/tables/City/cityQueries";
 
@@ -15,7 +17,7 @@ import CityPopulation from "./cityPopulation";
 import CityWarehouseForm from "./cityWarehouseForm";
 
 enum CityModalSubPages {
-  popularity,
+  relations,
   population,
   industry,
   warehouse,
@@ -23,18 +25,36 @@ enum CityModalSubPages {
   vehicles,
 }
 
-const pages = [
+const subPages = {
+  1: <CityPopulation />,
+  2: <CityIndustry />,
+  3: <CityWarehouseForm />,
+  4: <CityPersonel />,
+  5: <CityVehicles />,
+  0: (
+    <div>
+      <p>test</p>
+      <LoadingBar percent={20}></LoadingBar>
+    </div>
+  ),
+} as { [key in CityModalSubPages]: React.ReactElement };
+
+const pagerPages = [
   {
     label: "Warehouse",
     value: CityModalSubPages.warehouse,
   },
   {
+    label: "Personel",
+    value: CityModalSubPages.personel,
+  },
+  {
     label: "Relations",
-    value: CityModalSubPages.industry,
+    value: CityModalSubPages.relations,
   },
   {
     label: "Industry",
-    value: CityModalSubPages.personel,
+    value: CityModalSubPages.industry,
   },
   {
     label: "Vehicles",
@@ -44,13 +64,9 @@ const pages = [
     label: "Population",
     value: CityModalSubPages.population,
   },
-  {
-    label: "Popularity",
-    value: CityModalSubPages.popularity,
-  },
 ] as PagerProps<CityModalSubPages>["values"];
 
-export default function CityDataModal(): JSX.Element | null {
+export default function CityDataModal(): React.ReactElement | null {
   const [cityID] = useCurrentSelectedCity();
 
   const [selectedPage, setSelectedPage] = useState<CityModalSubPages>(
@@ -64,24 +80,7 @@ export default function CityDataModal(): JSX.Element | null {
       return <></>;
     }
 
-    switch (selectedPage) {
-      case CityModalSubPages.population:
-        return cityData.fullPopulation > 0 && <CityPopulation />;
-      case CityModalSubPages.industry:
-        return <CityIndustry />;
-      case CityModalSubPages.warehouse:
-        return <CityWarehouseForm />;
-      case CityModalSubPages.personel:
-        return <CityPersonel />;
-      case CityModalSubPages.vehicles:
-        return <CityVehicles />;
-      case CityModalSubPages.popularity:
-        return <></>;
-      default:
-        <></>;
-    }
-
-    return false;
+    return <Router pages={subPages} value={selectedPage} />;
   }, [cityData, selectedPage]);
 
   const footer = useMemo(
@@ -90,7 +89,7 @@ export default function CityDataModal(): JSX.Element | null {
         <TogglePager
           selected={selectedPage}
           onChange={setSelectedPage}
-          values={pages}
+          values={pagerPages}
         />
       ),
     [cityData, selectedPage]

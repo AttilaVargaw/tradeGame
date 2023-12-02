@@ -40,7 +40,7 @@ export type InventoryItem = {
   nameKey: string;
   // dailyRequirement: number;
   category: number;
-  itemID: ID;
+  item: ID;
   translation: string;
 };
 

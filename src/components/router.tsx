@@ -1,6 +1,4 @@
-import React from "react";
-
-export type RouterProps = { [key: string]: JSX.Element };
+export type RouterProps = { [key: string]: React.ReactElement };
 
 export function Router<T extends RouterProps>({
   pages,
@@ -9,7 +7,7 @@ export function Router<T extends RouterProps>({
   pages: T;
   value?: keyof T;
 }) {
-  if (!value) {
+  if (typeof value === "undefined") {
     return <></>;
   }
   return pages[value];

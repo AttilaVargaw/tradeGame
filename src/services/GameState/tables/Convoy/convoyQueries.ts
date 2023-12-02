@@ -161,6 +161,33 @@ export const getConvoyGoalsAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
 
+const getConvoySpeedQuery = select({
+  attributes: [
+    ["", "min(VehicleTypes.speed) as minSpeed"],
+    ["", "min(VehicleTypes.speed) * ? as dS"],
+    ["", "Convoy.posX - Convoy.goalX as headingX"],
+    ["", "Convoy.posY - Convoy.goalY as headingY"],
+  ],
+  table: Tables.Convoy,
+  join: [
+    {
+      A: Tables.Vehicle,
+      equation: {
+        A: [Tables.Convoy, "ID"],
+        B: [Tables.Vehicle, "convoy"],
+      },
+    },
+    {
+      A: Tables.VehicleTypes,
+      equation: {
+        A: [Tables.Vehicle, "type"],
+        B: [Tables.VehicleTypes, "ID"],
+      },
+    },
+  ],
+  where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+});
+
 export async function UpdateConvoys(dt: number) {
   const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
 
@@ -178,7 +205,7 @@ export async function UpdateConvoys(dt: number) {
       }) => {
         if (goalX && goalY && goalVectorY && goalVectorX) {
           const [convoy] = await db.select<ConvoyUpdateData[]>(
-            getQuery("getConvoySpeed"),
+            getConvoySpeedQuery,
             [dt, ID]
           );
 
@@ -302,11 +329,15 @@ export type ConvoyUpdateData = {
   goalVectorX: number;
 } & ConvoyData;
 
-export async function getVehiclesOfConvoy(convoyID: ID) {
+export async function getVehiclesOfConvoy(convoyID?: ID) {
+  if (typeof convoyID === "undefined") {
+    return [];
+  }
+
   return await db.select<VehicleData[]>(
     select({
       table: Tables.Vehicle,
-      attributes: [[Tables.Vehicle, "ID"]],
+      attributes: [[Tables.Vehicle, ["ID", "inventory", "name"]]],
       where: [{ A: [Tables.Vehicle, "ID"], value: convoyID }],
     })
   );
@@ -319,7 +350,6 @@ const setConvoyRouteActiveQuery = update({
 });
 
 export async function setConvoyRouteActive(convoyID: ID, active: boolean) {
-  console.log(active);
   await db.execute(setConvoyRouteActiveQuery, [active ? 1 : 0, convoyID]);
 
   dbObservable.next({ type: DBEvents.convoyUpdated });
