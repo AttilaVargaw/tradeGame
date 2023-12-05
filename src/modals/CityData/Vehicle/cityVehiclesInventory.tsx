@@ -54,30 +54,37 @@ export function CityVehiclesInventory() {
     updateEvents
   );
 
+  const [vehicleSideItems, setVehicleSideItems] = useState<
+    Record<number, (Translation & Item & InventoryItem)[]>
+  >([]);
+
   const cityItems = useDBValue(
     useCallback(async () => {
       const data = await getCityRequiredItemsWithQuantity(cityData?.ID);
 
-      const vehicleOnly = vehicleItems?.map((item) => ({
-        ...item,
-        number: 0,
-      }));
+      const items3 =
+        vehicleItems &&
+        (await Promise.all(
+          vehicleItems?.map(async (item) => ({
+            ...item,
+            number: (
+              await getNumberOfInventoryItem(cityData?.inventory, item.ID)
+            ).number,
+          }))
+        ));
 
       return {
-        0: unionBy(
-          data[categories],
-          vehicleOnly,
-          cityItems2,
-          (item) => item.item
-        ),
+        0: unionBy(items3, cityItems2, data?.[categories], (item) => item.item),
       } as Record<number, (Translation & Item & InventoryItem)[]>;
-    }, [categories, cityData?.ID, cityItems2, vehicleItems]),
+    }, [
+      categories,
+      cityData?.ID,
+      cityData?.inventory,
+      cityItems2,
+      vehicleItems,
+    ]),
     updateEvents
   );
-
-  const [vehicleSideItems, setVehicleSideItems] = useState<
-    Record<number, (Translation & Item & InventoryItem)[]>
-  >([]);
 
   useEffect(() => {
     if (cityItems?.[categories]) {
@@ -145,7 +152,7 @@ export function CityVehiclesInventory() {
             aID={cityData.inventory}
             bID={currentGoal}
             aNum={number}
-            bNum={vehicleSideItems[categories][index].number ?? 0}
+            bNum={vehicleSideItems?.[categories]?.[index]?.number ?? 0}
             label={translation}
             key={ID}
           />

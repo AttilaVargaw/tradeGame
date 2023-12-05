@@ -12,6 +12,8 @@ export async function moveBetweenInventories(
   amount: number,
   item: ID
 ) {
+  console.log(inventoryBID, item, amount, inventoryBID, item);
+
   await Promise.all([
     db.execute(
       "insert into Inventory (inventory, item, number) values(?, ?, 1) ON CONFLICT (inventory, item) DO UPDATE SET number = number + ? WHERE Inventory.inventory=? and item = ?;",
@@ -98,9 +100,10 @@ export const getEntityInventory = async (entityID?: ID) => {
   }
 
   return db.select<(Translation & Item & InventoryItem)[]>(
-    `select I.nameKey, I.descriptionKey, I.category, INV.number, I.weight, I.ID as item
+    `select *
         from Inventory as INV
         inner join Item as I on I.ID = INV.item
+        inner join translations on I.nameKey = translations.key
         where INV.inventory = $1`,
     [entityID]
   );
@@ -149,7 +152,11 @@ export const getNotAvailableItems = async (cityID?: ID) => {
     }));
 };
 
-export async function getNumberOfInventoryItem(inventory: ID, item: ID) {
+export async function getNumberOfInventoryItem(inventory?: ID, item?: ID) {
+  if (isUndefined(inventory) || isUndefined(item)) {
+    return { number: 0, item };
+  }
+
   const result = await db.select<{ number: number; item: ID }[]>(
     "select * from inventory inner join Item on inventory.item = item.id where inventory.inventory = ? and item.id = ?;",
     [inventory, item]
