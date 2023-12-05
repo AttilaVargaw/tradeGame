@@ -1,3 +1,5 @@
+import { isUndefined } from "lodash-es";
+
 import { insert, select } from "@Services/GameState/utils/simpleQueryBuilder";
 
 import { DBEvents, ID, TradeRouteProps } from "../dbTypes";
@@ -110,7 +112,7 @@ export const getAllTradeRoute = () => {
 };
 
 export const getTradeRouteByID = async (id?: number | null) => {
-  if (!id) {
+  if (isUndefined(id)) {
     return null;
   }
 

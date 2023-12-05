@@ -10,7 +10,7 @@ const Container = styled.div`
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 `;
 
-export const Link = styled.span`
+export const Link = styled.div`
   color: blue;
 
   &:focus,

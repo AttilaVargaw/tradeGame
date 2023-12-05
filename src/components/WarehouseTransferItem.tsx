@@ -27,21 +27,23 @@ export function WarehouseTransferItem({
   bID,
   interchange,
   disabled,
+  item,
 }: {
   label: string;
   aNum: number;
   bNum: number;
   aID: ID;
   bID: ID;
-  interchange: (idA: number, idB: number, num: number) => void;
+  interchange: (idA: number, idB: number, num: number, item: ID) => void;
   disabled?: boolean;
+  item: ID;
 }) {
   const [num, setNum] = useState(1);
 
   const onMove = useCallback(
     (direction: boolean) => () =>
-      interchange(direction ? aID : bID, direction ? bID : aID, num),
-    [aID, bID, interchange, num]
+      interchange(direction ? aID : bID, direction ? bID : aID, num, item),
+    [aID, bID, interchange, item, num]
   );
 
   const onTransfer = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
@@ -59,7 +61,7 @@ export function WarehouseTransferItem({
       </ElementContainer>
       <Row>
         <StyledButton
-          disabled={aID === -1 || bID === -1}
+          disabled={aID === -1 || bID === -1 || bNum === 0}
           size="small"
           onClick={onMove(false)}
         >
@@ -73,7 +75,7 @@ export function WarehouseTransferItem({
           min={1}
         />
         <StyledButton
-          disabled={aID === -1 || bID === -1}
+          disabled={aID === -1 || bID === -1 || aNum === 0}
           size="small"
           onClick={onMove(true)}
         >

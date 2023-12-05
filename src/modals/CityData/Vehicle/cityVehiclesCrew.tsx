@@ -1,5 +1,7 @@
-import { Label } from "@Components/label";
 import styled from "styled-components";
+
+import { Label } from "@Components/label";
+
 import { WarehouseTransferItem } from "../../../components/WarehouseTransferItem";
 
 const Container = styled.div`
@@ -22,6 +24,7 @@ export function CityVehiclesCrew() {
         aNum={0}
         bNum={0}
         label="Master"
+        item={1}
       />
       <WarehouseTransferItem
         aID={0}
@@ -29,7 +32,8 @@ export function CityVehiclesCrew() {
         interchange={() => undefined}
         aNum={0}
         bNum={0}
-        label="Mechanist"
+        label="Engineer"
+        item={2}
       />
       <WarehouseTransferItem
         aID={0}
@@ -38,6 +42,7 @@ export function CityVehiclesCrew() {
         aNum={0}
         bNum={0}
         label="Researcher"
+        item={3}
       />
       <WarehouseTransferItem
         aID={0}
@@ -46,6 +51,7 @@ export function CityVehiclesCrew() {
         aNum={0}
         bNum={0}
         label="Guard"
+        item={4}
       />
       <WarehouseTransferItem
         aID={0}
@@ -54,6 +60,34 @@ export function CityVehiclesCrew() {
         aNum={0}
         bNum={0}
         label="Cadet"
+        item={5}
+      />
+      <WarehouseTransferItem
+        aID={0}
+        bID={0}
+        interchange={() => undefined}
+        aNum={0}
+        bNum={0}
+        label="Crewman"
+        item={4}
+      />
+      <WarehouseTransferItem
+        aID={0}
+        bID={0}
+        interchange={() => undefined}
+        aNum={0}
+        bNum={0}
+        label="Cook"
+        item={4}
+      />
+      <WarehouseTransferItem
+        aID={0}
+        bID={0}
+        interchange={() => undefined}
+        aNum={0}
+        bNum={0}
+        label="Surgeon"
+        item={4}
       />
     </Container>
   );

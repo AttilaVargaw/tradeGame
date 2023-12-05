@@ -105,6 +105,7 @@ export const Button = ({
       $black={black}
       onClick={onClick2}
       $size={size}
+      disabled={disabled}
     />
   );
 };

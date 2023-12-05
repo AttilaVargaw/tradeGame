@@ -13,10 +13,16 @@ export type DailyRequirement = {
   translation: string;
 };
 
+//ID INTEGER PRIMARY KEY AUTOINCREMENT, startPrice INTEGER, endPrice INTEGER, nameKey TEXT, descriptionKey TEXT, category INTEGER, weight INTEGER
+
 export type Item = {
   ID: ID;
+  startPrice: number;
+  endPricec: number;
   nameKey: string;
   descriptionKey: string;
+  category: number;
+  weight: number;
 };
 
 export type PopulationData = {
@@ -36,11 +42,12 @@ export type IndustrialBuilding = {
 export type InventoryItem = {
   ID: ID;
   number: number;
-  city: string;
-  nameKey: string;
-  // dailyRequirement: number;
-  category: number;
   item: ID;
+};
+
+export type Translation = {
+  key: string;
+  lang: string;
   translation: string;
 };
 

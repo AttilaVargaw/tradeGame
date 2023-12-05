@@ -1,3 +1,4 @@
+import { unionBy } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
@@ -9,8 +10,14 @@ import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
 import { Pager } from "@Components/pager";
 import { PagerProps } from "@Components/pagerProps";
-import { DBEvents, InventoryItem } from "@Services/GameState/dbTypes";
 import {
+  DBEvents,
+  InventoryItem,
+  Item,
+  Translation,
+} from "@Services/GameState/dbTypes";
+import {
+  getEntityInventory,
   getEntityInventoryWeight,
   getNumberOfInventoryItem,
   moveBetweenInventories,
@@ -35,34 +42,59 @@ export function CityVehiclesInventory() {
 
   const [currentConvoy] = useCurrentSelectedConvoyAtom();
 
-  const cityItems = useDBValue(
-    useCallback(
-      () => getCityRequiredItemsWithQuantity(cityData?.ID),
-      [cityData?.ID]
-    ),
+  const [currentGoal, setCurrentGoal] = useState<number>(-1);
+
+  const vehicleItems = useDBValue(
+    useCallback(() => getEntityInventory(currentGoal), [currentGoal]),
     updateEvents
   );
 
-  const [currentGoal, setCurrentGoal] = useState<number>(-1);
+  const cityItems2 = useDBValue(
+    useCallback(() => getEntityInventory(cityData?.ID), [cityData?.ID]),
+    updateEvents
+  );
 
-  const [vehicleItems, setVehicleItems] = useState<
-    Record<number, InventoryItem[]>
-  >({ 0: [] });
+  const cityItems = useDBValue(
+    useCallback(async () => {
+      const data = await getCityRequiredItemsWithQuantity(cityData?.ID);
+
+      const vehicleOnly = vehicleItems?.map((item) => ({
+        ...item,
+        number: 0,
+      }));
+
+      return {
+        0: unionBy(
+          data[categories],
+          vehicleOnly,
+          cityItems2,
+          (item) => item.item
+        ),
+      } as Record<number, (Translation & Item & InventoryItem)[]>;
+    }, [categories, cityData?.ID, cityItems2, vehicleItems]),
+    updateEvents
+  );
+
+  const [vehicleSideItems, setVehicleSideItems] = useState<
+    Record<number, (Translation & Item & InventoryItem)[]>
+  >([]);
 
   useEffect(() => {
-    if (cityItems) {
-      Promise.all(
-        cityItems[categories]?.map((item) =>
-          getNumberOfInventoryItem(currentGoal, item.item)
-        )
-      ).then((values) =>
-        setVehicleItems({
-          0: cityItems[0]?.map((item, index) => ({
-            ...item,
-            number: values[index].number ?? 0,
-          })),
-        })
-      );
+    if (cityItems?.[categories]) {
+      currentGoal >= 0 &&
+        Promise.all(
+          cityItems[categories].map(async (item) =>
+            getNumberOfInventoryItem(currentGoal, item.item)
+          )
+        ).then((values) => {
+          !!values &&
+            setVehicleSideItems({
+              0: cityItems[categories].map((item, index) => ({
+                ...item,
+                number: values[index].number,
+              })),
+            });
+        });
     }
   }, [categories, cityItems, currentGoal]);
 
@@ -101,6 +133,27 @@ export function CityVehiclesInventory() {
     [currentConvoy?.name, vehicles]
   );
 
+  const items = useMemo(
+    () =>
+      cityData &&
+      vehicleSideItems?.[categories] &&
+      cityItems?.[categories]?.map(
+        ({ number, item, translation, ID }, index) => (
+          <WarehouseTransferItem
+            item={item}
+            interchange={moveBetweenInventories}
+            aID={cityData.inventory}
+            bID={currentGoal}
+            aNum={number}
+            bNum={vehicleSideItems[categories][index].number ?? 0}
+            label={translation}
+            key={ID}
+          />
+        )
+      ),
+    [categories, cityData, cityItems, currentGoal, vehicleSideItems]
+  );
+
   return (
     <Row style={{ gap: "1em" }}>
       <div style={{ flex: 1, marginTop: "1em" }}>
@@ -117,21 +170,7 @@ export function CityVehiclesInventory() {
         <Label type="painted">City</Label>
         <div />
         <Pager onChange={setCurrentGoal} values={goals} />
-        {cityData &&
-          cityItems?.[categories]?.map(({ nameKey, number, item }) => (
-            <WarehouseTransferItem
-              interchange={moveBetweenInventories}
-              aID={cityData.inventory}
-              bID={currentGoal}
-              aNum={number}
-              bNum={
-                vehicleItems?.[categories]?.find(({ ID }) => ID === item)
-                  ?.number ?? 0
-              }
-              label={nameKey}
-              key={nameKey}
-            />
-          ))}
+        {items}
       </Container>
       <div style={{ flex: 1, marginTop: "1em" }}>
         <LoadingBar

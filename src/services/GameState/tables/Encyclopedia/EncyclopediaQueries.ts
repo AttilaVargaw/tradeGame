@@ -8,12 +8,7 @@ export function GetEncyclopediaArticles(parent: number | null) {
   return db.select<EncyclopediaData[]>(
     select({
       table: Tables.Encyclopedia,
-      attributes: [
-        [Tables.Encyclopedia, "ID"],
-        [Tables.Encyclopedia, "body"],
-        [Tables.Encyclopedia, "name"],
-        [Tables.Encyclopedia, "folder"],
-      ],
+      attributes: [[Tables.Encyclopedia, ["ID", "body", "name", "folder", "parent"]]],
       where: [
         {
           A: [Tables.Encyclopedia, "parent"],

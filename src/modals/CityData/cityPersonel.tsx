@@ -1,4 +1,5 @@
 import styled from "styled-components";
+
 import { WarehouseRow } from "../../components/WarehouseRow";
 
 const Container = styled.div`
@@ -14,6 +15,9 @@ export default function CityPersonel() {
       <WarehouseRow direction="column" label="Researcher" number={0} />
       <WarehouseRow direction="column" label="Guard" number={0} />
       <WarehouseRow direction="column" label="Cadet" number={0} />
+      <WarehouseRow direction="column" label="Crewman" number={0} />
+      <WarehouseRow direction="column" label="Cook" number={0} />
+      <WarehouseRow direction="column" label="Surgeon" number={0} />
     </Container>
   );
 }

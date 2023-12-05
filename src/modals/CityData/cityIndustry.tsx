@@ -89,7 +89,7 @@ export default function CityIndustry() {
       {!aggeratedView &&
         industrialBuildings?.map(
           ({ nameKey, buildingNum, inputOutputData, ID }) => (
-            <>
+            <div style={{ display: "contents" }} key={nameKey}>
               <Label type="painted">{nameKey}</Label>
               {
                 <div>
@@ -124,7 +124,7 @@ export default function CityIndustry() {
                     ))}
                 </div>
               )}
-            </>
+            </div>
           )
         )}
 

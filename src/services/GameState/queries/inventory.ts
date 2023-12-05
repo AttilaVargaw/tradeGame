@@ -1,24 +1,25 @@
-import { groupBy } from "lodash-es";
+import { groupBy, isUndefined } from "lodash-es";
 
 import { select } from "@Services/GameState/utils/simpleQueryBuilder";
 
-import { DBEvents, ID, InventoryItem, Item } from "../dbTypes";
+import { DBEvents, ID, InventoryItem, Item, Translation } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
 import { Tables } from "../tables/common";
 
 export async function moveBetweenInventories(
   inventoryAID: ID,
   inventoryBID: ID,
-  amount: number
+  amount: number,
+  item: ID
 ) {
   await Promise.all([
     db.execute(
-      "UPDATE Inventory SET number = number + ? WHERE Inventory.inventory=?;",
-      [amount, inventoryBID]
+      "insert into Inventory (inventory, item, number) values(?, ?, 1) ON CONFLICT (inventory, item) DO UPDATE SET number = number + ? WHERE Inventory.inventory=? and item = ?;",
+      [inventoryBID, item, amount, inventoryBID, item]
     ),
     db.execute(
-      "UPDATE Inventory SET number = number - ? WHERE Inventory.inventory=?;",
-      [amount, inventoryAID]
+      "UPDATE Inventory SET number = number - ? WHERE Inventory.inventory=? and item = ?;",
+      [amount, inventoryAID, item]
     ),
   ]);
 
@@ -92,12 +93,12 @@ export const addCityWarehouseItem = async (
 };
 
 export const getEntityInventory = async (entityID?: ID) => {
-  if (!entityID) {
+  if (isUndefined(entityID)) {
     return [];
   }
 
-  return db.select<InventoryItem[]>(
-    `select I.nameKey, I.descriptionKey, INV.number, INV.weight, I.ID as ID
+  return db.select<(Translation & Item & InventoryItem)[]>(
+    `select I.nameKey, I.descriptionKey, I.category, INV.number, I.weight, I.ID as item
         from Inventory as INV
         inner join Item as I on I.ID = INV.item
         where INV.inventory = $1`,
@@ -106,7 +107,7 @@ export const getEntityInventory = async (entityID?: ID) => {
 };
 
 export const getEntityInventoryWeight = async (inventoryID?: ID) => {
-  if (typeof inventoryID === "undefined") {
+  if (isUndefined(inventoryID)) {
     return {};
   }
 
@@ -122,14 +123,15 @@ export const getEntityInventoryWeight = async (inventoryID?: ID) => {
 };
 
 export const getNotAvailableItems = async (cityID?: ID) => {
-  if (typeof cityID === "undefined") {
+  if (isUndefined(cityID)) {
     return [];
   }
 
   const [items, warehouse] = await Promise.all([
-    db.select<Item[]>(`select I.nameKey, I.descriptionKey, I.ID
-          from Item as I`),
-    db.select<InventoryItem[]>(
+    db.select<Item[]>(
+      `select I.nameKey, I.descriptionKey, I.ID from Item as I`
+    ),
+    db.select<InventoryItem & Item[]>(
       `select I.nameKey, I.descriptionKey, INV.number, I.ID
           from Inventory as INV
           inner join Item as I on I.ID = INV.item
@@ -149,7 +151,7 @@ export const getNotAvailableItems = async (cityID?: ID) => {
 
 export async function getNumberOfInventoryItem(inventory: ID, item: ID) {
   const result = await db.select<{ number: number; item: ID }[]>(
-    "select number, item from inventory inner join Item on inventory.item = item.id where inventory.inventory = ? and item.id = ?;",
+    "select * from inventory inner join Item on inventory.item = item.id where inventory.inventory = ? and item.id = ?;",
     [inventory, item]
   );
 

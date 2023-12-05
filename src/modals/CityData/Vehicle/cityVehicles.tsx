@@ -59,13 +59,12 @@ export default function CityVehicles() {
     }
 
     return (
-      <TerminalScreen>
-        {convoys &&
-          convoys.map((convoy) => (
-            <Link onClick={() => setCurrentConvoy(convoy)} key={convoy.ID}>
-              {convoy.name}
-            </Link>
-          ))}
+      <TerminalScreen style={{ height: "-webkit-fill-available" }}>
+        {convoys.map((convoy) => (
+          <Link onClick={() => setCurrentConvoy(convoy)} key={convoy.ID}>
+            {convoy.name}
+          </Link>
+        ))}
       </TerminalScreen>
     );
   }, [convoys, currentConvoy, setCurrentConvoy, subpage]);

@@ -1,4 +1,4 @@
-import { groupBy, isEqual, uniqBy, uniqWith } from "lodash-es";
+import { groupBy, isUndefined, union } from "lodash-es";
 
 import { select } from "@Services/GameState/utils/simpleQueryBuilder";
 
@@ -8,8 +8,10 @@ import {
   ID,
   IndustrialBuilding,
   InventoryItem,
+  Item,
   PopulationClass,
   PopulationData,
+  Translation,
 } from "../../dbTypes";
 import { db } from "../../gameState";
 import { getEntityInventory } from "../../queries/inventory";
@@ -61,7 +63,7 @@ inner join City as C on C.ID = IBS.city
 where C.ID = $1`;
 
 export const getCityIndustrialBuildings = async (id?: ID) => {
-  if (!id) {
+  if (isUndefined(id)) {
     return [];
   }
 
@@ -83,7 +85,7 @@ export const getCityIndustrialBuildings = async (id?: ID) => {
 };
 
 export const getCity = async (ID?: ID): Promise<CityEntity | null> => {
-  if (!ID) {
+  if (isUndefined(ID)) {
     return null;
   }
 
@@ -212,7 +214,7 @@ inner join Item as I on IBR.item = I.ID
 where C.ID = ?`;
 
 export const getCityIndustrialResourceChanges = async (id?: ID) => {
-  if (!id) {
+  if (isUndefined(id)) {
     return [];
   }
 
@@ -272,25 +274,26 @@ where City.ID = 1
 `;
 
 export async function getCityRequiredItemsWithQuantity(id?: ID) {
-  if (!id) {
+  if (isUndefined(id)) {
     return {};
   }
 
-  const requiredStuff = await db.select<number[]>(
-    "select item from industrialBuildings inner join IndustrialBuildingDailyRequirement on industrialBuildings.industrialBuilding = IndustrialBuildingDailyRequirement.industrialBuilding where city=?;",
-    [id]
-  );
+  const requiredIndustrialStuff = (
+    await db.select<{ item: number }[]>(
+      "select item from industrialBuildings inner join IndustrialBuildingDailyRequirement on industrialBuildings.industrialBuilding = IndustrialBuildingDailyRequirement.industrialBuilding where city=?;",
+      [id]
+    )
+  ).map(({ item }) => item);
 
-  const requiredClassStuff = await db.select<{ item: number }[]>(
-    `select item from CityPopulationClass as C inner join CityPopulationClass as PC on C.city = PC.city inner join ClassDailyRequirement as CDR 
+  const requiredClassStuff = (
+    await db.select<{ item: number }[]>(
+      `select item from CityPopulationClass as C inner join CityPopulationClass as PC on C.city = PC.city inner join ClassDailyRequirement as CDR 
   on CDR.Class = PC.id where C.city = ? group by item;`,
-    [id]
-  );
+      [id]
+    )
+  ).map(({ item }) => item);
 
-  const itemIDs = uniqWith<number>(
-    [...requiredStuff, ...requiredClassStuff.map((e) => e.item)],
-    isEqual
-  );
+  const itemIDs = union(requiredIndustrialStuff, requiredClassStuff);
 
   const inventoryID = (
     await db.select<CityEntity[]>("select inventory from city where id = ?;", [
@@ -299,25 +302,25 @@ export async function getCityRequiredItemsWithQuantity(id?: ID) {
   )[0].inventory;
 
   const results = await Promise.all(
-    itemIDs.map(async (id) => {
-      return (
+    itemIDs.map(
+      async (itemID) =>
         (
-          await db.select<InventoryItem[]>(
-            "select * from inventory inner join item on inventory.item = item.id where inventory = ? and item.id = ?;",
-            [inventoryID, id]
+          await db.select<(Translation & Item & InventoryItem)[]>(
+            "select * from inventory left join item on inventory.item = item.id left join translations on translations.key = item.nameKey where inventory = ? and item.id = ?;",
+            [inventoryID, itemID]
           )
         )[0] ??
         ({
           ...(
-            await db.select<InventoryItem[]>(
-              "select * from item where item.id = ?;",
-              [id]
+            await db.select<(Translation & Item & InventoryItem)[]>(
+              "select * from item left join translations on translations.key = item.nameKey where item.id = ?;",
+              [itemID]
             )
           )[0],
           number: 0,
-        } as InventoryItem)
-      );
-    })
+          item: itemID,
+        } as Translation)
+    )
   );
 
   return groupBy(results, (e) => e.category);

@@ -1,3 +1,5 @@
+import { isUndefined } from "lodash-es";
+
 export type RouterProps = { [key: string]: React.ReactElement };
 
 export function Router<T extends RouterProps>({
@@ -7,7 +9,7 @@ export function Router<T extends RouterProps>({
   pages: T;
   value?: keyof T;
 }) {
-  if (typeof value === "undefined") {
+  if (isUndefined(value)) {
     return <></>;
   }
   return pages[value];

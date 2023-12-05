@@ -8,13 +8,12 @@ import { GetEncyclopediaArticles } from "@Services/GameState/tables/Encyclopedia
 
 import Modal from "./Modal";
 
-//import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
-
 const header = <Label type="painted">Encyclopedia</Label>;
 
 export const EncyclopediaModal = () => {
-  const [article, setArticle] = useState<string | undefined>();
+  const [article, setArticle] = useState<EncyclopediaData | null>();
   const [folders, setFolders] = useState<EncyclopediaData[]>();
+  const [currentParentFolder, setCurrentParentFolder] = useState<number[]>([]);
 
   const terminalRef = useRef<HTMLDivElement>(null);
 
@@ -26,10 +25,7 @@ export const EncyclopediaModal = () => {
         setArticle(undefined);
         setFolders(encyclopediaArticles);
       } else {
-        setArticle(
-          `<h1>${encyclopediaArticles[0].name}</h1>` +
-            encyclopediaArticles[0].body
-        );
+        setArticle(encyclopediaArticles[0]);
         setFolders(undefined);
       }
     });
@@ -37,29 +33,47 @@ export const EncyclopediaModal = () => {
 
   const onFolderClick = useCallback(
     (ID: ID) => () => {
+      setCurrentParentFolder((current) => {
+        currentFolder && current.push(currentFolder);
+        return current;
+      });
       setCurrentFolder(ID);
     },
-    []
+    [currentFolder]
   );
 
   const body = useMemo(
     () => (
       <TerminalScreen
-        {...{
-          dangerouslySetInnerHTML: article ? { __html: article } : undefined,
-          children:
-            folders && !article
-              ? folders.map(({ ID, name }) => (
-                  <Link onClick={onFolderClick(ID)} key={ID}>
-                    {name}
-                  </Link>
-                ))
-              : undefined,
-        }}
+        style={{ height: "-webkit-fill-available" }}
         ref={terminalRef}
-      />
+      >
+        {currentFolder !== null && (
+          <Link
+            onClick={() => {
+              setCurrentFolder(currentParentFolder.pop() ?? null);
+            }}
+          >
+            {folders ? "..." : <h1>&larr; {article?.name}</h1>}
+          </Link>
+        )}
+        {folders &&
+          !article &&
+          folders.map(({ ID, name }) => (
+            <Link onClick={onFolderClick(ID)} key={name}>
+              {name}
+            </Link>
+          ))}
+        {!folders && article && (
+          <div
+            dangerouslySetInnerHTML={{
+              __html: article.body,
+            }}
+          />
+        )}
+      </TerminalScreen>
     ),
-    [article, folders, onFolderClick]
+    [article, currentFolder, currentParentFolder, folders, onFolderClick]
   );
 
   return <Modal body={body} header={header}></Modal>;

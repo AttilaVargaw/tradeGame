@@ -1,3 +1,5 @@
+import { isUndefined } from "lodash-es";
+
 import {
   insert,
   select,
@@ -89,7 +91,7 @@ const getConvoyQuery = select({
 });
 
 export const getConvoy = async (id: ID | null) => {
-  if (!id) {
+  if (isUndefined(id)) {
     return;
   }
 
@@ -330,7 +332,7 @@ export type ConvoyUpdateData = {
 } & ConvoyData;
 
 export async function getVehiclesOfConvoy(convoyID?: ID) {
-  if (typeof convoyID === "undefined") {
+  if (isUndefined(convoyID)) {
     return [];
   }
 

@@ -16,7 +16,10 @@ export default function CityWarehouseForm() {
   const [cityData] = useCurrentSelectedCity();
 
   const items = useDBValue(
-    useCallback(() => getCityRequiredItemsWithQuantity(cityData?.ID), [cityData])
+    useCallback(
+      () => getCityRequiredItemsWithQuantity(cityData?.ID),
+      [cityData]
+    )
   );
 
   const weight = useDBValue(
@@ -29,11 +32,11 @@ export default function CityWarehouseForm() {
   return (
     <Row>
       <div style={{ flex: 3 }}>
-        {items?.[0]?.map(({ number, ID, nameKey }) => (
+        {items?.[0]?.map(({ number, ID, nameKey, translation }) => (
           <WarehouseRow
             key={ID}
             editable={debugMode}
-            label={nameKey}
+            label={translation ?? nameKey}
             number={number}
             direction="row"
           />
