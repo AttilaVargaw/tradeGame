@@ -66,7 +66,7 @@ const pagerPages = [
   },
 ] as PagerProps<CityModalSubPages>["values"];
 
-export default function CityDataModal(): React.ReactElement | null {
+export default function CityDataModal(): React.ReactElement | boolean {
   const [cityID] = useCurrentSelectedCity();
 
   const [selectedPage, setSelectedPage] = useState<CityModalSubPages>(
@@ -77,7 +77,7 @@ export default function CityDataModal(): React.ReactElement | null {
 
   const body = useMemo(() => {
     if (!cityData) {
-      return <></>;
+      return false;
     }
 
     return <Router pages={subPages} value={selectedPage} />;
@@ -105,9 +105,5 @@ export default function CityDataModal(): React.ReactElement | null {
     [cityData]
   );
 
-  if (cityData) {
-    return <Modal header={header} body={body} footer={footer} />;
-  } else {
-    return null;
-  }
+  return !!cityData && <Modal header={header} body={body} footer={footer} />;
 }

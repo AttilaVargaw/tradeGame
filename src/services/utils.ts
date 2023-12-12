@@ -1,3 +1,5 @@
+import { groupBy } from "lodash-es";
+
 export function makeid(length: number) {
   let result = "";
   const characters =
@@ -21,4 +23,23 @@ export function CallUntilStopped(fn: () => void, delay = 500) {
   const interval = setInterval(fn, delay);
 
   return () => clearInterval(interval);
+}
+
+export function GroupBy<T extends object>(data: T[], filter: keyof T) {
+  return Object.entries(groupBy(data, filter)).reduce(
+    (acc, [key, value]) => acc.set(Number(key), value),
+    new Map<number, T[]>()
+  );
+}
+
+export type DangerouslySetInnerHTML = { __html: string };
+
+export function CreateInnerFromChildrenOrInnerHTML(
+  label?: string,
+  dangerouslySetInnerHTML?: DangerouslySetInnerHTML
+) {
+  return {
+    dangerouslySetInnerHTML,
+    children: dangerouslySetInnerHTML ? undefined : label,
+  };
 }

@@ -1,13 +1,15 @@
 import { PropsWithChildren, useCallback } from "react";
 import styled, { css } from "styled-components";
 
+import { DangerouslySetInnerHTML } from "@Services/utils";
+
 export type ToggleProps = PropsWithChildren<{
   onChange?: (newValue: boolean) => void;
   onClick?: () => boolean;
   active: boolean;
   disabled?: boolean;
   style?: React.CSSProperties;
-  dangerouslySetInnerHTML?: { __html: string };
+  dangerouslySetInnerHTML?: DangerouslySetInnerHTML;
 }>;
 
 export function Toggle({

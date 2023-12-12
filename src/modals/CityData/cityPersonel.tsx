@@ -1,15 +1,10 @@
-import styled from "styled-components";
+import { Grid } from "@Components/grid";
 
 import { WarehouseRow } from "../../components/WarehouseRow";
 
-const Container = styled.div`
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-`;
-
 export default function CityPersonel() {
   return (
-    <Container>
+    <Grid $num={4}>
       <WarehouseRow direction="column" label="Master" number={0} />
       <WarehouseRow direction="column" label="Mechanist" number={0} />
       <WarehouseRow direction="column" label="Researcher" number={0} />
@@ -18,6 +13,6 @@ export default function CityPersonel() {
       <WarehouseRow direction="column" label="Crewman" number={0} />
       <WarehouseRow direction="column" label="Cook" number={0} />
       <WarehouseRow direction="column" label="Surgeon" number={0} />
-    </Container>
+    </Grid>
   );
 }

@@ -46,22 +46,29 @@ export default function CityWarehouseForm() {
   );
 
   const items3 = useMemo(() => {
-    return unionBy(items2, items?.[categories], (item) => item.item);
+    return unionBy(
+      [items2, items].reduce((prev, item4) => {
+        return [...prev, ...(item4?.values() ?? [])];
+      }, []),
+      (item) => item
+    );
   }, [categories, items, items2]);
 
   return (
     <Row>
-      <div style={{ flex: 3 }}>
-        {items3?.map(({ number, ID, nameKey, translation }) => (
-          <WarehouseRow
-            key={ID}
-            editable={debugMode}
-            label={translation ?? nameKey}
-            number={number}
-            direction="row"
-          />
-        ))}
-      </div>
+      {/*<div style={{ flex: 3 }}>
+        {items3.map((item) =>
+          item.map(({ number, ID, nameKey, translation }) => (
+            <WarehouseRow
+              key={ID}
+              editable={debugMode}
+              label={translation ?? nameKey}
+              number={number}
+              direction="row"
+            />
+          ))
+        )}
+          </div>*/}
       <div style={{ flex: 1 }}>
         <LoadingBar
           percent={

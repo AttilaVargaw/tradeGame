@@ -11,7 +11,7 @@ const StyledButton = styled(Button)`
   align-self: center;
 `;
 
-export function Pager<T>({ values, onChange }: PagerProps<T>) {
+export function Pager<T>({ values, onChange, style }: PagerProps<T>) {
   const [index, setIndex] = useState(0);
 
   const onMinusClick = useCallback(() => {

@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { styled } from "styled-components";
 
+import { CreateInnerFromChildrenOrInnerHTML } from "@Services/utils";
+
 import { Grid } from "./grid";
 import { PagerProps } from "./pagerProps";
 import { Toggle } from "./toggle";
@@ -44,10 +46,10 @@ export function TogglePager<T = string>({
           active={innerSelected === value}
           onChange={onClick(value)}
           style={{ width: "100%" }}
-          {...{
-            dangerouslySetInnerHTML,
-            children: dangerouslySetInnerHTML ? undefined : label,
-          }}
+          {...CreateInnerFromChildrenOrInnerHTML(
+            label,
+            dangerouslySetInnerHTML
+          )}
         />
       ))}
     </Grid>

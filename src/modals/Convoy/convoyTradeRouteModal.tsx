@@ -1,10 +1,12 @@
 import { useCallback, useMemo } from "react";
 
 import { StackPager } from "@Components/StackPager";
+import { Row } from "@Components/grid";
 import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
 import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
-import { PagerLink, TerminalScreen } from "@Components/terminalScreen";
+import { PagerItemProps } from "@Components/pagerProps";
+import { Link, PagerLink, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
 import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
 import { ID } from "@Services/GameState/dbTypes";
@@ -17,6 +19,7 @@ import {
   setConvoyRouteActive,
   setConvoyTradeRoute,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { TradeRoute } from "@Services/GameState/tables/TradeRoutes";
 
 import Modal from "../Modal";
 
@@ -41,6 +44,15 @@ export function ConvoyTradeRouteModal() {
     useCallback(() => getConvoy(currentConvoyID), [currentConvoyID]),
     updateEvents
   );
+
+  const PagerLinkWithEdit = useCallback((item: PagerItemProps) => {
+    return (
+      <Row>
+        <PagerLink {...item} />
+        <Link onClick={() => {}}>Edit</Link>
+      </Row>
+    );
+  }, []);
 
   const currentTraderoute = useDBValue(
     useCallback(() => getTradeRouteByID(currentConvoy?.route), [currentConvoy]),
@@ -71,7 +83,7 @@ export function ConvoyTradeRouteModal() {
           <TerminalScreen style={{ height: "100%" }}>
             {tradeRoutes && (
               <StackPager
-                ItemTemplate={PagerLink}
+                ItemTemplate={PagerLinkWithEdit}
                 onChange={selectTradeRoute}
                 values={tradeRoutes.map(TradeRouteToLink)}
                 selected={currentTraderoute?.ID}
@@ -89,7 +101,7 @@ export function ConvoyTradeRouteModal() {
         </div>
       </>
     ),
-    [tradeRoutes, selectTradeRoute, currentTraderoute]
+    [tradeRoutes, PagerLinkWithEdit, selectTradeRoute, currentTraderoute]
   );
 
   const footer = useMemo(() => {

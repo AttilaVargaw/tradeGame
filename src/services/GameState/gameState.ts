@@ -1,10 +1,11 @@
 import { BehaviorSubject } from "rxjs";
 import Database from "tauri-plugin-sql-api";
 
-import { appLocalDataDir } from "@tauri-apps/api/path";
+import { path } from "@tauri-apps/api";
 
 import { creatorSQL } from "../creatorSQL";
 import { DBEvent, DBEvents } from "./dbTypes";
+import { getTwoInventoryCombo } from "./queries/inventory";
 import City from "./tables/City/CityTable";
 import CityPopulationClass from "./tables/CityPopulationClass";
 import CityTypes from "./tables/CityTypes/CityTypes";
@@ -33,7 +34,7 @@ const inMemory = false;
 
 export const init = async () => {
   db = await Database.load(inMemory ? "sqlite:memory" : "sqlite:tradegame.db");
-  console.log(await appLocalDataDir());
+  console.log(await path.appLocalDataDir());
 
   const creatorSQL1 =
     "PRAGMA foreign_keys=OFF;" +
@@ -82,16 +83,12 @@ export const init = async () => {
     FillTable(TradeRoutes) +
     "COMMIT;";
 
-  await db.execute(creatorSQL1);
-  console.log("creatorSQL1");
-
-  await db.execute(creatorSQL2);
-  console.log("creatorSQL2");
-
-  await db.execute(creatorSQL3);
-  console.log("creatorSQL3");
-
-  await db.execute(creatorSQL);
+  await Promise.all([
+    db.execute(creatorSQL1),
+    db.execute(creatorSQL2),
+    db.execute(creatorSQL3),
+    db.execute(creatorSQL),
+  ]);
 
   dbObservable.next({ type: DBEvents.initialized });
   dbObservable.next({ type: DBEvents.tradeRouteUpdate });

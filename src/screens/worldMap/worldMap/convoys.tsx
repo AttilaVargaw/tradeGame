@@ -1,10 +1,12 @@
 import L, {
   DomEvent,
-  DomUtil,
   LatLngExpression,
   PathOptions,
+  Tooltip,
   circle,
+  tooltip,
 } from "leaflet";
+import { isUndefined } from "lodash-es";
 import { useEffect, useRef } from "react";
 
 import {
@@ -13,6 +15,8 @@ import {
 } from "@Components/hooks/useCurrentConvoy";
 import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
+import { ID } from "@Services/GameState/dbTypes";
+import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
 import {
   getConvoyGoalsAsGeoJson,
   getConvoysAsGeoJson,
@@ -83,24 +87,27 @@ export function useConvoyLayer() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const convoyLayer = useRef<L.GeoJSON>(
+  const convoyLayer = useRef<L.GeoJSON<ConvoyData>>(
     L.geoJSON([], {
-      pointToLayer: ({ geometry: { coordinates }, properties: { ID, name } }) =>
-        circle(coordinates as LatLngExpression, {
+      pointToLayer: ({
+        geometry: { coordinates },
+        properties: { ID, name },
+      }) => {
+        const convoyTooltip = tooltip({
+          className: "marker",
+          content: name,
+          permanent: true,
+          direction: "top",
+          interactive: true,
+        });
+
+        return circle(coordinates as LatLngExpression, {
           color: "yellow",
           radius: 4,
           bubblingMouseEvents: false,
           interactive: true,
         })
-          .bindTooltip(
-            new L.Tooltip({
-              className: "marker",
-              content: name,
-              permanent: true,
-              direction: "top",
-              interactive: true,
-            })
-          )
+          .bindTooltip(convoyTooltip)
           .addEventListener("click", (event) => {
             DomEvent.stopPropagation(event);
 
@@ -111,7 +118,8 @@ export function useConvoyLayer() {
             currentConvoySubject.next(ID);
             currentSideMenuBehaviorSubject.next("convoy");
             currentCitiesObservable.next([null, null]);
-          }),
+          });
+      },
     })
   );
 

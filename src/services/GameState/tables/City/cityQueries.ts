@@ -1,6 +1,7 @@
 import { groupBy, isUndefined, union } from "lodash-es";
 
 import { select } from "@Services/GameState/utils/simpleQueryBuilder";
+import { GroupBy } from "@Services/utils";
 
 import {
   CityPositionProperty,
@@ -14,14 +15,18 @@ import {
   Translation,
 } from "../../dbTypes";
 import { db } from "../../gameState";
-import { getEntityInventory } from "../../queries/inventory";
+import { ItemsByCategory, getEntityInventory } from "../../queries/inventory";
 import { getQuery } from "../../queryManager";
 import { CityPopulationClassData } from "../CityPopulationClass";
 import { ConvoyData } from "../Convoy/Convoy";
 import { ResourceChange, Tables } from "../common";
 import { CityEntity, IndustryData } from "./CityTable";
 
-export async function getDockedConvoysForCity(cityID: ID) {
+export async function getDockedConvoysForCity(cityID?: ID) {
+  if (isUndefined(cityID)) {
+    return [];
+  }
+
   const convoysData = await db.select<ConvoyData[]>(
     select({
       attributes: [
@@ -275,7 +280,7 @@ where City.ID = 1
 
 export async function getCityRequiredItemsWithQuantity(id?: ID) {
   if (isUndefined(id)) {
-    return {};
+    return new Map<number, (Translation & Item & InventoryItem)[]>();
   }
 
   const requiredIndustrialStuff = (
@@ -323,5 +328,5 @@ export async function getCityRequiredItemsWithQuantity(id?: ID) {
     )
   );
 
-  return groupBy(results, (e) => e.category);
+  return GroupBy(results, "category");
 }

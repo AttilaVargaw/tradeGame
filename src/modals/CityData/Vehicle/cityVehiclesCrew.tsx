@@ -13,9 +13,9 @@ const Container = styled.div`
 export function CityVehiclesCrew() {
   return (
     <Container>
-      <div></div>
+      <div />
       <Label type="painted">City</Label>
-      <div></div>
+      <div />
       <Label type="led">test2</Label>
       <WarehouseTransferItem
         aID={0}

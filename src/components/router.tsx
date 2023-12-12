@@ -9,8 +9,5 @@ export function Router<T extends RouterProps>({
   pages: T;
   value?: keyof T;
 }) {
-  if (isUndefined(value)) {
-    return <></>;
-  }
-  return pages[value];
+  return isUndefined(value) ? false : pages[value];
 }

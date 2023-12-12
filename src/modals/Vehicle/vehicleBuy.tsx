@@ -44,7 +44,7 @@ export const OrderPage: FC<{ ID: ID; onBack: () => void }> = ({
   }, [ID, vehicleDescription]);
 
   if (!vehicleDescription) {
-    return <></>;
+    return false;
   }
 
   const { desc, name, price } = vehicleDescription;

@@ -2,6 +2,8 @@ import React from "react";
 import { PropsWithChildren } from "react";
 import styled from "styled-components";
 
+import { DangerouslySetInnerHTML } from "@Services/utils";
+
 import { PagerItemProps } from "./pagerProps";
 
 const Container = styled.div`
@@ -62,7 +64,7 @@ export const Screen = styled.div`
 export const TerminalScreen = React.forwardRef<
   HTMLDivElement,
   PropsWithChildren<{
-    dangerouslySetInnerHTML?: { __html: string };
+    dangerouslySetInnerHTML?: DangerouslySetInnerHTML;
     style?: React.CSSProperties;
     rows?: number;
   }>

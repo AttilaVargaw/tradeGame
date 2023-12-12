@@ -83,6 +83,14 @@ h2 {
   }
 }
 
+.docked-marker {
+  @extend .marker;
+
+  &:before {
+    display: none;
+  }
+}
+
 .city-marker {
   &:before {
     right: 0;

@@ -1,6 +1,7 @@
-import { groupBy, isUndefined } from "lodash-es";
+import { groupBy, isUndefined, uniq } from "lodash-es";
 
 import { select } from "@Services/GameState/utils/simpleQueryBuilder";
+import { GroupBy } from "@Services/utils";
 
 import { DBEvents, ID, InventoryItem, Item, Translation } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
@@ -12,8 +13,6 @@ export async function moveBetweenInventories(
   amount: number,
   item: ID
 ) {
-  console.log(inventoryBID, item, amount, inventoryBID, item);
-
   await Promise.all([
     db.execute(
       "insert into Inventory (inventory, item, number) values(?, ?, 1) ON CONFLICT (inventory, item) DO UPDATE SET number = number + ? WHERE Inventory.inventory=? and item = ?;",
@@ -25,10 +24,17 @@ export async function moveBetweenInventories(
     ),
   ]);
 
+  console.log("called", inventoryAID, inventoryBID, amount, item);
+
   dbObservable.next({
     type: DBEvents.inventoryUpdate,
   });
 }
+
+export type ItemsByCategory = Map<
+  number,
+  (Translation & Item & InventoryItem)[]
+>;
 
 export async function getAllItems(inventoryID: ID) {
   const items = await db.select<InventoryItem[]>(
@@ -94,24 +100,29 @@ export const addCityWarehouseItem = async (
   return ret;
 };
 
-export const getEntityInventory = async (entityID?: ID) => {
+export const getEntityInventory = async (
+  entityID?: ID
+): Promise<ItemsByCategory> => {
   if (isUndefined(entityID)) {
-    return [];
+    return new Map<number, (Translation & Item & InventoryItem)[]>();
   }
 
-  return db.select<(Translation & Item & InventoryItem)[]>(
-    `select *
+  return new Map<number, (Translation & Item & InventoryItem)[]>(
+    await db.select(
+      `select *
         from Inventory as INV
         inner join Item as I on I.ID = INV.item
         inner join translations on I.nameKey = translations.key
-        where INV.inventory = $1`,
-    [entityID]
+        where INV.inventory = $1
+        group by category`,
+      [entityID]
+    )
   );
 };
 
 export const getEntityInventoryWeight = async (inventoryID?: ID) => {
   if (isUndefined(inventoryID)) {
-    return {};
+    return { weight: 0 };
   }
 
   return (
@@ -172,4 +183,92 @@ export async function getNumberOfInventoryItem(inventory?: ID, item?: ID) {
   }
 
   return result[0];
+}
+
+export async function getTwoInventoryCombo(inventoryA?: ID, inventoryB?: ID) {
+  if (isUndefined(inventoryA) || isUndefined(inventoryB)) {
+    return [new Map(), new Map()];
+  }
+
+  const cityID = (
+    await db.select<{ ID: ID }[]>("select id from city where inventory = ?;", [
+      inventoryA,
+    ])
+  ).map((e) => e.ID);
+
+  const requiredIndustrialStuff = (
+    await db.select<{ ID: ID }[]>(
+      "select item as ID from industrialBuildings inner join IndustrialBuildingDailyRequirement on industrialBuildings.industrialBuilding = IndustrialBuildingDailyRequirement.industrialBuilding inner join City on City.ID = industrialBuildings.City where city.inventory = ?;",
+      [inventoryA]
+    )
+  ).map((e) => e.ID);
+
+  const requiredClassStuff = (
+    await db.select<{ ID: ID }[]>(
+      `select distinct item as ID from CityPopulationClass as C inner join PopulationClass as PC on C.populationClass = PC.id inner join ClassDailyRequirement as CDR 
+  on CDR.Class = PC.id inner join City on C.city = City.id where City.inventory = ?;`,
+      [inventoryA]
+    )
+  ).map((e) => e.ID);
+
+  const itemIDs = (
+    await db.select<{ ID: ID }[]>(
+      "select item.id as ID, translations.translation from inventory inner join Item on inventory.item = item.id join translations on item.nameKey = translations.key where (inventory.inventory = $1 and item.id = (select item from inventory where inventory = $1)) or (inventory.inventory = $2 and item.id = (select item from inventory where inventory = $2));",
+      [inventoryA, inventoryB]
+    )
+  ).map((e) => e.ID);
+
+  const ids = uniq([
+    ...cityID,
+    ...requiredIndustrialStuff,
+    ...requiredClassStuff,
+    ...itemIDs,
+  ]);
+
+  return [
+    GroupBy(
+      await Promise.all<{ number: number; ID: ID; category: number }>(
+        ids.map(async (itemID) => {
+          const result = await db.select<
+            { number: number; ID: ID; category: number }[]
+          >(
+            "select number, item.id, item.category, translations.translation from inventory join item on inventory.item = item.id join translations on item.nameKey = translations.key where inventory = ? and item =?",
+            [inventoryA, itemID]
+          );
+
+          if (result.length === 0) {
+            const info = await db.select<{ category: number }[]>(
+              "select category, translations.translation from item join translations on item.nameKey = translations.key where id=?",
+              [itemID]
+            );
+            return { ...info[0], number: 0, ID: itemID };
+          }
+          return result[0];
+        })
+      ),
+      "category"
+    ),
+    GroupBy(
+      await Promise.all<{ number: number; ID: ID; category: number }>(
+        ids.map(async (itemID) => {
+          const result = await db.select<
+            { number: number; ID: ID; category: number }[]
+          >(
+            "select number, item.id, item.category, translations.translation from inventory join item on inventory.item = item.id join translations on item.nameKey = translations.key where inventory = ? and item =?",
+            [inventoryB, itemID]
+          );
+
+          if (result.length === 0) {
+            const info = await db.select<{ category: number }[]>(
+              "select category, translations.translation from item join translations on item.nameKey = translations.key where id=?",
+              [itemID]
+            );
+            return { ...info[0], number: 0, ID: itemID };
+          }
+          return result[0];
+        })
+      ),
+      "category"
+    ),
+  ];
 }

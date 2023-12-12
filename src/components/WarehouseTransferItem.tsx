@@ -61,7 +61,7 @@ export function WarehouseTransferItem({
       </ElementContainer>
       <Row>
         <StyledButton
-          disabled={aID === -1 || bID === -1 || bNum === 0}
+          disabled={aID === -1 || bID === -1 || bNum - num < 0}
           size="small"
           onClick={onMove(false)}
         >
@@ -75,7 +75,7 @@ export function WarehouseTransferItem({
           min={1}
         />
         <StyledButton
-          disabled={aID === -1 || bID === -1 || aNum === 0}
+          disabled={aID === -1 || bID === -1 || aNum - num < 0}
           size="small"
           onClick={onMove(true)}
         >

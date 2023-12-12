@@ -98,7 +98,7 @@ export const creatorSQL = `
     INSERT INTO Item VALUES(2,10,10,'luxuryFood','luxuryFoodDesc',0,1);
     INSERT INTO Item VALUES(3,10,10,'luxClothes','luxClothesDesc',0,1);
     INSERT INTO Item VALUES(4,10,20,'basicFood','basicFoodDesc',0,1);
-    INSERT INTO Item VALUES(5,10,10,'mre','mre',1,1);
+    INSERT INTO Item VALUES(5,10,10,'mre','mre',0,1);
     INSERT INTO Item VALUES(6,10,10,'goodFood','goodFoodDesc',0,1);
     INSERT INTO Item VALUES(7,10,10,'basicClothes','basicClothesDesc',0,5);
     INSERT INTO Item VALUES(8,10,10,'workClothes','workClothes',0,5);
@@ -112,8 +112,8 @@ export const creatorSQL = `
     INSERT INTO Item VALUES(16,20,20,'metalIngot','metalIngotsDesc',2,1000);
     INSERT INTO Item VALUES(17,10,10,'oil','oilDesc',2,1000);
     INSERT INTO Item VALUES(18,10,10,'neoLoead','neoLeadDesc',2,1000);
-    INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss',1,8);
-    INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun',1,6);
+    INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss',3,8);
+    INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun',3,6);
     INSERT INTO Item VALUES(21,10,10,'medicaments','medicaments',0,1);
     INSERT INTO Item VALUES(22,10,10,'advMedicaments','advMedicaments',0,1);
     INSERT INTO Item VALUES(23,10,10,'appliances','appliancesDesc',0,10);

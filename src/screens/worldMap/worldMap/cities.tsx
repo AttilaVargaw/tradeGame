@@ -1,24 +1,41 @@
-import L, { DomEvent, LatLngExpression, circle } from "leaflet";
+import { Feature, Geometry } from "geojson";
+import L, {
+  DomEvent,
+  LatLngExpression,
+  Layer,
+  Tooltip,
+  circle,
+  tooltip,
+} from "leaflet";
 import { useEffect } from "react";
 import { useRef } from "react";
 
 import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
-import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
+import {
+  currentConvoyObservable,
+  currentConvoySubject,
+} from "@Components/hooks/useCurrentConvoy";
 import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { currentCityBehaviorSubject } from "@Components/hooks/useCurrentSelectedCity";
+import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
+import { useDBValue } from "@Components/hooks/useDBValue";
 import {
   currentCitiesObservable,
   currentSelectedCities,
 } from "@Components/hooks/useSelectedCities";
-import { CityPositionProperty } from "@Services/GameState/dbTypes";
+import { CityPositionProperty, DBEvents } from "@Services/GameState/dbTypes";
 import { ID } from "@Services/GameState/dbTypes";
+import { dbObservable } from "@Services/GameState/gameState";
 import { addTradeRoute } from "@Services/GameState/queries/tradeRoute";
 import { CityEntity } from "@Services/GameState/tables/City/CityTable";
 import {
   getCities,
   getCity,
 } from "@Services/GameState/tables/City/cityQueries";
-import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
+import {
+  getConvoy,
+  setConvoyGoal,
+} from "@Services/GameState/tables/Convoy/convoyQueries";
 import { addToContextMenu } from "@Services/contextMenu";
 
 const CityColors: { [key: string]: string } = {
@@ -48,6 +65,7 @@ const currentCitiesMarkerB = CityMarker();
 
 export function useCitites() {
   const [, setCurrentModal] = useCurrentModal();
+  const [currentConvoy, setCurrentConvoy] = useCurrentSelectedConvoyAtom();
 
   const citiesGeoJson =
     useRef<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
@@ -62,7 +80,7 @@ export function useCitites() {
             coordinates: [posX, posY],
             type: "Point",
           },
-          properties: { name, type, ID },
+          properties: { name, type, ID, posX, posY },
         })),
       } as GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>;
 
@@ -104,8 +122,15 @@ export function useCitites() {
     );
   }, []);
 
+
+  const features = useRef<Record<ID, Feature<Geometry, CityEntity>>>({});
+
   const cityLayer = useRef<L.GeoJSON<CityEntity>>(
     L.geoJSON([], {
+      onEachFeature: (feature) => {
+        features.current[feature.properties.ID] = feature;
+      },
+      attribution: "",
       pointToLayer: ({
         geometry: { coordinates },
         properties: { ID, name, type },
@@ -174,17 +199,14 @@ export function useCitites() {
             }
           })
           .addEventListener("dblclick", async () => {
+            currentConvoySubject.next(null);
+            setCurrentConvoy(null);
             if (citiesGeoJson.current) {
-              const cityID: ID | undefined =
-                citiesGeoJson.current?.features.find(
-                  ({ properties: { ID: ID2 } }) => ID === ID2
-                )?.properties.ID;
-
-              if (cityID) {
-                const cityData = await getCity(cityID);
-                currentCityBehaviorSubject.next(cityData);
-                setCurrentModal("cityInfo");
-              }
+              const cityData = await getCity(
+                features.current[ID].properties.ID
+              );
+              currentCityBehaviorSubject.next(cityData);
+              setCurrentModal("cityInfo");
             }
           })
           .addEventListener("contextmenu", () => {

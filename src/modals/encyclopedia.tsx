@@ -8,7 +8,7 @@ import { GetEncyclopediaArticles } from "@Services/GameState/tables/Encyclopedia
 
 import Modal from "./Modal";
 
-const header = <Label type="painted">Encyclopedia</Label>;
+const Header = <Label type="painted">Encyclopedia</Label>;
 
 export const EncyclopediaModal = () => {
   const [article, setArticle] = useState<EncyclopediaData | null>();
@@ -76,5 +76,5 @@ export const EncyclopediaModal = () => {
     [article, currentFolder, currentParentFolder, folders, onFolderClick]
   );
 
-  return <Modal body={body} header={header}></Modal>;
+  return <Modal body={body} header={Header}></Modal>;
 };

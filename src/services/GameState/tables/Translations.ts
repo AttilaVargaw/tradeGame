@@ -9,7 +9,7 @@ export type Translations = {
 export type TranslationsTableName = "TradeRouteSeries";
 
 export default {
-  name: "TradeRouteSeries",
+  name: "Translations",
   createData: [
     { name: "key", type: "TEXT" /*references: "City"*/ },
     { name: "lang", type: "TEXT" /*references: "City"*/ },

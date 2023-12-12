@@ -1,3 +1,5 @@
+import { ItemsByCategory } from "@Services/GameState/queries/inventory";
+
 import {
   ID,
   IndustrialBuilding,
@@ -22,7 +24,7 @@ export type CityEntity = {
   name: string;
   fullPopulation: number;
   industry: IndustryData;
-  warehouse: InventoryItem[];
+  warehouse: ItemsByCategory;
   inventory: number;
 };
 

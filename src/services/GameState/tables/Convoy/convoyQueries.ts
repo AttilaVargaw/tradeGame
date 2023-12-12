@@ -109,11 +109,14 @@ export async function dockConvoyToCity(convoyID: ID, cityID: ID | null) {
 
   dbObservable.next({
     type: cityID ? DBEvents.convoyDock : DBEvents.convoyUnDock,
+    data: cityID,
   });
 }
 
 const getConvoysAsGeoJsonQuery = select({
-  attributes: [[Tables.Convoy, ["posX", "posY", "ID", "type", "name"]]],
+  attributes: [
+    [Tables.Convoy, ["posX", "posY", "ID", "type", "name", "dockedTo"]],
+  ],
   table: Tables.Convoy,
 });
 
@@ -122,13 +125,13 @@ export const getConvoysAsGeoJson = async () => {
 
   return {
     type: "FeatureCollection",
-    features: convoysData.map(({ posX, posY, name, ID }) => ({
+    features: convoysData.map(({ posX, posY, name, ID, dockedTo }) => ({
       type: "Feature",
       geometry: {
         coordinates: [posX, posY],
         type: "Point",
       },
-      properties: { name, type: "vehicle", ID },
+      properties: { name, type: "vehicle", ID, dockedTo },
     })),
   } as GeoJSON.FeatureCollection<GeoJSON.Point, ConvoyData>;
 };

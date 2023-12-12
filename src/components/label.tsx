@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 
 export type styles = "led" | "painted";
 
-export const Container = styled.div<{ $type?: styles; $color?: string }>`
+const Container = styled.div<{ $type?: styles; $color?: string }>`
   padding: 0.5em;
   display: flex;
   flex-direction: row;
