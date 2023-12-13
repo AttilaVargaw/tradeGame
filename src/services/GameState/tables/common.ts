@@ -1,4 +1,4 @@
-import { ID } from "../dbTypes";
+import { ID, update } from "../utils/SimpleQueryBuider";
 
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
 
@@ -10,25 +10,25 @@ export type ResourceChange = {
   descriptionKey: string;
 };
 
-export enum Tables {
-  VehicleData = "VehicleData",
-  Convoy = "Convoy",
-  Vehicle = "Vehicle",
-  VehicleTypes = "VehicleTypes",
-  TradeRoutes = "TradeRoutes",
-  CityTypes = "CityTypes",
-  Translations = "Translations",
-  ClassDailyRequirement = "ClassDailyRequirement",
-  City = "City",
-  IndustrialBuildingDailyRequirement = "IndustrialBuildingDailyRequirement",
-  IndustrialBuilding = "IndustrialBuilding",
-  PopulationClass = "PopulationClass",
-  Inventory = "Inventory",
-  Item = "Item",
-  CityPopulationClass = "CityPopulationClass",
-  IndustrialBuildings = "IndustrialBuildings",
-  Encyclopedia = "Encyclopedia",
-}
+export type Tables =
+  | "VehicleData"
+  | "Convoy"
+  | "Vehicle"
+  | "VehicleTypes"
+  | "TradeRoutes"
+  | "CityTypes"
+  | "Translations"
+  | "ClassDailyRequirement"
+  | "City"
+  | "IndustrialBuildingDailyRequirement"
+  | "IndustrialBuilding"
+  | "PopulationClass"
+  | "Inventory"
+  | "Item"
+  | "CityPopulationClass"
+  | "IndustrialBuildings"
+  | "Encyclopedia"
+  | "";
 
 type Attr = {
   name: string;
@@ -38,16 +38,66 @@ type Attr = {
   notNullable?: boolean | null;
 };
 
-export type ConvoyAttr = "name" | "ID";
-
-export type CityAttr = "ID" | "posX" | "posY" | "type" | "name";
-
-export type VehicleAttr = "name" | "type" | "posX" | "posY" | "convoy" | "ID";
-
-export type TradeRouteAttr = "cityA" | "cityB" | "name" | "ID";
-
 export type TableData<TABLE> = {
   initData?: TABLE[];
   createData: Attr[];
   name: string;
+};
+
+export type DailyRequirement = {
+  num: number;
+  itemID: ID;
+  nameKey: string;
+  ID: ID;
+  dailyRequirementID: ID;
+  dailyRequirement: number;
+  descriptionKey: number;
+  translation: string;
+};
+
+export type Item = {
+  ID: ID;
+  startPrice: number;
+  endPricec: number;
+  nameKey: string;
+  descriptionKey: string;
+  category: number;
+  weight: number;
+};
+
+export type PopulationData = {
+  ID: ID;
+  num: number;
+  name: string;
+  dailyRequirement: DailyRequirement[];
+};
+
+export type IndustrialBuilding = {
+  buildingNum: number;
+  nameKey: string;
+  ID: ID;
+  inputOutputData: ResourceChange[];
+};
+
+export type InventoryItem = {
+  ID: ID;
+  number: number;
+  item: ID;
+};
+
+export type Translation = {
+  key: string;
+  lang: string;
+  translation: string;
+};
+
+export type PopulationClass = {
+  ID: ID;
+  name: string;
+};
+
+export type CityPositionProperty = {
+  name: string;
+  type: string;
+  ID: ID;
 };

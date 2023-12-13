@@ -1,6 +1,6 @@
 import L, { LatLngExpression, circle, tooltip } from "leaflet";
-import { RedrawType, gameRedrawSubject } from "@Components/hooks/useGameLoop";
 
+import { RedrawType, gameRedrawSubject } from "@Hooks/index";
 import { getConvoylessVehiclesAsGeoJSON } from "@Services/GameState/tables/Convoy/convoyQueries";
 import { getVehicleGoalsAsGeoJson } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
 

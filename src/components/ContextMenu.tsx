@@ -3,8 +3,8 @@ import styled from "styled-components";
 
 import { contextMenuObservable } from "@Services/contextMenu";
 
-import { ContextMenuPosition } from "./hooks/useContextMenuPosition";
-import { useObservableValue } from "./hooks/useObservable";
+import { ContextMenuPosition } from "../hooks/useContextMenuPosition";
+import { useObservableValue } from "../hooks/useObservable";
 import { Link, TerminalScreen } from "./terminalScreen";
 
 const Container = styled.div<{ $top: number; $left: number }>`

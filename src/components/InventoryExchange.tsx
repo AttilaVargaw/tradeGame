@@ -2,8 +2,8 @@ import { isUndefined } from "lodash-es";
 import { PropsWithChildren, useMemo, useState } from "react";
 import { styled } from "styled-components";
 
-import { ID } from "@Services/GameState/dbTypes";
 import { ItemsByCategory } from "@Services/GameState/queries/inventory";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import { categorySelectorElements } from "../modals/CityData/Vehicle/cityVehiclesInventory";
 import { LoadingBar } from "./LoadingBar";
@@ -39,6 +39,13 @@ function InventoryLoadingBar({
   );
 }
 
+export type MoveFunction = (
+  inventoryAID: ID,
+  inventoryBID: ID,
+  amount: number,
+  item: ID
+) => Promise<void>;
+
 export function InventoryExchange({
   aInventory,
   bInventory,
@@ -55,12 +62,7 @@ export function InventoryExchange({
   bInventory: ItemsByCategory;
   aId: ID;
   bId: ID;
-  moveFn: (
-    inventoryAID: ID,
-    inventoryBID: ID,
-    amount: number,
-    item: ID
-  ) => Promise<void>;
+  moveFn: MoveFunction;
   aWeight?: number;
   bWeight?: number;
   aCapacity?: number;
@@ -96,11 +98,13 @@ export function InventoryExchange({
         onChange={setInCategory}
         values={categorySelectorElements}
       />
-      <Row style={{ gap: "1em" }}>
-        <InventoryLoadingBar capacity={aCapacity} weight={aWeight} />
-        <Container>{items}</Container>
-        <InventoryLoadingBar capacity={bCapacity} weight={bWeight} />
-      </Row>
+      {items && (
+        <Row style={{ gap: "1em" }}>
+          <InventoryLoadingBar capacity={aCapacity} weight={aWeight} />
+          <Container>{items}</Container>
+          <InventoryLoadingBar capacity={bCapacity} weight={bWeight} />
+        </Row>
+      )}
     </>
   );
 }

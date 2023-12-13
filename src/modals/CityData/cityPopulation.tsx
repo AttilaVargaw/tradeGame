@@ -10,17 +10,20 @@ import styled from "styled-components";
 
 import { Button } from "@Components/button";
 import { Grid } from "@Components/grid";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
 import { Select } from "@Components/input";
 import { Label } from "@Components/label";
-import { PopulationClass, PopulationData } from "@Services/GameState/dbTypes";
-import { ID } from "@Services/GameState/dbTypes";
+import { useCurrentSelectedCity } from "@Hooks/index";
 import {
   addCityClass,
   getCity,
   getNotExistingCityClasses,
   setPopulation,
 } from "@Services/GameState/tables/City/cityQueries";
+import {
+  PopulationClass,
+  PopulationData,
+} from "@Services/GameState/tables/common";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import { WarehouseRow } from "../../components/WarehouseRow";
 import debugModeContext from "../../debugModeContext";

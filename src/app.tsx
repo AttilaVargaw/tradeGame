@@ -1,8 +1,7 @@
-import { GameErrorBoundary } from "@Components/GameErorrBoundary";
-import { LoadingPage } from "@Components/LoadingPage";
-import { useGameState } from "@Components/hooks/useGameState";
+import { GameErrorBoundary } from "@Components/index";
+import { useGameState } from "@Hooks/index";
 
-import { ContextMenu } from "./components/ContextMenu";
+import { ContextMenu, LoadingPage } from "./components";
 import DebugModeContext from "./debugModeContext";
 import { WorldMap } from "./screens/worldMap/worldMap/worldMap";
 

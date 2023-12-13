@@ -1,4 +1,4 @@
-import { ID } from "../dbTypes";
+import { ID } from "../utils/SimpleQueryBuider";
 import { TableData } from "./common";
 
 export type PopulationClass = {

@@ -1,8 +1,9 @@
-import { VehicleType } from "@Services/GameState/dbTypes";
 import { FC } from "react";
-import { Screen } from "@Components/terminalScreen";
-import Placeholder from "@Components/placeholder";
+
 import { Button } from "@Components/button";
+import Placeholder from "@Components/placeholder";
+import { Screen } from "@Components/terminalScreen";
+import { VehicleType } from "@Services/GameState/tables/vehicleTypes";
 
 export const BuyItem: FC<VehicleType & { onClick: () => void }> = ({
   desc,

@@ -1,41 +1,26 @@
 import { Feature, Geometry } from "geojson";
-import L, {
-  DomEvent,
-  LatLngExpression,
-  Layer,
-  Tooltip,
-  circle,
-  tooltip,
-} from "leaflet";
+import L, { DomEvent, LatLngExpression, circle } from "leaflet";
 import { useEffect } from "react";
 import { useRef } from "react";
 
-import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
 import {
-  currentConvoyObservable,
-  currentConvoySubject,
-} from "@Components/hooks/useCurrentConvoy";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { currentCityBehaviorSubject } from "@Components/hooks/useCurrentSelectedCity";
-import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
-import { useDBValue } from "@Components/hooks/useDBValue";
-import {
+  ContextMenuPosition,
   currentCitiesObservable,
+  currentCityBehaviorSubject,
+  currentConvoySubject,
   currentSelectedCities,
-} from "@Components/hooks/useSelectedCities";
-import { CityPositionProperty, DBEvents } from "@Services/GameState/dbTypes";
-import { ID } from "@Services/GameState/dbTypes";
-import { dbObservable } from "@Services/GameState/gameState";
+  useCurrentSelectedConvoyAtom,
+} from "@Hooks/index";
+import { useCurrentModal } from "@Hooks/index";
 import { addTradeRoute } from "@Services/GameState/queries/tradeRoute";
 import { CityEntity } from "@Services/GameState/tables/City/CityTable";
 import {
   getCities,
   getCity,
 } from "@Services/GameState/tables/City/cityQueries";
-import {
-  getConvoy,
-  setConvoyGoal,
-} from "@Services/GameState/tables/Convoy/convoyQueries";
+import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
+import { CityPositionProperty } from "@Services/GameState/tables/common";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 import { addToContextMenu } from "@Services/contextMenu";
 
 const CityColors: { [key: string]: string } = {
@@ -121,7 +106,6 @@ export function useCitites() {
       })
     );
   }, []);
-
 
   const features = useRef<Record<ID, Feature<Geometry, CityEntity>>>({});
 

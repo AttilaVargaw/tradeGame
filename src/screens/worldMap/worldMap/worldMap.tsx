@@ -2,14 +2,16 @@ import { MouseEventHandler, useCallback, useMemo } from "react";
 import styled from "styled-components";
 
 import { ModalRouter } from "@Components/ModalRouter";
-import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import { ContextMenuPosition } from "@Components/hooks/useContextMenuPosition";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
-import { useCurrentSelectedCities } from "@Components/hooks/useSelectedCities";
+import {
+  ContextMenuPosition,
+  useContextMenuHandler,
+  useCurrentConvoy,
+  useCurrentSelectedCities,
+  useCurrentSelectedCity,
+  useKeypressHandler,
+  useWindowSize,
+} from "@Hooks/index";
 
-import { useWindowSize } from "../../../components/hooks/useWIndowSize";
 import SideMenu from "../../SideMenu/sideMenu";
 import { GameMap } from "./GameMap";
 

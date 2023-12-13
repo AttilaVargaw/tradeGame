@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { Tick, TickSpeed } from "../hooks/useGameLoop";
+import { useObservableValue } from "../hooks/useObservable";
 import { Button } from "./button";
-import { Tick, TickSpeed } from "./hooks/useGameLoop";
-import { useObservableValue } from "./hooks/useObservable";
 import { PagerProps } from "./pagerProps";
 import { TogglePager } from "./togglePager";
 

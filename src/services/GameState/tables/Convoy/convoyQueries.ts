@@ -1,24 +1,25 @@
 import { isUndefined } from "lodash-es";
 
 import {
+  ID,
+  UpdateEvent,
   insert,
   select,
   update,
-} from "@Services/GameState/utils/simpleQueryBuilder";
+} from "@Services/GameState/utils/SimpleQueryBuider";
 import { Lenght } from "@Services/utils";
 
-import { CityPositionProperty, DBEvents, ID } from "../../dbTypes";
+import { DBEvents } from "../../dbTypes";
 import { db, dbObservable } from "../../gameState";
-import { getQuery } from "../../queryManager";
 import { getCities } from "../City/cityQueries";
 import { VehicleData } from "../Vehicle/Vehicle";
-import { Tables } from "../common";
+import { CityPositionProperty } from "../common";
 import { ConvoyData } from "./Convoy";
 
 export async function CreateConvoy(name: string) {
   const data = await db.execute(
     insert({
-      table: Tables.Convoy,
+      table: "Convoy",
       attributes: { name, type: "", posX: 0, posY: 0 },
     })
   );
@@ -35,8 +36,8 @@ export const setConvoyGoal = async (
 ) => {
   const data = await db.execute(
     update({
-      table: Tables.Convoy,
-      where: [{ A: [Tables.Convoy, "ID"], value: convoyID }],
+      table: "Convoy",
+      where: [{ A: ["Convoy", "ID"], value: convoyID }],
       updateRows: [
         ["goalX", goalX],
         ["goalY", goalY],
@@ -50,8 +51,8 @@ export const setConvoyGoal = async (
 export async function GetConvoiyCount() {
   return (
     await db.select<{ "count(ID)": number }[]>(
-      select({
-        table: Tables.Convoy,
+      select<{ "count(ID)": number }>({
+        table: "Convoy",
         attributes: [["", "count(ID)"]],
       })
     )
@@ -61,7 +62,7 @@ export async function GetConvoiyCount() {
 const getConvoysQuery = select({
   attributes: [
     [
-      Tables.Convoy,
+      "Convoy",
       [
         "name",
         "ID",
@@ -75,7 +76,7 @@ const getConvoysQuery = select({
       ],
     ],
   ],
-  table: Tables.Convoy,
+  table: "Convoy",
 });
 
 export const getConvoys = () => {
@@ -84,10 +85,10 @@ export const getConvoys = () => {
 
 const getConvoyQuery = select({
   attributes: [
-    [Tables.Convoy, ["name", "ID", "route", "posY", "posX", "isRouteActive"]],
+    ["Convoy", ["name", "ID", "route", "posY", "posX", "isRouteActive"]],
   ],
-  table: Tables.Convoy,
-  where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+  table: "Convoy",
+  where: [{ A: ["Convoy", "ID"], value: "?" }],
 });
 
 export const getConvoy = async (id: ID | null) => {
@@ -101,8 +102,8 @@ export const getConvoy = async (id: ID | null) => {
 export async function dockConvoyToCity(convoyID: ID, cityID: ID | null) {
   await db.execute(
     update({
-      table: Tables.Convoy,
-      where: [{ A: [Tables.Convoy, "ID"], value: convoyID, operator: "=" }],
+      table: "Convoy",
+      where: [{ A: ["Convoy", "ID"], value: convoyID, operator: "=" }],
       updateRows: [["dockedTo", cityID]],
     })
   );
@@ -114,10 +115,8 @@ export async function dockConvoyToCity(convoyID: ID, cityID: ID | null) {
 }
 
 const getConvoysAsGeoJsonQuery = select({
-  attributes: [
-    [Tables.Convoy, ["posX", "posY", "ID", "type", "name", "dockedTo"]],
-  ],
-  table: Tables.Convoy,
+  attributes: [["Convoy", ["posX", "posY", "ID", "type", "name", "dockedTo"]]],
+  table: "Convoy",
 });
 
 export const getConvoysAsGeoJson = async () => {
@@ -137,11 +136,11 @@ export const getConvoysAsGeoJson = async () => {
 };
 
 const getConvoyGoalsAsGeoJsonQuery = select({
-  attributes: [[Tables.Convoy, ["posX", "posY", "ID", "goalX", "goalY"]]],
-  table: Tables.Convoy,
+  attributes: [["Convoy", ["posX", "posY", "ID", "goalX", "goalY"]]],
+  table: "Convoy",
   where: [
-    { A: [Tables.Convoy, "goalX"], value: null, operator: " is not " },
-    { A: [Tables.Convoy, "goalY"], value: null, operator: " is not " },
+    { A: ["Convoy", "goalX"], value: null, operator: " is not " },
+    { A: ["Convoy", "goalY"], value: null, operator: " is not " },
   ],
 });
 
@@ -166,35 +165,50 @@ export const getConvoyGoalsAsGeoJson = async () => {
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
 
-const getConvoySpeedQuery = select({
+const getConvoySpeedQuery = select<{
+  minSpeed: number;
+  dS: number;
+  headingX: number;
+  headingY: number;
+  "min(VehicleTypes.speed) as minSpeed": string;
+}>({
   attributes: [
     ["", "min(VehicleTypes.speed) as minSpeed"],
     ["", "min(VehicleTypes.speed) * ? as dS"],
     ["", "Convoy.posX - Convoy.goalX as headingX"],
     ["", "Convoy.posY - Convoy.goalY as headingY"],
   ],
-  table: Tables.Convoy,
+  table: "Convoy",
   join: [
     {
-      A: Tables.Vehicle,
+      A: "Vehicle",
       equation: {
-        A: [Tables.Convoy, "ID"],
-        B: [Tables.Vehicle, "convoy"],
+        A: ["Convoy", "ID"],
+        B: ["Vehicle", "convoy"],
       },
     },
     {
-      A: Tables.VehicleTypes,
+      A: "VehicleTypes",
       equation: {
-        A: [Tables.Vehicle, "type"],
-        B: [Tables.VehicleTypes, "ID"],
+        A: ["Vehicle", "type"],
+        B: ["VehicleTypes", "ID"],
       },
     },
   ],
-  where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+  where: [{ A: ["Convoy", "ID"], value: "?" }],
+});
+
+const getConvoyQuery2 = select({
+  attributes: [
+    ["Convoy", ["name", "ID", "goalX", "goalY", "posY", "posX", "dockedTo"]],
+    ["", "posX-goalX as goalVectorX"],
+    ["", "posY-goalY as goalVectorY"],
+  ],
+  table: "Convoy",
 });
 
 export async function UpdateConvoys(dt: number) {
-  const convoys = await db.select<ConvoyData[]>(getQuery("getConvoys"));
+  const convoys = await db.select<ConvoyData[]>(getConvoyQuery2);
 
   const ret = await Promise.all(
     convoys.map(
@@ -230,7 +244,7 @@ export async function UpdateConvoys(dt: number) {
           const stop =
             Lenght(headingX, headingY) - Lenght(newVector[0], newVector[1]) < 0;
 
-          const updateRows: [string, number | null][] = [
+          const updateRows: UpdateEvent<VehicleData>["updateRows"] = [
             ["posX", stop ? goalX : newPos[0]],
             ["posY", stop ? goalY : newPos[1]],
           ];
@@ -250,9 +264,9 @@ export async function UpdateConvoys(dt: number) {
           }
 
           await db.execute(
-            update({
-              table: Tables.Convoy,
-              where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+            update<VehicleData>({
+              table: "Convoy",
+              where: [{ A: ["Convoy", "ID"], value: "?" }],
               updateRows,
             }),
             [ID]
@@ -272,9 +286,9 @@ export async function UpdateConvoys(dt: number) {
 export const getConvoylessVehicles = () => {
   return db.select<VehicleData[]>(
     select({
-      attributes: [[Tables.Vehicle, ["name", "ID"]]],
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
+      attributes: [["Vehicle", ["name", "ID"]]],
+      table: "Vehicle",
+      where: [{ A: ["Vehicle", "convoy"], value: null, operator: " is " }],
     })
   );
 };
@@ -282,9 +296,9 @@ export const getConvoylessVehicles = () => {
 export const getConvoylessVehiclesAsGeoJSON = async () => {
   const vehicleData = await db.select<VehicleData[]>(
     select({
-      attributes: [[Tables.Vehicle, ["name", "ID", "posX", "posY"]]],
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
+      attributes: [["Vehicle", ["name", "ID", "posX", "posY"]]],
+      table: "Vehicle",
+      where: [{ A: ["Vehicle", "convoy"], value: null, operator: " is " }],
     })
   );
 
@@ -305,7 +319,7 @@ export async function GetTraderouteCount() {
   return (
     await db.select<{ "count(ID)": number }[]>(
       select({
-        table: Tables.TradeRoutes,
+        table: "TradeRoutes",
         attributes: [["", "count(ID)"]],
       })
     )
@@ -313,9 +327,9 @@ export async function GetTraderouteCount() {
 }
 
 const setConvoyTradeRouteQuery = update({
-  table: Tables.Convoy,
+  table: "Convoy",
   updateRows: [["route", "$1"]],
-  where: [{ A: [Tables.Convoy, "ID"], value: "$2" }],
+  where: [{ A: ["Convoy", "ID"], value: "$2" }],
 });
 
 export const setConvoyTradeRoute = async (ID: ID, routeID: ID | null) => {
@@ -341,17 +355,17 @@ export async function getVehiclesOfConvoy(convoyID?: ID) {
 
   return await db.select<VehicleData[]>(
     select({
-      table: Tables.Vehicle,
-      attributes: [[Tables.Vehicle, ["ID", "inventory", "name"]]],
-      where: [{ A: [Tables.Vehicle, "ID"], value: convoyID }],
+      table: "Vehicle",
+      attributes: [["Vehicle", ["ID", "inventory", "name"]]],
+      where: [{ A: ["Vehicle", "ID"], value: convoyID }],
     })
   );
 }
 
 const setConvoyRouteActiveQuery = update({
-  table: Tables.Convoy,
+  table: "Convoy",
   updateRows: [["isRouteActive", "?"]],
-  where: [{ A: [Tables.Convoy, "ID"], value: "?" }],
+  where: [{ A: ["Convoy", "ID"], value: "?" }],
 });
 
 export async function setConvoyRouteActive(convoyID: ID, active: boolean) {

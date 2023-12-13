@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { useCurrentSelectedConvoyAtom } from "@Components/hooks/useCurrentSelectedConvoy";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
 import { TogglePager } from "@Components/togglePager";
+import { useCurrentSelectedCity } from "@Hooks/index";
+import { useCurrentSelectedConvoyAtom } from "@Hooks/index";
 import { getDockedConvoysForCity } from "@Services/GameState/tables/City/cityQueries";
 import { ConvoyData } from "@Services/GameState/tables/Convoy/Convoy";
 import { VehicleData } from "@Services/GameState/tables/Vehicle/Vehicle";

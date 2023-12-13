@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { Button } from "@Components/button";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { Router, RouterProps } from "@Components/router";
+import { useCurrentModal } from "@Hooks/index";
 
 export const Container = styled.div`
   z-index: 100000;

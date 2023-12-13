@@ -3,8 +3,8 @@ import { useCallback, useContext, useMemo, useState } from "react";
 
 import { LoadingBar } from "@Components/LoadingBar";
 import { Row } from "@Components/grid";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { useDBValue } from "@Components/hooks/useDBValue";
+import { useCurrentSelectedCity } from "@Hooks/index";
+import { useDBValue } from "@Hooks/index";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import {
   getEntityInventory,

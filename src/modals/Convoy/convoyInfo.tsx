@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 
 import { Grid } from "@Components/grid";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useDBValue } from "@Components/hooks/useDBValue";
+import { useCurrentConvoy } from "@Hooks/index";
+import { useDBValue } from "@Hooks/index";
 import { getConvoy } from "@Services/GameState/tables/Convoy/convoyQueries";
 
 export const ConvoyInfo = () => {

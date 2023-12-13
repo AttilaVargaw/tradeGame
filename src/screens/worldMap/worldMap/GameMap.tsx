@@ -8,10 +8,12 @@ import L, {
 import { useEffect, useRef } from "react";
 import styled from "styled-components";
 
-import { useContextMenuHandler } from "@Components/hooks/useContextMenuHandler";
-import { currentConvoySubject } from "@Components/hooks/useCurrentConvoy";
-import { useKeypressHandler } from "@Components/hooks/useKeypressHandler";
-import { currentCitiesObservable } from "@Components/hooks/useSelectedCities";
+import {
+  currentCitiesObservable,
+  currentConvoySubject,
+  useContextMenuHandler,
+  useKeypressHandler,
+} from "@Hooks/index";
 import { setConvoyGoal } from "@Services/GameState/tables/Convoy/convoyQueries";
 
 import { currentSideMenuBehaviorSubject } from "../../SideMenu/currentSideMenu";

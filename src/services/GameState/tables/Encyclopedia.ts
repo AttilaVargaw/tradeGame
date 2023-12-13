@@ -1,12 +1,12 @@
-import { ID } from "../dbTypes";
+import { ID } from "../utils/SimpleQueryBuider";
 import { TableData } from "./common";
 
 export type EncyclopediaData = {
   name: string;
   ID: ID;
   body: string;
-  parent?: number | null;
-  folder?: boolean;
+  parent: number | null;
+  folder: boolean | null;
 };
 
 export type EncyclopediaTableName = "Encyclopedia";
@@ -26,12 +26,13 @@ export default {
   ],
   name: "Encyclopedia",
   initData: [
-    { name: "Ranks in the Guild", folder: true },
+    { name: "Ranks in the Guild", folder: true, parent: null },
     { name: "Unlicensed members", folder: true, parent: 1 },
     { name: "Licensed members", folder: true, parent: 1 },
     { name: "Warrant holders", folder: true, parent: 1 },
     { name: "Master", folder: true, parent: 1 },
     {
+      folder: null,
       name: "Unlicensed members",
       body: `
       <p>Ordinary crewman</p>

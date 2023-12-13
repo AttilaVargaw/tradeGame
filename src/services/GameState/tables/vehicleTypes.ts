@@ -1,9 +1,9 @@
-import { ID } from "../dbTypes";
+import { ID } from "../utils/SimpleQueryBuider";
 import type { TableData } from "./common";
 
 export type VehicleTypesName = "VehicleTypes";
 
-export type VehicleTypeData = {
+export type VehicleType = {
   name: string;
   desc: string;
   price: number;
@@ -12,8 +12,6 @@ export type VehicleTypeData = {
   inventorySize: number;
   ID: ID;
 };
-
-export type VehicleTypeAttr = "name" | "desc" | "price" | "ID" | "type";
 
 export default {
   name: "VehicleTypes",
@@ -115,4 +113,4 @@ export default {
       inventorySize: 4000,
     },
   ],
-} as TableData<Partial<VehicleTypeData>>;
+} as TableData<VehicleType>;

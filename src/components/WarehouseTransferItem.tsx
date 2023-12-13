@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
 import { styled } from "styled-components";
 
-import { Button } from "@Components/button";
-import { Input } from "@Components/input";
-import { Label } from "@Components/label";
-import { ID } from "@Services/GameState/dbTypes";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
+import { Button } from "./button";
 import { Row } from "./grid";
+import { Input } from "./input";
+import { Label } from "./label";
 
 const ElementContainer = styled.div`
   min-width: 10em;

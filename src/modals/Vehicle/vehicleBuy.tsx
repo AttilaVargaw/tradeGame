@@ -2,17 +2,17 @@ import { FC, useCallback, useEffect, useState } from "react";
 
 import { Button } from "@Components/button";
 import { Grid } from "@Components/grid";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
 import { PagerProps } from "@Components/pagerProps";
 import Placeholder from "@Components/placeholder";
 import { TogglePager } from "@Components/togglePager";
-import { ID } from "@Services/GameState/dbTypes";
-import { VehicleType } from "@Services/GameState/dbTypes";
+import { useCurrentModal } from "@Hooks/index";
 import {
   addVehicle,
   getVehicleType,
   getVehicleTypes,
 } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
+import { VehicleType } from "@Services/GameState/tables/vehicleTypes";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 import { makeid } from "@Services/utils";
 
 import { BuyItem } from "./buyItem";
@@ -127,15 +127,11 @@ export const VehicleBuyModal = () => {
             selected={selectedVehicleType}
           />
           <Grid $num={8} style={{ gap: "1em", paddingTop: "1em" }}>
-            {vehicleDescriptions.map(({ ID, name, desc, price, type }) => (
+            {vehicleDescriptions.map((vehicle) => (
               <BuyItem
-                onClick={onOrderClick(ID)}
-                type={type}
-                key={ID}
-                desc={desc}
-                price={price}
-                ID={ID}
-                name={name}
+                onClick={onOrderClick(vehicle.ID)}
+                {...vehicle}
+                key={vehicle.ID}
               />
             ))}
           </Grid>

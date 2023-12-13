@@ -55,6 +55,7 @@ export default defineConfig({
       "@Services": path.resolve(__dirname, "./src/services"),
       "@Components": path.resolve(__dirname, "./src/components"),
       "@Screens": path.resolve(__dirname, "./src/screens"),
+      "@Hooks": path.resolve(__dirname, "./src/hooks"),
     },
   },
 });

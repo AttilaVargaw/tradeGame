@@ -1,7 +1,9 @@
-import { Input } from "@Components/input";
-import { Label } from "@Components/label";
-import { ID } from "@Services/GameState/dbTypes";
 import { useCallback } from "react";
+
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
+
+import { Input } from "./input";
+import { Label } from "./label";
 
 export function WarehouseRow({
   editable = false,

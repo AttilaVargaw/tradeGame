@@ -1,20 +1,21 @@
 import {
+  ID,
   insert,
   select,
   update,
-} from "@Services/GameState/utils/simpleQueryBuilder";
+} from "@Services/GameState/utils/SimpleQueryBuider";
 
-import { CityPositionProperty, DBEvents, VehicleType } from "../../dbTypes";
-import { ID } from "../../dbTypes";
+import { DBEvents } from "../../dbTypes";
 import { db, dbObservable } from "../../gameState";
-import { Tables } from "../common";
+import { CityPositionProperty } from "../common";
+import { VehicleType } from "../vehicleTypes";
 import { VehicleData } from "./Vehicle";
 
 export const getVehicles = () => {
   return db.select<VehicleData[]>(
     select({
-      attributes: [[Tables.Vehicle, ["ID", "name", "posY", "posX", "convoy"]]],
-      table: Tables.Vehicle,
+      attributes: [["Vehicle", ["ID", "name", "posY", "posX", "convoy"]]],
+      table: "Vehicle",
     })
   );
 };
@@ -22,32 +23,26 @@ export const getVehicles = () => {
 export const getVehiclesOfConvoy = (ID: ID | null) => {
   return db.select<VehicleData[]>(
     select({
-      attributes: [[Tables.Vehicle, ["name", "ID", "inventory"]]],
-      table: Tables.Vehicle,
+      attributes: [["Vehicle", ["name", "ID", "inventory"]]],
+      table: "Vehicle",
       join: [
         {
-          A: Tables.Convoy,
-          equation: { A: [Tables.Convoy, "ID"], B: [Tables.Vehicle, "convoy"] },
+          A: "Convoy",
+          equation: { A: ["Convoy", "ID"], B: ["Vehicle", "convoy"] },
         },
       ],
-      where: [{ A: [Tables.Vehicle, "convoy"], value: ID }],
+      where: [{ A: ["Vehicle", "convoy"], value: ID }],
     })
   );
 };
 
 const getVehicleGoalsAsGeoJsonQuery = select({
-  attributes: [
-    [Tables.Vehicle, "posX"],
-    [Tables.Vehicle, "posY"],
-    [Tables.Vehicle, "ID"],
-    [Tables.Vehicle, "goalY"],
-    [Tables.Vehicle, "goalX"],
-  ],
-  table: Tables.Vehicle,
+  attributes: [["Vehicle", ["posX", "posY", "ID", "goalY", "goalX"]]],
+  table: "Vehicle",
   where: [
-    { A: [Tables.Vehicle, "convoy"], value: null, operator: " is " },
-    { A: [Tables.Vehicle, "goalX"], value: null, operator: " is not " },
-    { A: [Tables.Vehicle, "goalY"], value: null, operator: " is not " },
+    { A: ["Vehicle", "convoy"], value: null, operator: " is " },
+    { A: ["Vehicle", "goalX"], value: null, operator: " is not " },
+    { A: ["Vehicle", "goalY"], value: null, operator: " is not " },
   ],
 });
 
@@ -74,15 +69,9 @@ export const getVehicleGoalsAsGeoJson = async () => {
 export const getVehiclesAsGeoJson = async () => {
   const vehicleData = await db.select<VehicleData[]>(
     select({
-      attributes: [
-        [Tables.Vehicle, "posX"],
-        [Tables.Vehicle, "posY"],
-        [Tables.Vehicle, "ID"],
-        [Tables.Vehicle, "type"],
-        [Tables.Vehicle, "name"],
-      ],
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "convoy"], value: null, operator: " is " }],
+      attributes: [["Vehicle", ["posX", "posY", "ID", "type", "name"]]],
+      table: "Vehicle",
+      where: [{ A: ["Vehicle", "convoy"], value: null, operator: " is " }],
     })
   );
 
@@ -102,11 +91,9 @@ export const getVehiclesAsGeoJson = async () => {
 export const getVehicleTypes = (type: string) => {
   return db.select<VehicleType[]>(
     select({
-      table: Tables.VehicleTypes,
-      attributes: [
-        [Tables.VehicleTypes, ["price", "ID", "desc", "name", "type"]],
-      ],
-      where: [{ A: [Tables.VehicleTypes, "type"], value: type }],
+      table: "VehicleTypes",
+      attributes: [["VehicleTypes", ["price", "ID", "desc", "name", "type"]]],
+      where: [{ A: ["VehicleTypes", "type"], value: type }],
     })
   );
 };
@@ -114,7 +101,7 @@ export const getVehicleTypes = (type: string) => {
 export const addVehicle = async (type: number, name: string) => {
   const data = await db.execute(
     insert({
-      table: Tables.Vehicle,
+      table: "Vehicle",
       attributes: { name, posX: 0, posY: 0, type },
     })
   );
@@ -126,10 +113,10 @@ export const getVehicleType = (ID: ID) => {
   return db.select<VehicleType[]>(
     select({
       attributes: [
-        [Tables.VehicleTypes, ["name", "desc", "ID", "price", "inventorySize"]],
+        ["VehicleTypes", ["name", "desc", "ID", "price", "inventorySize"]],
       ],
-      table: Tables.VehicleTypes,
-      where: [{ A: [Tables.VehicleTypes, "ID"], value: ID }],
+      table: "VehicleTypes",
+      where: [{ A: ["VehicleTypes", "ID"], value: ID }],
     })
   );
 };
@@ -137,17 +124,17 @@ export const getVehicleType = (ID: ID) => {
 export async function GetVehicleCount() {
   return (
     await db.select<{ "count(ID)": number }[]>(
-      select({
-        table: Tables.Vehicle,
+      select<{ "count(ID)": number }>({
+        table: "Vehicle",
         attributes: [["", "count(ID)"]],
       })
     )
   )[0]["count(ID)"];
 }
 
-const setVehicleGoalQuery = update({
-  table: Tables.Vehicle,
-  where: [{ A: [Tables.Vehicle, "ID"], value: "?" }],
+const setVehicleGoalQuery = update<VehicleData>({
+  table: "Vehicle",
+  where: [{ A: ["Vehicle", "ID"], value: "?" }],
   updateRows: [
     ["goalX", "?"],
     ["goalY", "?"],
@@ -162,9 +149,9 @@ export const setVehicleGoal = async (ID: ID, goalX: number, goalY: number) => {
 
 export const addVehicleToConvoy = async (convoyID: ID, VehicleID: ID) => {
   const data = await db.execute(
-    update({
-      table: Tables.Vehicle,
-      where: [{ A: [Tables.Vehicle, "ID"], value: VehicleID }],
+    update<VehicleData>({
+      table: "Vehicle",
+      where: [{ A: ["Vehicle", "ID"], value: VehicleID }],
       updateRows: [["convoy", convoyID]],
     })
   );

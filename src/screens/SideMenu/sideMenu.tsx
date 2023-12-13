@@ -2,8 +2,8 @@ import { forwardRef } from "react";
 import styled, { CSSProperties } from "styled-components";
 
 import { SevenDigitClock } from "@Components/SevenDigitClock";
-import { useObservableValue } from "@Components/hooks/useObservable";
 import { Router } from "@Components/router";
+import { useObservableValue } from "@Hooks/index";
 
 import { DefaultSideMenu } from "./DefaultSideMenu";
 import { ConvoySideMenu } from "./convoySideMenu";

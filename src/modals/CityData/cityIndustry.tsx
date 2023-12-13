@@ -1,14 +1,8 @@
 import { useCallback, useContext, useState } from "react";
 import { styled } from "styled-components";
 
-import { Button } from "@Components/button";
-import { Row } from "@Components/grid";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { useDBValue } from "@Components/hooks/useDBValue";
-import { Input, Select } from "@Components/input";
-import { Label } from "@Components/label";
-import { Toggle } from "@Components/toggle";
-import { ID } from "@Services/GameState/dbTypes";
+import { Button, Input, Label, Row, Select, Toggle } from "@Components/index";
+import { useCurrentSelectedCity, useDBValue } from "@Hooks/index";
 import {
   addIndustrialBuildings,
   getAllIndustrialBuildings,
@@ -16,6 +10,7 @@ import {
   getCityIndustrialResourceChanges,
   setIndustrialBuildingNumber,
 } from "@Services/GameState/tables/City/cityQueries";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import { WarehouseRow } from "../../components/WarehouseRow";
 import debugModeContext from "../../debugModeContext";

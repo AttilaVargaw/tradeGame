@@ -1,8 +1,7 @@
 import { useCallback } from "react";
 
 import { Button } from "@Components/button";
-import { Modal, useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { useDBValue } from "@Components/hooks/useDBValue";
+import { Modal, useCurrentModal, useDBValue } from "@Hooks/index";
 
 export function ModalOpenerButton({
   modal,

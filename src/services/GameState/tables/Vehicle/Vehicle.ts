@@ -1,4 +1,5 @@
-import { ID } from "../../dbTypes";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
+
 import { TableData } from "../common";
 
 export type VehicleData = {
@@ -8,8 +9,8 @@ export type VehicleData = {
   convoy: number;
   posY: number;
   posX: number;
-  goalY?: number;
-  goalX?: number;
+  goalY: number | null;
+  goalX: number | null;
   speed: number;
   inventory: number;
 };

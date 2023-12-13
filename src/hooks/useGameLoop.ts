@@ -48,7 +48,6 @@ export function GameLoop() {
 
         Tick.next(currentTick);
       }
-
       for (let i = 0; i < TickSpeed.value; ++i) {
         updates = await UpdateConvoys(ds);
       }

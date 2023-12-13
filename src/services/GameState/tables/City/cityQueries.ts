@@ -1,26 +1,24 @@
 import { groupBy, isUndefined, union } from "lodash-es";
 
-import { select } from "@Services/GameState/utils/simpleQueryBuilder";
+import { ID, select } from "@Services/GameState/utils/SimpleQueryBuider";
 import { GroupBy } from "@Services/utils";
 
+import { db } from "../../gameState";
+import { getEntityInventory } from "../../queries/inventory";
+import { CityPopulationClassData } from "../CityPopulationClass";
+import { ConvoyData } from "../Convoy/Convoy";
 import {
   CityPositionProperty,
-  DailyRequirement,
-  ID,
   IndustrialBuilding,
   InventoryItem,
   Item,
   PopulationClass,
   PopulationData,
+  ResourceChange,
+  Tables,
   Translation,
-} from "../../dbTypes";
-import { db } from "../../gameState";
-import { ItemsByCategory, getEntityInventory } from "../../queries/inventory";
-import { getQuery } from "../../queryManager";
-import { CityPopulationClassData } from "../CityPopulationClass";
-import { ConvoyData } from "../Convoy/Convoy";
-import { ResourceChange, Tables } from "../common";
-import { CityEntity, IndustryData } from "./CityTable";
+} from "../common";
+import { CityEntity, DailyRequirement, IndustryData } from "./CityTable";
 
 export async function getDockedConvoysForCity(cityID?: ID) {
   if (isUndefined(cityID)) {
@@ -29,20 +27,34 @@ export async function getDockedConvoysForCity(cityID?: ID) {
 
   const convoysData = await db.select<ConvoyData[]>(
     select({
-      attributes: [
-        [Tables.Convoy, "ID"],
-        [Tables.Convoy, "name"],
-      ],
-      table: Tables.Convoy,
-      where: [{ A: [Tables.Convoy, "dockedTo"], value: cityID, operator: "=" }],
+      attributes: [["Convoy", ["ID", "name"]]],
+      table: "Convoy",
+      where: [{ A: ["Convoy", "dockedTo"], value: cityID, operator: "=" }],
     })
   );
 
   return convoysData;
 }
 
+const getCitiesQuery = select({
+  attributes: [
+    ["City", ["ID", "name", "posX", "posY", "inventory"]],
+    ["CityTypes", [["name", "type"]]],
+  ],
+  table: "City",
+  join: [
+    {
+      A: "CityTypes",
+      equation: {
+        A: ["City", "type"],
+        B: ["CityTypes", "ID"],
+      },
+    },
+  ],
+});
+
 export const getCitiesAsGeoJson = async () => {
-  const citiesData = await db.select<CityEntity[]>(getQuery("getCities"));
+  const citiesData = await db.select<CityEntity[]>(getCitiesQuery);
 
   return {
     type: "FeatureCollection",
@@ -58,7 +70,7 @@ export const getCitiesAsGeoJson = async () => {
 };
 
 export const getCities = () => {
-  return db.select<CityEntity[]>(getQuery("getCities"));
+  return db.select<CityEntity[]>(getCitiesQuery);
 };
 
 const getCityIndustrialBuildingsQuery = `select IBS.ID, IBS.num as buildingNum, IB.nameKey
@@ -89,14 +101,18 @@ export const getCityIndustrialBuildings = async (id?: ID) => {
   return industrialBuildings;
 };
 
+const getCityQuery = select({
+  attributes: [["City", ["ID", "name", "posX", "posY", "type", "inventory"]]],
+  table: "City",
+  where: [{ A: ["City", "ID"], operator: "=", value: "?" }],
+});
+
 export const getCity = async (ID?: ID): Promise<CityEntity | null> => {
   if (isUndefined(ID)) {
     return null;
   }
 
-  const cityData = (
-    await db.select<CityEntity[]>(getQuery("getCity"), [ID])
-  )[0];
+  const cityData = (await db.select<CityEntity[]>(getCityQuery, [ID]))[0];
 
   const [classes, warehouse] = await Promise.all([
     getPopulation(ID),

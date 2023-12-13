@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react";
 
-import { useDBValue } from "@Components/hooks/useDBValue";
-import { useSelectedRouteAtom } from "@Components/hooks/useSelectedTradeRoute";
 import { Label } from "@Components/label";
 import { TerminalScreen } from "@Components/terminalScreen";
+import { useDBValue } from "@Hooks/index";
+import { useSelectedRouteAtom } from "@Hooks/index";
 import { getTradeRouteByID } from "@Services/GameState/queries/tradeRoute";
 
 import Modal from "./Modal";

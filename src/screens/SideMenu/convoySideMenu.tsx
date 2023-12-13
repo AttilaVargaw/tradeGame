@@ -2,11 +2,10 @@ import { useCallback } from "react";
 
 import { StackPager } from "@Components/StackPager";
 import { Col, Row } from "@Components/grid";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useCurrentModal } from "@Components/hooks/useCurrentModal";
-import { useDBValue } from "@Components/hooks/useDBValue";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
+import { useCurrentConvoy, useDBValue } from "@Hooks/index";
+import { useCurrentModal } from "@Hooks/useCurrentModal";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import { getTradeRouteByID } from "@Services/GameState/queries/tradeRoute";
 import {
@@ -63,6 +62,11 @@ export function ConvoySideMenu() {
     [setCurrentModal]
   );
 
+  const openShippingPlanner = useCallback(
+    () => setCurrentModal("shippingPlanner"),
+    [setCurrentModal]
+  );
+
   const activateTradeRoute = useCallback(() => {
     convoyData &&
       setConvoyRouteActive(convoyData.ID, !convoyData.isRouteActive);
@@ -85,6 +89,11 @@ export function ConvoySideMenu() {
             label="Docked to:"
           />
         )}
+        <LineRowWithDefault
+          defaultText="none"
+          label="Current program:"
+          onLinkClick={openShippingPlanner}
+        />
       </TerminalScreen>
       <Toggle
         onChange={activateTradeRoute}

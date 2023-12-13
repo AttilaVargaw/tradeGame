@@ -1,18 +1,29 @@
 import { ItemsByCategory } from "@Services/GameState/queries/inventory";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import {
-  ID,
   IndustrialBuilding,
-  InventoryItem,
   PopulationData,
-} from "../../dbTypes";
-import { ResourceChange, TableData } from "../common";
+  ResourceChange,
+  TableData,
+} from "../common";
 
 export type CityTableName = "City";
 
 export type IndustryData = {
   industrialBuildings: IndustrialBuilding[];
   aggregatedInputOutput: ResourceChange[];
+};
+
+export type DailyRequirement = {
+  num: number;
+  itemID: ID;
+  nameKey: string;
+  ID: ID;
+  dailyRequirementID: ID;
+  dailyRequirement: number;
+  descriptionKey: number;
+  translation: string;
 };
 
 export type CityEntity = {
@@ -35,7 +46,7 @@ export type CityData = {
   type: number;
   name: string;
   inventory: number;
-  industrialBuildings?: number;
+  industrialBuildings: number | null;
 };
 
 export default {

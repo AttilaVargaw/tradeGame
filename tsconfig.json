@@ -11,7 +11,7 @@
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react-jsx",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
@@ -20,7 +20,8 @@
     "paths": {
       "@Services/*": ["./src/services/*"],
       "@Screens/*": ["./src/sreens/*"],
-      "@Components/*": ["./src/components/*"]
+      "@Components/*": ["./src/components/*"],
+      "@Hooks/*": ["./src/hooks/*"]
     }
   },
   "include": ["src"],
@@ -32,6 +33,6 @@
     "node_modules",
     "jest",
     "src/setupTests.ts"
-  ],
+  ]
   // "types": ["typePatches", "node", "leaflet"]
 }

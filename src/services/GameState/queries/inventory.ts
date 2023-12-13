@@ -1,11 +1,11 @@
-import { groupBy, isUndefined, uniq } from "lodash-es";
+import { isUndefined, uniq } from "lodash-es";
 
-import { select } from "@Services/GameState/utils/simpleQueryBuilder";
 import { GroupBy } from "@Services/utils";
 
-import { DBEvents, ID, InventoryItem, Item, Translation } from "../dbTypes";
+import { DBEvents } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
-import { Tables } from "../tables/common";
+import { InventoryItem, Item, Translation } from "../tables/common";
+import { ID, select } from "../utils/SimpleQueryBuider";
 
 export async function moveBetweenInventories(
   inventoryAID: ID,
@@ -24,8 +24,6 @@ export async function moveBetweenInventories(
     ),
   ]);
 
-  console.log("called", inventoryAID, inventoryBID, amount, item);
-
   dbObservable.next({
     type: DBEvents.inventoryUpdate,
   });
@@ -36,42 +34,36 @@ export type ItemsByCategory = Map<
   (Translation & Item & InventoryItem)[]
 >;
 
-export async function getAllItems(inventoryID: ID) {
-  const items = await db.select<InventoryItem[]>(
+export async function getAllItems() {
+  const items = await db.select<(Translation & Item & InventoryItem)[]>(
     select({
-      table: Tables.Inventory,
+      table: "Inventory",
       attributes: [
-        [Tables.Item, ["nameKey", "descriptionKey", "category", "ID"]],
-        [Tables.Translations, "translation"],
-        [Tables.Inventory, ["inventory", "number"]],
+        ["Item", ["nameKey", "descriptionKey", "category", "ID"]],
+        ["Translations", ["translation"]],
+        ["Inventory", ["inventory", "number"]],
       ],
       join: [
         {
-          A: Tables.Translations,
+          A: "Translations",
           equation: {
-            A: [Tables.Item, "nameKey"],
-            B: [Tables.Translations, "key"],
+            A: ["Item", "nameKey"],
+            B: ["Translations", "key"],
           },
         },
         {
-          A: Tables.Item,
+          A: "Item",
           equation: {
-            A: [Tables.Inventory, "item"],
-            B: [Tables.Item, "ID"],
+            A: ["Inventory", "item"],
+            B: ["Item", "ID"],
           },
         },
       ],
-      where: [
-        {
-          A: [Tables.Inventory, "inventory"],
-          value: inventoryID,
-          operator: "=",
-        },
-      ],
+      groupBy: "category",
     })
   );
 
-  return groupBy(items, "category");
+  return GroupBy(items, "category");
 }
 
 export const updateInventoryItem = async (number: number, ID: ID) => {

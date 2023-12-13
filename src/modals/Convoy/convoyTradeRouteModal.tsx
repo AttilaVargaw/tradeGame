@@ -2,15 +2,15 @@ import { useCallback, useMemo } from "react";
 
 import { StackPager } from "@Components/StackPager";
 import { Row } from "@Components/grid";
-import { useCurrentConvoy } from "@Components/hooks/useCurrentConvoy";
-import { useDBValue } from "@Components/hooks/useDBValue";
 import { Label } from "@Components/label";
 import { PagerItemProps } from "@Components/pagerProps";
 import { Link, PagerLink, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
-import { DBEvents, TradeRouteProps } from "@Services/GameState/dbTypes";
-import { ID } from "@Services/GameState/dbTypes";
+import { useCurrentConvoy } from "@Hooks/index";
+import { useDBValue } from "@Hooks/index";
+import { DBEvents } from "@Services/GameState/dbTypes";
 import {
+  TradeRouteProps,
   getAllTradeRoute,
   getTradeRouteByID,
 } from "@Services/GameState/queries/tradeRoute";
@@ -19,7 +19,7 @@ import {
   setConvoyRouteActive,
   setConvoyTradeRoute,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
-import { TradeRoute } from "@Services/GameState/tables/TradeRoutes";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import Modal from "../Modal";
 

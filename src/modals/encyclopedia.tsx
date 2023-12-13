@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Label } from "@Components/label";
-import { Link, TerminalScreen } from "@Components/terminalScreen";
-import { ID } from "@Services/GameState/dbTypes";
+import { Label, Link, TerminalScreen } from "@Components/index";
 import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
 import { GetEncyclopediaArticles } from "@Services/GameState/tables/Encyclopedia/EncyclopediaQueries";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import Modal from "./Modal";
 

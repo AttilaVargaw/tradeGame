@@ -1,12 +1,8 @@
 import React, { useCallback, useMemo, useState } from "react";
 
-import { LoadingBar } from "@Components/LoadingBar";
-import { useCurrentSelectedCity } from "@Components/hooks/useCurrentSelectedCity";
-import { useDBValue } from "@Components/hooks/useDBValue";
-import { Label } from "@Components/label";
+import { Label, LoadingBar, Router, TogglePager } from "@Components/index";
 import { PagerProps } from "@Components/pagerProps";
-import { Router } from "@Components/router";
-import { TogglePager } from "@Components/togglePager";
+import { useCurrentSelectedCity, useDBValue } from "@Hooks/index";
 import { getCity } from "@Services/GameState/tables/City/cityQueries";
 
 import Modal from "../Modal";

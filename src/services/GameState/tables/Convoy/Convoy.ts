@@ -1,4 +1,5 @@
-import { ID } from "../../dbTypes";
+import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
+
 import { TableData } from "../common";
 
 export type ConvoyData = {
@@ -7,13 +8,13 @@ export type ConvoyData = {
   ID: ID;
   posY: number;
   posX: number;
-  route: number;
-  goalY?: number;
-  goalX?: number;
-  goalVectorX?: number;
-  goalVectorY?: number;
-  dockedTo?: number;
-  isRouteActive?: boolean;
+  route: number | null;
+  goalY: number | null;
+  goalX: number | null;
+  goalVectorX: number | null;
+  goalVectorY: number | null;
+  dockedTo: number | null;
+  isRouteActive: boolean;
 };
 
 export type ConvoyTableName = "Convoy";

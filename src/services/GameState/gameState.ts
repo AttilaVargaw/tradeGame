@@ -5,7 +5,6 @@ import { path } from "@tauri-apps/api";
 
 import { creatorSQL } from "../creatorSQL";
 import { DBEvent, DBEvents } from "./dbTypes";
-import { getTwoInventoryCombo } from "./queries/inventory";
 import City from "./tables/City/CityTable";
 import CityPopulationClass from "./tables/CityPopulationClass";
 import CityTypes from "./tables/CityTypes/CityTypes";
@@ -16,13 +15,8 @@ import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDaily
 import PopulationClasses from "./tables/PopulationClass";
 import TradeRoutes from "./tables/TradeRoutes";
 import Vehicle from "./tables/Vehicle/Vehicle";
-import { Tables } from "./tables/common";
 import vehicleTypes from "./tables/vehicleTypes";
-import {
-  DropTableIfExist,
-  FillTable,
-  create,
-} from "./utils/simpleQueryBuilder";
+import { DropTableIfExist, FillTable, create } from "./utils/SimpleQueryBuider";
 
 export let db: Database;
 
@@ -44,9 +38,9 @@ export const init = async () => {
     DropTableIfExist(vehicleTypes.name) +
     DropTableIfExist(City.name) +
     DropTableIfExist(CityPopulationClass.name) +
-    DropTableIfExist(Tables.TradeRoutes) +
-    DropTableIfExist(Tables.Convoy) +
-    DropTableIfExist(Tables.Vehicle) +
+    DropTableIfExist("TradeRoutes") +
+    DropTableIfExist("Convoy") +
+    DropTableIfExist("Vehicle") +
     DropTableIfExist(Encyclopedia.name) +
     DropTableIfExist(IndustrialBuildingDailyRequirement.name);
 
