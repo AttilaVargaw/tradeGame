@@ -12,6 +12,7 @@ import ClassDailyRequirements from "./tables/ClassDailyRequirement";
 import Convoy from "./tables/Convoy/Convoy";
 import Encyclopedia from "./tables/Encyclopedia";
 import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDailyRequirement";
+import Inventory from "./tables/Inventory/Inventory";
 import PopulationClasses from "./tables/PopulationClass";
 import TradeRoutes from "./tables/TradeRoutes";
 import Vehicle from "./tables/Vehicle/Vehicle";
@@ -42,7 +43,8 @@ export const init = async () => {
     DropTableIfExist("Convoy") +
     DropTableIfExist("Vehicle") +
     DropTableIfExist(Encyclopedia.name) +
-    DropTableIfExist(IndustrialBuildingDailyRequirement.name);
+    DropTableIfExist(IndustrialBuildingDailyRequirement.name) +
+    DropTableIfExist(Inventory.name);
 
   const creatorSQL2 =
     "BEGIN TRANSACTION;" +
@@ -56,6 +58,7 @@ export const init = async () => {
     create(Convoy.name, Convoy.createData) +
     create(Vehicle.name, Vehicle.createData) +
     create(Encyclopedia.name, Encyclopedia.createData) +
+    create(Inventory.name, Inventory.createData) +
     create(
       IndustrialBuildingDailyRequirement.name,
       IndustrialBuildingDailyRequirement.createData
@@ -75,6 +78,7 @@ export const init = async () => {
     FillTable(Convoy) +
     FillTable(IndustrialBuildingDailyRequirement) +
     FillTable(TradeRoutes) +
+    FillTable(Inventory) +
     "COMMIT;";
 
   await Promise.all([

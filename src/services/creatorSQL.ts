@@ -3,7 +3,6 @@ export const creatorSQL = `
     drop table if exists IndustrialBuildings;
     drop table if exists Item;
     drop table if exists Translations;
-    drop table if exists Inventory;
 
     BEGIN TRANSACTION;
 
@@ -87,11 +86,6 @@ export const creatorSQL = `
     INSERT INTO IndustrialBuilding VALUES(1,'artificalFoodFactory',NULL);
     INSERT INTO IndustrialBuilding VALUES(2,'waterPurificator',NULL);
     INSERT INTO IndustrialBuilding VALUES(3,'hidrophonic farm',NULL);
-
-    CREATE TABLE Inventory (ID INTEGER PRIMARY KEY AUTOINCREMENT, inventory INTEGER, item INTEGER, number REAL, UNIQUE(inventory, item));
-    INSERT INTO Inventory VALUES(0,0,1,1005.0);
-    INSERT INTO Inventory VALUES(2,3,3,5.0);
-    INSERT INTO Inventory VALUES(3,10,3,5.0);
 
     CREATE TABLE Item (ID INTEGER PRIMARY KEY AUTOINCREMENT, startPrice INTEGER, endPrice INTEGER, nameKey TEXT, descriptionKey TEXT, category INTEGER, weight INTEGER);
     INSERT INTO Item VALUES(1,10,10,'water','waterDesc',0, 1);

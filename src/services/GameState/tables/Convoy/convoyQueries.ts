@@ -14,6 +14,7 @@ import { db, dbObservable } from "../../gameState";
 import { getCities } from "../City/cityQueries";
 import { VehicleData } from "../Vehicle/Vehicle";
 import { CityPositionProperty } from "../common";
+import { VehicleType } from "../vehicleTypes";
 import { ConvoyData } from "./Convoy";
 
 export async function CreateConvoy(name: string) {
@@ -50,13 +51,13 @@ export const setConvoyGoal = async (
 
 export async function GetConvoiyCount() {
   return (
-    await db.select<{ "count(ID)": number }[]>(
-      select<{ "count(ID)": number }>({
+    await db.select<{ count: number }[]>(
+      select<{ count: number; ID: ID }, "Convoy" | "">({
         table: "Convoy",
-        attributes: [["", "count(ID)"]],
+        attributes: [["", ["count(ID) as count"]]],
       })
     )
-  )[0]["count(ID)"];
+  )[0].count;
 }
 
 const getConvoysQuery = select({
@@ -164,19 +165,26 @@ export const getConvoyGoalsAsGeoJson = async () => {
     })),
   } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
 };
-
-const getConvoySpeedQuery = select<{
-  minSpeed: number;
-  dS: number;
-  headingX: number;
-  headingY: number;
-  "min(VehicleTypes.speed) as minSpeed": string;
-}>({
+// bug here
+const getConvoySpeedQuery = select<
+  VehicleType & ConvoyData,
+  "Convoy" | "Vehicle" | "VehicleTypes" | "",
+  {
+    headingX: number;
+    headingY: number;
+    minSpeed: number;
+    dS: number;
+  }
+>({
   attributes: [
-    ["", "min(VehicleTypes.speed) as minSpeed"],
-    ["", "min(VehicleTypes.speed) * ? as dS"],
-    ["", "Convoy.posX - Convoy.goalX as headingX"],
-    ["", "Convoy.posY - Convoy.goalY as headingY"],
+    ["", ["min(VehicleTypes.speed) as minSpeed", "min(VehicleTypes.speed) * ? as dS"]],
+    [
+      "",
+      [
+        "Convoy.posX - Convoy.goalX as headingX",
+        "Convoy.posY - Convoy.goalY as headingY",
+      ],
+    ],
   ],
   table: "Convoy",
   join: [
@@ -198,11 +206,14 @@ const getConvoySpeedQuery = select<{
   where: [{ A: ["Convoy", "ID"], value: "?" }],
 });
 
-const getConvoyQuery2 = select({
+const getConvoyQuery2 = select<
+  ConvoyData & { goalVectorX: string; goalVectorY: string },
+  "Convoy" | ""
+>({
   attributes: [
     ["Convoy", ["name", "ID", "goalX", "goalY", "posY", "posX", "dockedTo"]],
-    ["", "posX-goalX as goalVectorX"],
-    ["", "posY-goalY as goalVectorY"],
+    ["", ["posX - goalX as goalVectorX"]],
+    ["", ["posY - goalY as goalVectorY"]],
   ],
   table: "Convoy",
 });
@@ -244,7 +255,7 @@ export async function UpdateConvoys(dt: number) {
           const stop =
             Lenght(headingX, headingY) - Lenght(newVector[0], newVector[1]) < 0;
 
-          const updateRows: UpdateEvent<VehicleData>["updateRows"] = [
+          const updateRows: UpdateEvent<VehicleData, "">["updateRows"] = [
             ["posX", stop ? goalX : newPos[0]],
             ["posY", stop ? goalY : newPos[1]],
           ];
@@ -264,7 +275,7 @@ export async function UpdateConvoys(dt: number) {
           }
 
           await db.execute(
-            update<VehicleData>({
+            update<VehicleData, "Convoy">({
               table: "Convoy",
               where: [{ A: ["Convoy", "ID"], value: "?" }],
               updateRows,
@@ -317,16 +328,16 @@ export const getConvoylessVehiclesAsGeoJSON = async () => {
 
 export async function GetTraderouteCount() {
   return (
-    await db.select<{ "count(ID)": number }[]>(
+    await db.select<{ count: number }[]>(
       select({
         table: "TradeRoutes",
-        attributes: [["", "count(ID)"]],
+        attributes: [["", ["count(ID) as count"]]],
       })
     )
-  )[0]["count(ID)"];
+  )[0].count;
 }
 
-const setConvoyTradeRouteQuery = update({
+const setConvoyTradeRouteQuery = update<{ route: string; ID: ID }, "Convoy">({
   table: "Convoy",
   updateRows: [["route", "$1"]],
   where: [{ A: ["Convoy", "ID"], value: "$2" }],
@@ -354,7 +365,7 @@ export async function getVehiclesOfConvoy(convoyID?: ID) {
   }
 
   return await db.select<VehicleData[]>(
-    select({
+    select<VehicleData, "Vehicle">({
       table: "Vehicle",
       attributes: [["Vehicle", ["ID", "inventory", "name"]]],
       where: [{ A: ["Vehicle", "ID"], value: convoyID }],

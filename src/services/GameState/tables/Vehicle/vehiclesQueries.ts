@@ -22,7 +22,7 @@ export const getVehicles = () => {
 
 export const getVehiclesOfConvoy = (ID: ID | null) => {
   return db.select<VehicleData[]>(
-    select({
+    select<VehicleData, "Vehicle" | "Convoy">({
       attributes: [["Vehicle", ["name", "ID", "inventory"]]],
       table: "Vehicle",
       join: [
@@ -36,7 +36,7 @@ export const getVehiclesOfConvoy = (ID: ID | null) => {
   );
 };
 
-const getVehicleGoalsAsGeoJsonQuery = select({
+const getVehicleGoalsAsGeoJsonQuery = select<VehicleData, "Vehicle">({
   attributes: [["Vehicle", ["posX", "posY", "ID", "goalY", "goalX"]]],
   table: "Vehicle",
   where: [
@@ -68,7 +68,7 @@ export const getVehicleGoalsAsGeoJson = async () => {
 
 export const getVehiclesAsGeoJson = async () => {
   const vehicleData = await db.select<VehicleData[]>(
-    select({
+    select<VehicleData, "Vehicle">({
       attributes: [["Vehicle", ["posX", "posY", "ID", "type", "name"]]],
       table: "Vehicle",
       where: [{ A: ["Vehicle", "convoy"], value: null, operator: " is " }],
@@ -111,7 +111,7 @@ export const addVehicle = async (type: number, name: string) => {
 
 export const getVehicleType = (ID: ID) => {
   return db.select<VehicleType[]>(
-    select({
+    select<VehicleType, "VehicleTypes">({
       attributes: [
         ["VehicleTypes", ["name", "desc", "ID", "price", "inventorySize"]],
       ],
@@ -123,16 +123,16 @@ export const getVehicleType = (ID: ID) => {
 
 export async function GetVehicleCount() {
   return (
-    await db.select<{ "count(ID)": number }[]>(
-      select<{ "count(ID)": number }>({
+    await db.select<{ count: number }[]>(
+      select<{ ID: ID }, "Vehicle" | "", { count: number }>({
         table: "Vehicle",
-        attributes: [["", "count(ID)"]],
+        attributes: [["", ["count(ID) as count"]]],
       })
     )
-  )[0]["count(ID)"];
+  )[0]["count"];
 }
 
-const setVehicleGoalQuery = update<VehicleData>({
+const setVehicleGoalQuery = update<VehicleData, "Vehicle">({
   table: "Vehicle",
   where: [{ A: ["Vehicle", "ID"], value: "?" }],
   updateRows: [
@@ -149,7 +149,7 @@ export const setVehicleGoal = async (ID: ID, goalX: number, goalY: number) => {
 
 export const addVehicleToConvoy = async (convoyID: ID, VehicleID: ID) => {
   const data = await db.execute(
-    update<VehicleData>({
+    update<VehicleData, "Vehicle">({
       table: "Vehicle",
       where: [{ A: ["Vehicle", "ID"], value: VehicleID }],
       updateRows: [["convoy", convoyID]],

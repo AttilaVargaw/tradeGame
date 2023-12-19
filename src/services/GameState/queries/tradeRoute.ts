@@ -2,8 +2,9 @@ import { isUndefined } from "lodash-es";
 
 import { DBEvents } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
+import { CityData } from "../tables/City/CityTable";
 import { getCity } from "../tables/City/cityQueries";
-import { Tables } from "../tables/common";
+import { REAL, TEXT, Tables } from "../tables/common";
 import { ID, insert, select } from "../utils/SimpleQueryBuider";
 
 export type TradeRouteProps = {
@@ -27,11 +28,16 @@ export type TradeRouteView = {
   cityBID: ID;
   cityAName: string;
   cityBName: string;
+  cityAPosY: number;
+  cityAPosX: number;
+  cityBPosY: number;
+  cityBPosX: number;
 };
 
 const getTradouteByIDQuery = select<
-  { CityA: ID; ID: ID; name: string; posX: string; posY: string },
-  Tables | "CityA" | "CityB"
+  TradeRoute & CityData,
+  "TradeRoutes" | "CityA" | "CityB" | "City",
+  TradeRouteView
 >({
   table: "TradeRoutes",
   where: [{ A: ["TradeRoutes", "ID"], value: "?" }],
@@ -39,19 +45,19 @@ const getTradouteByIDQuery = select<
     [
       "CityA",
       [
-        ["ID", "cityAID"],
-        ["name", "cityAName"],
-        ["posX", "cityAPosX"],
-        ["posY", "cityAPosY"],
+        "ID as cityAID",
+        "name as cityAName",
+        "posX as cityAPosX",
+        "posY as cityAPosY",
       ],
     ],
     [
       "CityB",
       [
-        ["ID", "cityBID"],
-        ["name", "cityBName"],
-        ["posX", "cityBPosX"],
-        ["posY", "cityBPosY"],
+        "ID as cityBID",
+        "name as cityBName",
+        "posX as cityBPosX",
+        "posY as cityBPosY",
       ],
     ],
     ["TradeRoutes", ["name", "ID"]],
@@ -84,19 +90,19 @@ const getTradouteQuery = select({
     [
       "CityA",
       [
-        ["ID", "cityAID"],
-        ["name", "cityAName"],
-        ["posX", "cityAPosX"],
-        ["posY", "cityAPosY"],
+        "ID as cityAID",
+        "name as cityAName",
+        "posX as cityAPosX",
+        "posY as cityAPosY",
       ],
     ],
     [
       "CityB",
       [
-        ["ID", "cityBID"],
-        ["name", "cityBName"],
-        ["posX", "cityBPosX"],
-        ["posY", "cityBPosY"],
+        "ID as cityBID",
+        "name as cityBName",
+        "posX as cityBPosX",
+        "posY as cityBPosY",
       ],
     ],
     ["TradeRoutes", ["name", "ID"]],
@@ -153,8 +159,20 @@ export type TradeRouteAsGeoJSONView = {
 export const getTradeRoutesAsGeoJson = async (ID?: number) => {
   const tradeRoutes = await db.select<TradeRouteAsGeoJSONView[]>(
     select<
-      { ID: ID; name: string; posX: number; posY: number },
-      "CityA" | Tables | "CityB"
+      { ID: ID; name: TEXT; posX: REAL; posY: REAL },
+      "CityA" | Tables | "CityB",
+      {
+        cityAID: ID;
+        cityBID: ID;
+        cityAName: TEXT;
+        cityAPosX: REAL;
+        cityAPosY: REAL;
+        name: TEXT;
+        ID: ID;
+        cityBName: TEXT;
+        cityBPosX: TEXT;
+        cityBPosY: TEXT;
+      }
     >({
       table: "TradeRoutes",
       where: ID ? [{ A: ["TradeRoutes", "ID"], value: ID }] : undefined,
@@ -162,19 +180,19 @@ export const getTradeRoutesAsGeoJson = async (ID?: number) => {
         [
           "CityA",
           [
-            ["ID", "cityAID"],
-            ["name", "cityAName"],
-            ["posX", "cityAPosX"],
-            ["posY", "cityAPosY"],
+            "ID as cityAID",
+            "name as cityAName",
+            "posX as cityAPosX",
+            "posY as cityAPosY",
           ],
         ],
         [
           "CityB",
           [
-            ["ID", "cityBID"],
-            ["name", "cityBName"],
-            ["posX", "cityBPosX"],
-            ["posY", "cityBPosY"],
+            "ID as cityBID",
+            "name as cityBName",
+            "posX as cityBPosX",
+            "posY as cityBPosY",
           ],
         ],
         ["TradeRoutes", ["name", "ID"]],

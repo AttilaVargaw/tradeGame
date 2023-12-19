@@ -15,7 +15,6 @@ import {
   PopulationClass,
   PopulationData,
   ResourceChange,
-  Tables,
   Translation,
 } from "../common";
 import { CityEntity, DailyRequirement, IndustryData } from "./CityTable";
@@ -39,7 +38,7 @@ export async function getDockedConvoysForCity(cityID?: ID) {
 const getCitiesQuery = select({
   attributes: [
     ["City", ["ID", "name", "posX", "posY", "inventory"]],
-    ["CityTypes", [["name", "type"]]],
+    ["CityTypes", ["name as type"]],
   ],
   table: "City",
   join: [

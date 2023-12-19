@@ -10,6 +10,11 @@ export type ResourceChange = {
   descriptionKey: string;
 };
 
+export type INTEGER = number;
+export type REAL = number;
+export type TEXT = string;
+export type BOOLEAN = 0 | 1;
+
 export type Tables =
   | "VehicleData"
   | "Convoy"
@@ -27,8 +32,7 @@ export type Tables =
   | "Item"
   | "CityPopulationClass"
   | "IndustrialBuildings"
-  | "Encyclopedia"
-  | "";
+  | "Encyclopedia";
 
 type Attr = {
   name: string;
@@ -47,57 +51,57 @@ export type TableData<TABLE> = {
 export type DailyRequirement = {
   num: number;
   itemID: ID;
-  nameKey: string;
+  nameKey: TEXT;
   ID: ID;
   dailyRequirementID: ID;
-  dailyRequirement: number;
-  descriptionKey: number;
-  translation: string;
+  dailyRequirement: REAL;
+  descriptionKey: REAL;
+  translation: TEXT;
 };
 
 export type Item = {
   ID: ID;
-  startPrice: number;
-  endPricec: number;
-  nameKey: string;
-  descriptionKey: string;
-  category: number;
-  weight: number;
+  startPrice: REAL;
+  endPricec: REAL;
+  nameKey: TEXT;
+  descriptionKey: TEXT;
+  category: ID;
+  weight: REAL;
 };
 
 export type PopulationData = {
   ID: ID;
-  num: number;
-  name: string;
+  num: INTEGER;
+  name: TEXT;
   dailyRequirement: DailyRequirement[];
 };
 
 export type IndustrialBuilding = {
-  buildingNum: number;
-  nameKey: string;
+  buildingNum: INTEGER;
+  nameKey: TEXT;
   ID: ID;
   inputOutputData: ResourceChange[];
 };
 
 export type InventoryItem = {
   ID: ID;
-  number: number;
+  number: INTEGER;
   item: ID;
 };
 
 export type Translation = {
-  key: string;
-  lang: string;
-  translation: string;
+  key: TEXT;
+  lang: TEXT;
+  translation: TEXT;
 };
 
 export type PopulationClass = {
   ID: ID;
-  name: string;
+  name: TEXT;
 };
 
 export type CityPositionProperty = {
-  name: string;
-  type: string;
+  name: TEXT;
+  type: TEXT;
   ID: ID;
 };

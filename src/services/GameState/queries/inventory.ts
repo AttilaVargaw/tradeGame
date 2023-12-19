@@ -4,6 +4,7 @@ import { GroupBy } from "@Services/utils";
 
 import { DBEvents } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
+import { InventoryData } from "../tables/Inventory/Inventory";
 import { InventoryItem, Item, Translation } from "../tables/common";
 import { ID, select } from "../utils/SimpleQueryBuider";
 
@@ -34,33 +35,38 @@ export type ItemsByCategory = Map<
   (Translation & Item & InventoryItem)[]
 >;
 
+const getAllItemsQuery = select<
+  Translation & Item & InventoryItem & InventoryData,
+  "Item" | "Translation" | "Inventory" | "Translations"
+>({
+  table: "Inventory",
+  attributes: [
+    ["Item", ["nameKey", "descriptionKey", "category", "ID"]],
+    ["Translations", ["translation"]],
+    ["Inventory", ["inventory as number"]],
+  ],
+  join: [
+    {
+      A: "Translations",
+      equation: {
+        A: ["Item", "nameKey"],
+        B: ["Translations", "key"],
+      },
+    },
+    {
+      A: "Item",
+      equation: {
+        A: ["Inventory", "item"],
+        B: ["Item", "ID"],
+      },
+    },
+  ],
+  groupBy: "category",
+});
+
 export async function getAllItems() {
   const items = await db.select<(Translation & Item & InventoryItem)[]>(
-    select({
-      table: "Inventory",
-      attributes: [
-        ["Item", ["nameKey", "descriptionKey", "category", "ID"]],
-        ["Translations", ["translation"]],
-        ["Inventory", ["inventory", "number"]],
-      ],
-      join: [
-        {
-          A: "Translations",
-          equation: {
-            A: ["Item", "nameKey"],
-            B: ["Translations", "key"],
-          },
-        },
-        {
-          A: "Item",
-          equation: {
-            A: ["Inventory", "item"],
-            B: ["Item", "ID"],
-          },
-        },
-      ],
-      groupBy: "category",
-    })
+    getAllItemsQuery
   );
 
   return GroupBy(items, "category");
