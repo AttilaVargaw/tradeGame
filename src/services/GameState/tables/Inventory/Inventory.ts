@@ -15,6 +15,7 @@ export default {
     { name: "item", type: "INTEGER" },
     { name: "inventory", type: "INTEGER" },
     { name: "number", type: "INTEGER" },
+    "UNIQUE(inventory, item)",
   ],
   initData: [
     { inventory: 0, item: 1, number: 1005 },

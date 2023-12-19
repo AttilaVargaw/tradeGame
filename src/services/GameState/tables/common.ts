@@ -44,7 +44,7 @@ type Attr = {
 
 export type TableData<TABLE> = {
   initData?: TABLE[];
-  createData: Attr[];
+  createData: (Attr | string)[];
   name: string;
 };
 

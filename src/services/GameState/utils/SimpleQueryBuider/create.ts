@@ -2,11 +2,11 @@ import { DBAttr, attrToCreateQuery } from "./common";
 
 export function create<T extends string>(
   tableName: T,
-  attr: DBAttr[],
+  attr: (DBAttr | string)[],
   drop = true
 ) {
   attr.forEach((a) => {
-    if (a.references && !a.referencesOn) {
+    if (typeof a !== "string" && a.references && !a.referencesOn) {
       a.referencesOn = `ID`;
     }
   });

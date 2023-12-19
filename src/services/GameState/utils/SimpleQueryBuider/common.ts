@@ -17,13 +17,13 @@ export function InputToString(input: string | number | null | boolean) {
   }
 }
 
-export function attrToCreateQuery({
-  name,
-  type,
-  references,
-  referencesOn,
-  notNullable = false,
-}: DBAttr) {
+export function attrToCreateQuery(attr: DBAttr | string) {
+  if (typeof attr === "string") {
+    return attr;
+  }
+
+  const { name, type, references, referencesOn, notNullable = false } = attr;
+
   return `${name} ${type} ${
     references ? ` REFERENCES ${references} (${referencesOn})` : ""
   }`;

@@ -6,13 +6,11 @@ import { createHtmlPlugin } from "vite-plugin-html";
 
 import react from "@vitejs/plugin-react";
 
-import eslint from "./.eslintrc.json";
-
 export default defineConfig({
   plugins: [
     react(),
     createHtmlPlugin({
-      entry: "./src/index.tsx",
+      entry: "src/index.tsx",
       template: "./src/index.html",
       inject: {
         data: {
