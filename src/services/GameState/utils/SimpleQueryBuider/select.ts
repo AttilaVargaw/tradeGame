@@ -32,13 +32,16 @@ export type SelectEvent<
   attributes: [
     TABLES,
     (
-      | SelectAttribute<keyof RESULT & string, keyof SELECT & string>
-      | Aggregation<keyof SELECT & string, keyof RESULT & string, TABLES>
-    )[]
+      | (
+          | SelectAttribute<keyof RESULT & string, keyof SELECT & string>
+          | Aggregation<keyof SELECT & string, keyof RESULT & string, TABLES>
+        )[]
+      | "*"
+    )
   ][];
-  where?: WhereEquitation<TABLES>[];
+  where?: WhereEquitation<TABLES, SELECT>[];
   join?: Join<TABLES>[];
-  groupBy?: string;
+  groupBy?: keyof RESULT & string;
 };
 
 export function select<
@@ -66,8 +69,8 @@ export function select<
     join?.length || 0 > 0
       ? join
           ?.map(
-            ({ A, equation, as }) =>
-              ` inner join ${A} ${
+            ({ A, equation, as, type }) =>
+              ` ${type ?? "inner"} join ${A} ${
                 as ? ` ${as}` : ""
               } on ${joinEquitationToString(equation)}`
           )
@@ -77,5 +80,5 @@ export function select<
     (where?.length || 0) > 0
       ? ` WHERE ${where?.map(whereEquationToString).join(" and ")}`
       : ""
-  }${groupBy ? ` group by${groupBy}` : ""};`;
+  }${groupBy ? ` group by ${groupBy}` : ""};`;
 }

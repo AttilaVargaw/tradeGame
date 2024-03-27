@@ -14,6 +14,9 @@ import Encyclopedia from "./tables/Encyclopedia";
 import IndustrialBuildingDailyRequirement from "./tables/IndustrialBuildingDailyRequirement";
 import Inventory from "./tables/Inventory/Inventory";
 import PopulationClasses from "./tables/PopulationClass";
+import ShippingPlan from "./tables/ShippingPlan/ShippingPlan";
+import ShippingPlanExchange from "./tables/ShippingPlan/ShippingPlanExchange";
+import ShippingPlanRoutes from "./tables/ShippingPlan/ShippingPlanRoutes";
 import TradeRoutes from "./tables/TradeRoutes";
 import Vehicle from "./tables/Vehicle/Vehicle";
 import vehicleTypes from "./tables/vehicleTypes";
@@ -44,7 +47,10 @@ export const init = async () => {
     DropTableIfExist("Vehicle") +
     DropTableIfExist(Encyclopedia.name) +
     DropTableIfExist(IndustrialBuildingDailyRequirement.name) +
+    DropTableIfExist(ShippingPlan.name) +
+    DropTableIfExist(ShippingPlanExchange.name) +
     DropTableIfExist(Inventory.name);
+  DropTableIfExist(ShippingPlanRoutes.name);
 
   const creatorSQL2 =
     "BEGIN TRANSACTION;" +
@@ -59,6 +65,9 @@ export const init = async () => {
     create(Vehicle.name, Vehicle.createData) +
     create(Encyclopedia.name, Encyclopedia.createData) +
     create(Inventory.name, Inventory.createData) +
+    create(ShippingPlan.name, ShippingPlan.createData) +
+    create(ShippingPlanExchange.name, ShippingPlanExchange.createData) +
+    create(ShippingPlanRoutes.name, ShippingPlanRoutes.createData) +
     create(
       IndustrialBuildingDailyRequirement.name,
       IndustrialBuildingDailyRequirement.createData
@@ -79,6 +88,9 @@ export const init = async () => {
     FillTable(IndustrialBuildingDailyRequirement) +
     FillTable(TradeRoutes) +
     FillTable(Inventory) +
+    FillTable(ShippingPlanExchange) +
+    FillTable(ShippingPlan) +
+    FillTable(ShippingPlanRoutes) +
     "COMMIT;";
 
   await Promise.all([

@@ -19,7 +19,7 @@ import { ConvoyData } from "./Convoy";
 
 export async function CreateConvoy(name: string) {
   const data = await db.execute(
-    insert({
+    insert<Pick<ConvoyData, "name" | "type" | "posX" | "posY">, "Convoy">({
       table: "Convoy",
       attributes: { name, type: "", posX: 0, posY: 0 },
     })
@@ -177,7 +177,13 @@ const getConvoySpeedQuery = select<
   }
 >({
   attributes: [
-    ["", ["min(VehicleTypes.speed) as minSpeed", "min(VehicleTypes.speed) * ? as dS"]],
+    [
+      "",
+      [
+        "min(VehicleTypes.speed) as minSpeed",
+        "min(VehicleTypes.speed) * ? as dS",
+      ],
+    ],
     [
       "",
       [

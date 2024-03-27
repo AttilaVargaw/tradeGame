@@ -6,7 +6,7 @@ import { Label } from "@Components/label";
 import { PagerItemProps } from "@Components/pagerProps";
 import { Link, PagerLink, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
-import { useCurrentConvoy } from "@Hooks/index";
+import { useCurrentConvoy, useCurrentModal } from "@Hooks/index";
 import { useDBValue } from "@Hooks/index";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import {
@@ -45,14 +45,19 @@ export function ConvoyTradeRouteModal() {
     updateEvents
   );
 
-  const PagerLinkWithEdit = useCallback((item: PagerItemProps) => {
-    return (
-      <Row>
-        <PagerLink {...item} />
-        <Link onClick={() => {}}>Edit</Link>
-      </Row>
-    );
-  }, []);
+  const [, setCurrentModal] = useCurrentModal();
+
+  const PagerLinkWithEdit = useCallback(
+    (item: PagerItemProps) => {
+      return (
+        <Row>
+          <PagerLink {...item} />
+          <Link onClick={() => setCurrentModal("newTradeProgram")}>Edit</Link>
+        </Row>
+      );
+    },
+    [setCurrentModal]
+  );
 
   const currentTraderoute = useDBValue(
     useCallback(() => getTradeRouteByID(currentConvoy?.route), [currentConvoy]),
@@ -106,15 +111,13 @@ export function ConvoyTradeRouteModal() {
 
   const footer = useMemo(() => {
     return (
-      <>
-        <Toggle
-          disabled={!currentTraderoute}
-          onChange={activateTradeRoute}
-          active={!!currentConvoy?.isRouteActive}
-        >
-          ON
-        </Toggle>
-      </>
+      <Toggle
+        disabled={!currentTraderoute}
+        onChange={activateTradeRoute}
+        active={!!currentConvoy?.isRouteActive}
+      >
+        ON
+      </Toggle>
     );
   }, [currentTraderoute, activateTradeRoute, currentConvoy?.isRouteActive]);
 

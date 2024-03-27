@@ -4,7 +4,7 @@ import { DBEvents } from "../dbTypes";
 import { db, dbObservable } from "../gameState";
 import { CityData } from "../tables/City/CityTable";
 import { getCity } from "../tables/City/cityQueries";
-import { REAL, TEXT, Tables } from "../tables/common";
+import { REAL, TEXT } from "../tables/common";
 import { ID, insert, select } from "../utils/SimpleQueryBuider";
 
 export type TradeRouteProps = {
@@ -160,7 +160,7 @@ export const getTradeRoutesAsGeoJson = async (ID?: number) => {
   const tradeRoutes = await db.select<TradeRouteAsGeoJSONView[]>(
     select<
       { ID: ID; name: TEXT; posX: REAL; posY: REAL },
-      "CityA" | Tables | "CityB",
+      "CityA" | "CityB" | "TradeRoutes" | "City",
       {
         cityAID: ID;
         cityBID: ID;
@@ -255,7 +255,7 @@ export const addTradeRoute = async ([cityA, cityB]: (ID | null)[]) => {
     const [start, end] = await Promise.all([cityA, cityB].map(getCity));
 
     const data = await db.execute(
-      insert<{ cityA: ID; cityB: ID; name: string }>({
+      insert<{ cityA: ID; cityB: ID; name: string }, "TradeRoutes">({
         table: "TradeRoutes",
         attributes: {
           cityA,

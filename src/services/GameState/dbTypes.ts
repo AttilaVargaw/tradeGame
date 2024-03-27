@@ -14,6 +14,7 @@ export enum DBEvents {
   convoyDock,
   convoyUnDock,
   inventoryUpdate,
+  shippingPlanUpdate
 }
 
 export type DBEvent = {

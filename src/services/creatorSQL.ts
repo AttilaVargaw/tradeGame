@@ -105,8 +105,8 @@ export const creatorSQL = `
     INSERT INTO Item VALUES(15,21,10,'bricks','bricksDesc',2,1000);
     INSERT INTO Item VALUES(16,20,20,'metalIngot','metalIngotsDesc',2,1000);
     INSERT INTO Item VALUES(17,10,10,'oil','oilDesc',2,1000);
-    INSERT INTO Item VALUES(18,10,10,'neoLoead','neoLeadDesc',2,1000);
-    INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss',3,8);
+    INSERT INTO Item VALUES(18,10,10,'neoLoead','neoLeadDesc',1,1000);
+    INSERT INTO Item VALUES(19,10,10,'blunderbuss','blunderbuss',1,8);
     INSERT INTO Item VALUES(20,10,10,'needleGun','needleGun',3,6);
     INSERT INTO Item VALUES(21,10,10,'medicaments','medicaments',0,1);
     INSERT INTO Item VALUES(22,10,10,'advMedicaments','advMedicaments',0,1);

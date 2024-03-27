@@ -1,4 +1,4 @@
-import { ID, update } from "../utils/SimpleQueryBuider";
+import { ID } from "../utils/SimpleQueryBuider";
 
 export type dbTypes = "REAL" | "INTEGER" | "TEXT";
 
@@ -14,25 +14,6 @@ export type INTEGER = number;
 export type REAL = number;
 export type TEXT = string;
 export type BOOLEAN = 0 | 1;
-
-export type Tables =
-  | "VehicleData"
-  | "Convoy"
-  | "Vehicle"
-  | "VehicleTypes"
-  | "TradeRoutes"
-  | "CityTypes"
-  | "Translations"
-  | "ClassDailyRequirement"
-  | "City"
-  | "IndustrialBuildingDailyRequirement"
-  | "IndustrialBuilding"
-  | "PopulationClass"
-  | "Inventory"
-  | "Item"
-  | "CityPopulationClass"
-  | "IndustrialBuildings"
-  | "Encyclopedia";
 
 type Attr = {
   name: string;

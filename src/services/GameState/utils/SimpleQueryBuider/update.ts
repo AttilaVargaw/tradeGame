@@ -5,7 +5,7 @@ import { ID, InputToString } from "./common";
 export type UpdateEvent<T extends object, TABLES extends string> = {
   updateRows: [keyof T & string, string | number | null | ID | boolean][];
   table: TABLES;
-  where?: WhereEquitation<TABLES>[];
+  where?: WhereEquitation<TABLES, T>[];
   join?: Join<TABLES>[];
   toBind?: boolean;
 };

@@ -2,14 +2,16 @@ import { isUndefined } from "lodash-es";
 import { PropsWithChildren, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { ItemsByCategory } from "@Services/GameState/queries/inventory";
+import { LoadingBar } from "@Components/LoadingBar";
+import { Grid, Row } from "@Components/grid";
+import { TogglePager } from "@Components/togglePager";
+import { ShippingPlanExchange } from "@Services/GameState/tables/ShippingPlan/ShippingPlanExchange";
+import { Translations } from "@Services/GameState/tables/Translations";
+import { Item } from "@Services/GameState/tables/common";
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
-import { categorySelectorElements } from "../modals/CityData/Vehicle/cityVehiclesInventory";
-import { LoadingBar } from "./LoadingBar";
-import { WarehouseTransferItem } from "./WarehouseTransferItem";
-import { Grid, Row } from "./grid";
-import { TogglePager } from "./togglePager";
+import { categorySelectorElements } from "../CityData/Vehicle/cityVehiclesInventory";
+import { PlannerTransferItem } from "./PlannerTransferItem";
 
 const Container = styled(Grid)`
   margin-top: 1em;
@@ -44,52 +46,40 @@ export type MoveFunction = (
   item: ID
 ) => Promise<void>;
 
-export function InventoryExchange({
-  aInventory,
-  bInventory,
-  aId,
-  bId,
-  moveFn,
+export function ShippingPlanner({
+  inventory,
   aWeight,
   bWeight,
   aCapacity,
   children,
   bCapacity,
-  planner = false,
+  plan,
 }: PropsWithChildren<{
-  aInventory: ItemsByCategory;
-  bInventory: ItemsByCategory;
-  aId: ID;
-  bId: ID;
-  moveFn: MoveFunction;
+  inventory?: Map<number, (ShippingPlanExchange & Item & Translations)[]>;
   aWeight?: number;
   bWeight?: number;
   aCapacity?: number;
   bCapacity?: number;
-  planner?: boolean;
+  plan: ID;
 }>) {
   const [inCategory, setInCategory] = useState<number>(0);
 
   const items = useMemo(() => {
-    if (bInventory && bInventory.has(inCategory)) {
-      return bInventory
-        .get(inCategory)
-        ?.map(({ number, translation, ID }, index) => (
-          <WarehouseTransferItem
-            allwaysEnabled={planner}
+    if (inventory && inventory.has(inCategory)) {
+      return inventory
+        .get(inCategory)!
+        .map(({ translation, ID, number }) => (
+          <PlannerTransferItem
+            plan={plan}
             item={ID}
-            interchange={moveFn}
-            aID={aId}
-            bID={bId}
-            aNum={aInventory?.get(inCategory)?.[index]?.number ?? 0}
-            bNum={number}
             label={translation}
             key={ID}
+            number={number}
           />
         ));
     }
     return false;
-  }, [aId, aInventory, bId, bInventory, inCategory, moveFn, planner]);
+  }, [inventory, inCategory, plan]);
 
   return (
     <>
@@ -102,7 +92,7 @@ export function InventoryExchange({
       {items && (
         <Row style={{ gap: "1em" }}>
           <InventoryLoadingBar capacity={aCapacity} weight={aWeight} />
-          <Container $num={4}>{items}</Container>
+          <Container $num={2}>{items}</Container>
           <InventoryLoadingBar capacity={bCapacity} weight={bWeight} />
         </Row>
       )}

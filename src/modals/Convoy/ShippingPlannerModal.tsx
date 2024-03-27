@@ -1,46 +1,31 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-import { InventoryExchange, MoveFunction } from "@Components/InventoryExchange";
 import { Label } from "@Components/label";
-import { useCurrentConvoy } from "@Hooks/index";
 import { useDBValue } from "@Hooks/index";
-import { getAllItems } from "@Services/GameState/queries/inventory";
-import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
+import { DBEvents } from "@Services/GameState/dbTypes";
+import { getShippingPlan } from "@Services/GameState/tables/ShippingPlan/ShippingPlanQueries";
 
 import Modal from "../Modal";
+import { ShippingPlannerRoutes } from "./ShippingPlannerRoutes";
 
-function Header() {
-  return <Label type="painted">Shipping Planner</Label>;
-}
+const updateEvents = [DBEvents.shippingPlanUpdate];
 
-const changePlan: MoveFunction = (async (
-  inventoryAID: ID,
-  inventoryBID: ID,
-  amount: number,
-  item: ID
-) => {
-  return;
-}) as MoveFunction;
+const currentPlan = 0;
 
 export function ShippingPlannerModal() {
-  const allItems = useDBValue(getAllItems);
-  const [currentConvoy] = useCurrentConvoy();
+  const plan = useDBValue(
+    useCallback(() => getShippingPlan(currentPlan), []),
+    updateEvents
+  );
 
-  const body = useMemo(() => {
-    return (
-      !!currentConvoy && (
-        <InventoryExchange
-          aId={0}
-          moveFn={changePlan}
-          bId={currentConvoy}
-          aInventory={new Map()}
-          bInventory={new Map()}
-        />
-      )
-    );
-  }, [currentConvoy]);
+  const body = useMemo(() => <ShippingPlannerRoutes plan={currentPlan} />, []);
 
   const footer = useMemo(() => <></>, []);
 
-  return <Modal body={body} footer={footer} header={<Header />} />;
+  const header = useMemo(
+    () => <Label type="painted">{plan?.name ?? ""}</Label>,
+    [plan?.name]
+  );
+
+  return <Modal body={body} footer={footer} header={header} />;
 }

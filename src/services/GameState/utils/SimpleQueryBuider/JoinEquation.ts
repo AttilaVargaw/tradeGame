@@ -1,5 +1,3 @@
-import { Tables } from "@Services/GameState/tables/common";
-
 export type JoinEquitation<T extends string> = {
   A: [T, string | number | null];
   B: [T, string | number | null];
@@ -18,4 +16,5 @@ export type Join<T extends string> = {
   A: T;
   equation: JoinEquitation<T>;
   as?: string;
+  type?: "inner" | "left" | "right" | "left outer";
 };

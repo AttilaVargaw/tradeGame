@@ -1,5 +1,5 @@
-export type WhereEquitation<T extends string> = {
-  A: [T, string];
+export type WhereEquitation<T extends string, E extends object = object> = {
+  A: [T, keyof E];
   operator?: "=" | ">" | "<" | "<>" | " is " | " is not ";
   value: string | number | null;
 };

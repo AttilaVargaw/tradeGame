@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { styled } from "styled-components";
+import styled from "styled-components";
 
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
@@ -27,6 +27,7 @@ export function WarehouseTransferItem({
   bID,
   interchange,
   disabled,
+  allwaysEnabled = false,
   item,
 }: {
   label: string;
@@ -37,6 +38,7 @@ export function WarehouseTransferItem({
   interchange: (idA: number, idB: number, num: number, item: ID) => void;
   disabled?: boolean;
   item: ID;
+  allwaysEnabled?: boolean;
 }) {
   const [num, setNum] = useState(1);
 
@@ -61,7 +63,9 @@ export function WarehouseTransferItem({
       </ElementContainer>
       <Row>
         <StyledButton
-          disabled={aID === -1 || bID === -1 || bNum - num < 0}
+          disabled={
+            !allwaysEnabled && (aID === -1 || bID === -1 || bNum - num < 0)
+          }
           size="small"
           onClick={onMove(false)}
         >
@@ -75,7 +79,9 @@ export function WarehouseTransferItem({
           min={1}
         />
         <StyledButton
-          disabled={aID === -1 || bID === -1 || aNum - num < 0}
+          disabled={
+            !allwaysEnabled && (aID === -1 || bID === -1 || aNum - num < 0)
+          }
           size="small"
           onClick={onMove(true)}
         >

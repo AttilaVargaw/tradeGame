@@ -1,5 +1,5 @@
 import { useCallback, useContext, useState } from "react";
-import { styled } from "styled-components";
+import styled from "styled-components";
 
 import { Button, Input, Label, Row, Select, Toggle } from "@Components/index";
 import { useCurrentSelectedCity, useDBValue } from "@Hooks/index";

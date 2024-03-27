@@ -100,7 +100,7 @@ export const getVehicleTypes = (type: string) => {
 
 export const addVehicle = async (type: number, name: string) => {
   const data = await db.execute(
-    insert({
+    insert<Pick<VehicleData, "name" | "posX" | "posY" | "type">, "Vehicle">({
       table: "Vehicle",
       attributes: { name, posX: 0, posY: 0, type },
     })

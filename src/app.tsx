@@ -1,5 +1,6 @@
 import { GameErrorBoundary } from "@Components/index";
 import { useGameState } from "@Hooks/index";
+import { Delete } from "@Services/GameState/utils/SimpleQueryBuider/delete";
 
 import { ContextMenu, LoadingPage } from "./components";
 import DebugModeContext from "./debugModeContext";

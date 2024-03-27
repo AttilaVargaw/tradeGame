@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { styled } from "styled-components";
+import styled from "styled-components";
 
 import { CreateInnerFromChildrenOrInnerHTML } from "@Services/utils";
 
