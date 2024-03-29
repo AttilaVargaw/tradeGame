@@ -2,23 +2,30 @@ import { useCallback, useMemo } from "react";
 
 import { Label } from "@Components/label";
 import { useDBValue } from "@Hooks/index";
+import { useCurrentShippingPlan } from "@Hooks/useCurrentShippingPlan";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import { getShippingPlan } from "@Services/GameState/tables/ShippingPlan/ShippingPlanQueries";
 
-import Modal from "../Modal";
+import Modal from "../../Modal";
 import { ShippingPlannerRoutes } from "./ShippingPlannerRoutes";
 
 const updateEvents = [DBEvents.shippingPlanUpdate];
 
-const currentPlan = 0;
+export function ShippingPlannerRoutesModal() {
+  const [currentShippingPlan] = useCurrentShippingPlan();
 
-export function ShippingPlannerModal() {
   const plan = useDBValue(
-    useCallback(() => getShippingPlan(currentPlan), []),
+    useCallback(
+      () => getShippingPlan(currentShippingPlan),
+      [currentShippingPlan]
+    ),
     updateEvents
   );
 
-  const body = useMemo(() => <ShippingPlannerRoutes plan={currentPlan} />, []);
+  const body = useMemo(
+    () => <ShippingPlannerRoutes plan={currentShippingPlan} />,
+    [currentShippingPlan]
+  );
 
   const footer = useMemo(() => <></>, []);
 

@@ -8,7 +8,7 @@ export type Modal =
   | "encyclopedia"
   | "convoyTradeRoute"
   | "shippingPlanner"
-  | "newTradeProgram"
+  | "ShippingPlannerRoutes"
   | null;
 
 const currentModalAtom = atom<Modal>(null);

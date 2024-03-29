@@ -1,6 +1,7 @@
 import { useCurrentModal } from "../hooks/useCurrentModal";
 import CityDataModal from "../modals/CityData/cityDataModal";
-import { ShippingPlannerModal } from "../modals/Convoy/ShippingPlannerModal";
+import { ShippingPlannerRoutesModal } from "../modals/Convoy/ShippingPlannerRoutes/ShippingPlannerRoutesModal";
+import { ShippingTransferPlanner } from "../modals/Convoy/ShippingTransferPlanner/ShippingTransferPlanner";
 import { ConvoyModal } from "../modals/Convoy/convoyModal";
 import { ConvoyTradeRouteModal } from "../modals/Convoy/convoyTradeRouteModal";
 import VehicleModal from "../modals/Vehicle/vehicleModal";
@@ -24,9 +25,9 @@ export function ModalRouter(): React.ReactElement | null {
     case "convoyTradeRoute":
       return <ConvoyTradeRouteModal />;
     case "shippingPlanner":
-      return <ConvoyTradeRouteModal />;
-    case "newTradeProgram":
-      return <ShippingPlannerModal />;
+      return <ShippingTransferPlanner />;
+    case "ShippingPlannerRoutes":
+      return <ShippingPlannerRoutesModal />;
 
     default:
       return null;

@@ -8,6 +8,7 @@ import { Link, PagerLink, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
 import { useCurrentConvoy, useCurrentModal } from "@Hooks/index";
 import { useDBValue } from "@Hooks/index";
+import { useCurrentShippingPlan } from "@Hooks/useCurrentShippingPlan";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import {
   TradeRouteProps,
@@ -45,18 +46,28 @@ export function ConvoyTradeRouteModal() {
     updateEvents
   );
 
+  const [, setCurrentShippingPlan] = useCurrentShippingPlan();
+
   const [, setCurrentModal] = useCurrentModal();
 
+  const onEdit = useCallback(
+    (id: ID | null) => () => {
+      setCurrentModal("ShippingPlannerRoutes");
+      setCurrentShippingPlan(id);
+    },
+    [setCurrentModal, setCurrentShippingPlan]
+  );
+
   const PagerLinkWithEdit = useCallback(
-    (item: PagerItemProps) => {
+    (item: PagerItemProps<ID>) => {
       return (
         <Row>
           <PagerLink {...item} />
-          <Link onClick={() => setCurrentModal("newTradeProgram")}>Edit</Link>
+          <Link onClick={onEdit(item.value)}>Edit</Link>
         </Row>
       );
     },
-    [setCurrentModal]
+    [onEdit]
   );
 
   const currentTraderoute = useDBValue(
@@ -75,8 +86,11 @@ export function ConvoyTradeRouteModal() {
   );
 
   const selectTradeRoute = useCallback(
-    (ID: ID | null) =>
-      currentConvoyID && setConvoyTradeRoute(currentConvoyID, ID),
+    (ID: ID | null) => {
+      if (currentConvoyID) {
+        setConvoyTradeRoute(currentConvoyID, ID);
+      }
+    },
     [currentConvoyID]
   );
 
@@ -98,6 +112,7 @@ export function ConvoyTradeRouteModal() {
               <PagerLink
                 active={!currentTraderoute}
                 onChange={() => selectTradeRoute(null)}
+                value={null}
               >
                 Off
               </PagerLink>

@@ -38,6 +38,7 @@ export function StackPager<T = string | number>({
     <Container>
       {values.map(({ label, value, dangerouslySetInnerHTML }) => (
         <ItemTemplate
+          value={value}
           key={String(value)}
           active={innerSelected === value}
           onChange={onClick(value)}

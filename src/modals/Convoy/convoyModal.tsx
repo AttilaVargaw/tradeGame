@@ -158,7 +158,6 @@ export const ConvoyModal = () => {
         </>
       );
     } else {
-      console.log("convinfo", currentConvoy);
       return <ConvoyInfo />;
     }
   }, [

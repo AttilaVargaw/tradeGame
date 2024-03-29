@@ -25,7 +25,12 @@ export const Link = styled.div`
     0 0 2px darkblue, 0 0 2.5px darkblue, 0 0 3px darkblue, 0 0 3.5px darkblue;
 `;
 
-export function PagerLink({ active, onChange, children }: PagerItemProps) {
+export function PagerLink<T>({
+  active,
+  onChange,
+  children,
+  value,
+}: PagerItemProps<T>) {
   return (
     <Link onClick={onChange}>
       {children}

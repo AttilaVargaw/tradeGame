@@ -259,3 +259,23 @@ export async function getTwoInventoryCombo(inventoryA?: ID, inventoryB?: ID) {
     ),
   ];
 }
+
+const selectAllItems = select<
+  Item & Translation,
+  "item" | "translations",
+  Item
+>({
+  attributes: [["item", "*"]],
+  table: "item",
+  groupBy: "category",
+  join: [
+    {
+      A: "translations",
+      equation: { A: ["item", "nameKey"], B: ["translations", "id"] },
+    },
+  ],
+});
+
+export function getAllitems() {
+  return db.select<Map<number, (Item & Translation)[]>>(selectAllItems);
+}

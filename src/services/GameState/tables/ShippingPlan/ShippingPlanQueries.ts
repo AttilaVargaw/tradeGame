@@ -17,12 +17,13 @@ import { ShippingPlan } from "./ShippingPlan";
 import { ShippingPlanExchange } from "./ShippingPlanExchange";
 import { ShippingPlanRoute } from "./ShippingPlanRoutes";
 
-export async function addRouteToShipping(id: ID, plan: ID) {
+export async function addRouteToShipping(id: ID | null, plan: ID | null) {
   await db.execute(
     insert<Pick<ShippingPlanRoute, "plan" | "route">, "ShippingPlanRoutes">({
       attributes: { plan: plan, route: id },
       table: "ShippingPlanRoutes",
-    })
+    }),
+    [plan, id]
   );
 
   dbObservable.next({
@@ -68,16 +69,16 @@ const getShippingPlanRoutesQuery = select<
   ],
 });
 
-export async function getShippingPlan(id?: ID) {
-  if (isUndefined(id)) {
+export async function getShippingPlan(id: ID | null) {
+  if (isNull(id)) {
     return null;
   }
 
   return (await db.select<ShippingPlan[]>(getShippingPlanQuery))[0];
 }
 
-export async function getShippingPlanRoutes(id?: ID) {
-  if (isUndefined(id)) {
+export async function getShippingPlanRoutes(id: ID | null) {
+  if (isNull(id)) {
     return null;
   }
 
@@ -129,8 +130,8 @@ export async function moveBetweenInventories(
   });
 }
 
-export async function getShippingPlanItems(id?: ID) {
-  if (isUndefined(id)) {
+export async function getShippingPlanItems(id: ID | null) {
+  if (isNull(id)) {
     return new Map<number, (ShippingPlanExchange & Item & Translations)[]>();
   }
 

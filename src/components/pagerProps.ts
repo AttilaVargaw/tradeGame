@@ -2,13 +2,14 @@ import { CSSProperties, PropsWithChildren } from "react";
 
 import { DangerouslySetInnerHTML } from "@Services/utils";
 
-export type PagerItemProps = PropsWithChildren<{
+export type PagerItemProps<DATA> = PropsWithChildren<{
   active: boolean;
   onChange: () => void;
   style?: CSSProperties;
+  value: DATA | null;
 }>;
 
-export type PagerProps<T, U extends PagerItemProps = PagerItemProps> = {
+export type PagerProps<T, U extends PagerItemProps<T> = PagerItemProps<T>> = {
   values: {
     label?: string;
     value: T;

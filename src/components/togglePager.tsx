@@ -42,6 +42,7 @@ export function TogglePager<T = string>({
     <Grid $num={values.length}>
       {values.map(({ label, value, dangerouslySetInnerHTML }) => (
         <ItemTemplate
+          value={value}
           key={String(value)}
           active={innerSelected === value}
           onChange={onClick(value)}

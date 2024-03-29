@@ -1,4 +1,4 @@
-import { isUndefined } from "lodash-es";
+import { isNull, isUndefined } from "lodash-es";
 
 import {
   ID,
@@ -93,7 +93,7 @@ const getConvoyQuery = select({
 });
 
 export const getConvoy = async (id: ID | null) => {
-  if (isUndefined(id)) {
+  if (isNull(id)) {
     return;
   }
 
