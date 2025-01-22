@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
@@ -42,16 +42,12 @@ export function WarehouseTransferItem({
 }) {
   const [num, setNum] = useState(1);
 
-  const onMove = useCallback(
-    (direction: boolean) => () =>
-      interchange(direction ? aID : bID, direction ? bID : aID, num, item),
-    [aID, bID, interchange, item, num]
-  );
+  const onMove = (direction: boolean) => () =>
+    interchange(direction ? aID : bID, direction ? bID : aID, num, item);
 
-  const onTransfer = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
-    ({ target: { value } }) => setNum(Number.parseInt(value)),
-    []
-  );
+  const onTransfer: React.ChangeEventHandler<HTMLInputElement> = ({
+    target: { value },
+  }) => setNum(Number.parseInt(value));
 
   return (
     <>

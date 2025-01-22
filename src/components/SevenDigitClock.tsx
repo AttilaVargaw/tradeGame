@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Tick, TickSpeed } from "../hooks/useGameLoop";
@@ -40,10 +40,10 @@ export function SevenDigitClock() {
 
   const [speed, setSpeed] = useState(1);
 
-  const onSpeedToggleClick = useCallback((speed: number) => {
+  const onSpeedToggleClick = (speed: number) => {
     setSpeed(speed);
     TickSpeed.next(speed);
-  }, []);
+  };
 
   const tick = useObservableValue(Tick);
 

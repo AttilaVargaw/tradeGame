@@ -19,7 +19,7 @@ import {
   getConvoysAsGeoJson,
 } from "@Services/GameState/tables/Convoy/convoyQueries";
 
-import { currentSideMenuBehaviorSubject } from "./../../SideMenu/currentSideMenu";
+import { currentSideMenuBehaviorSubject } from "../../SideMenu/currentSideMenu";
 
 const currentRouteStyle: PathOptions = {
   color: "greenyellow",

@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-
 import { Button } from "@Components/button";
 import { GetConvoiyCount } from "@Services/GameState/tables/Convoy/convoyQueries";
 import { GetVehicleCount } from "@Services/GameState/tables/Vehicle/vehiclesQueries";
@@ -23,12 +21,12 @@ export function DefaultSideMenu() {
         modal={null}
       />
       <ModalOpenerButtonWithCounter
-        countFn={useCallback(() => GetVehicleCount(), [])}
+        countFn={() => GetVehicleCount()}
         label="Vehicles"
         modal="vehicle"
       />
       <ModalOpenerButtonWithCounter
-        countFn={useCallback(() => GetConvoiyCount(), [])}
+        countFn={() => GetConvoiyCount()}
         label="Convoys"
         modal="convoys"
       />

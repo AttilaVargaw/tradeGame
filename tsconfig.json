@@ -21,7 +21,8 @@
       "@Services/*": ["./src/services/*"],
       "@Screens/*": ["./src/sreens/*"],
       "@Components/*": ["./src/components/*"],
-      "@Hooks/*": ["./src/hooks/*"]
+      "@Hooks/*": ["./src/hooks/*"],
+      "@Modals/*": ["./src/modals/*"]
     }
   },
   "include": ["src"],

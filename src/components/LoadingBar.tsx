@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import styled from "styled-components";
 
 import { ScreenText } from "./terminalScreen";
@@ -33,33 +32,29 @@ function getColoumnColor(
 }
 
 export function LoadingBar({ percent }: { percent: number }) {
-  const elements = useMemo(
-    () =>
-      Array(20)
-        .fill("")
-        .map((e, i) => {
-          const color = getColoumnColor(i, percent);
+  const elements = Array(20)
+    .fill("")
+    .map((e, i) => {
+      const color = getColoumnColor(i, percent);
 
-          return (
-            <div
-              key={i}
-              style={{
-                height: "5%",
-                backgroundColor: color.base,
-                //border: "solid 0.1em",
-                margin: "0.1em",
-                boxSizing: "border-box",
-                borderRadius: "2px",
-                boxShadow:
-                  color.base === "grey"
-                    ? undefined
-                    : `0 0 0.5px ${color.light}, 0 0 1px ${color.light}, 0 0 1.5px ${color.dark}, 0 0 2px ${color.dark}, 0 0 2.5px ${color.dark}, 0 0 3px ${color.dark}, 0 0 3.5px ${color.dark}`,
-              }}
-            />
-          );
-        }),
-    [percent]
-  );
+      return (
+        <div
+          key={i}
+          style={{
+            height: "5%",
+            backgroundColor: color.base,
+            //border: "solid 0.1em",
+            margin: "0.1em",
+            boxSizing: "border-box",
+            borderRadius: "2px",
+            boxShadow:
+              color.base === "grey"
+                ? undefined
+                : `0 0 0.5px ${color.light}, 0 0 1px ${color.light}, 0 0 1.5px ${color.dark}, 0 0 2px ${color.dark}, 0 0 2.5px ${color.dark}, 0 0 3px ${color.dark}, 0 0 3.5px ${color.dark}`,
+          }}
+        />
+      );
+    });
 
   return (
     <Container>

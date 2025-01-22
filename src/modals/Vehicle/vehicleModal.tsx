@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Label } from "@Components/label";
 import { TogglePager } from "@Components/togglePager";
@@ -26,36 +26,30 @@ const pages = [
 export default function VehicleModal() {
   const [selectedPage, setSelectedPage] = useState(Subpages.List);
 
-  const body = useMemo(() => {
+  const body = (() => {
     switch (selectedPage) {
       case Subpages.Buy:
         return <VehicleBuyModal />;
       case Subpages.List:
         return <VehicleListModal />;
     }
-  }, [selectedPage]);
+  })();
 
   return (
     <Modal
-      header={useMemo(
-        () => (
-          <Label type="painted">
-            {selectedPage === 0 ? "Vehicle list" : "Orders"}
-          </Label>
-        ),
-        [selectedPage]
-      )}
+      header={
+        <Label type="painted">
+          {selectedPage === 0 ? "Vehicle list" : "Orders"}
+        </Label>
+      }
       body={body}
-      footer={useMemo(
-        () => (
-          <TogglePager
-            selected={selectedPage}
-            onChange={setSelectedPage}
-            values={pages}
-          />
-        ),
-        [selectedPage]
-      )}
+      footer={
+        <TogglePager
+          selected={selectedPage}
+          onChange={setSelectedPage}
+          values={pages}
+        />
+      }
     />
   );
 }

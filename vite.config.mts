@@ -1,17 +1,26 @@
 import path from "path";
 
+import fs from "node:fs";
 import { defineConfig } from "vite";
 import checker from "vite-plugin-checker";
 import { createHtmlPlugin } from "vite-plugin-html";
 
 import react from "@vitejs/plugin-react";
 
+const ReactCompilerConfig = {
+  target: "19",
+};
+
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
+      },
+    }),
     createHtmlPlugin({
-      entry: "src/index.tsx",
-      template: "./src/index.html",
+      entry: "main.tsx",
+      template: "src/index.html",
       inject: {
         data: {
           title: "index",
@@ -29,6 +38,9 @@ export default defineConfig({
   // Tauri expects a fixed port, fail if that port is not available
   server: {
     strictPort: true,
+    fs: {
+      allow: [fs.realpathSync.native(__dirname), __dirname],
+    },
   },
   // to access the Tauri environment variables set by the CLI with information about the current target
   envPrefix: [
@@ -54,6 +66,7 @@ export default defineConfig({
       "@Components": path.resolve(__dirname, "./src/components"),
       "@Screens": path.resolve(__dirname, "./src/screens"),
       "@Hooks": path.resolve(__dirname, "./src/hooks"),
+      "@Modals": path.resolve(__dirname, "./src/modals"), 
     },
   },
 });

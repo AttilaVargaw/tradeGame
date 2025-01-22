@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { FallbackProps } from "react-error-boundary";
 
 import Modal from "../modals/Modal";
@@ -14,19 +13,9 @@ const header = (
 export function ErrorComponent({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <Modal
-      body={useMemo(
-        () => (
-          <>{String(error)}</>
-        ),
-        [error]
-      )}
+      body={<>{String(error)}</>}
       header={header}
-      footer={useMemo(
-        () => (
-          <Button onClick={resetErrorBoundary}>Retry</Button>
-        ),
-        [resetErrorBoundary]
-      )}
+      footer={<Button onClick={resetErrorBoundary}>Retry</Button>}
       hideCloseButton
     />
   );

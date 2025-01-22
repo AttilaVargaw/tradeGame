@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Label, Link, TerminalScreen } from "@Components/index";
 import { EncyclopediaData } from "@Services/GameState/tables/Encyclopedia";
@@ -30,49 +30,43 @@ export const EncyclopediaModal = () => {
     });
   }, [currentFolder]);
 
-  const onFolderClick = useCallback(
-    (ID: ID) => () => {
-      setCurrentParentFolder((current) => {
-        currentFolder && current.push(currentFolder);
-        return current;
-      });
-      setCurrentFolder(ID);
-    },
-    [currentFolder]
-  );
+  const onFolderClick = (ID: ID) => () => {
+    setCurrentParentFolder((current) => {
+      currentFolder && current.push(currentFolder);
+      return current;
+    });
+    setCurrentFolder(ID);
+  };
 
-  const body = useMemo(
-    () => (
-      <TerminalScreen
-        style={{ height: "-webkit-fill-available" }}
-        ref={terminalRef}
-      >
-        {currentFolder !== null && (
-          <Link
-            onClick={() => {
-              setCurrentFolder(currentParentFolder.pop() ?? null);
-            }}
-          >
-            {folders ? "..." : <h1>&larr; {article?.name}</h1>}
+  const body = (
+    <TerminalScreen
+      style={{ height: "-webkit-fill-available" }}
+      ref={terminalRef}
+    >
+      {currentFolder !== null && (
+        <Link
+          onClick={() => {
+            setCurrentFolder(currentParentFolder.pop() ?? null);
+          }}
+        >
+          {folders ? "..." : <h1>&larr; {article?.name}</h1>}
+        </Link>
+      )}
+      {folders &&
+        !article &&
+        folders.map(({ ID, name }) => (
+          <Link onClick={onFolderClick(ID)} key={name}>
+            {name}
           </Link>
-        )}
-        {folders &&
-          !article &&
-          folders.map(({ ID, name }) => (
-            <Link onClick={onFolderClick(ID)} key={name}>
-              {name}
-            </Link>
-          ))}
-        {!folders && article && (
-          <div
-            dangerouslySetInnerHTML={{
-              __html: article.body,
-            }}
-          />
-        )}
-      </TerminalScreen>
-    ),
-    [article, currentFolder, currentParentFolder, folders, onFolderClick]
+        ))}
+      {!folders && article && (
+        <div
+          dangerouslySetInnerHTML={{
+            __html: article.body,
+          }}
+        />
+      )}
+    </TerminalScreen>
   );
 
   return <Modal body={body} header={Header}></Modal>;

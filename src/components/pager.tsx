@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 import { Button } from "./button";
@@ -14,7 +14,7 @@ const StyledButton = styled(Button)`
 export function Pager<T>({ values, onChange, style }: PagerProps<T>) {
   const [index, setIndex] = useState(0);
 
-  const onMinusClick = useCallback(() => {
+  const onMinusClick = () => {
     if (0 > index - 1) {
       const i = values.length - 1;
 
@@ -26,9 +26,9 @@ export function Pager<T>({ values, onChange, style }: PagerProps<T>) {
       onChange(values[i].value);
       setIndex(i);
     }
-  }, [index, onChange, values]);
+  };
 
-  const onAddClick = useCallback(() => {
+  const onAddClick = () => {
     if (0 > index - 1) {
       const i = values.length - 1;
 
@@ -40,7 +40,7 @@ export function Pager<T>({ values, onChange, style }: PagerProps<T>) {
       onChange(values[i].value);
       setIndex(i);
     }
-  }, [index, onChange, values]);
+  };
 
   return (
     <Row>

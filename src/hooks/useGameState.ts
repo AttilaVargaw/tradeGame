@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { init } from "@Services/GameState/gameState";
-import { dialog } from "@tauri-apps/api";
+import {  } from "@tauri-apps/api";
 
 import { GameLoop } from "./useGameLoop";
+import * as dialog from "@tauri-apps/plugin-dialog"
 
 export function useGameState() {
   const [gameLoaded, setGameLoaded] = useState(false);

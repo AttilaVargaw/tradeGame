@@ -1,6 +1,6 @@
 import { BehaviorSubject } from "rxjs";
 
-import { Subpages } from "./sideMenu";
+import { Subpages } from "./subpages";
 
 export const currentSideMenuBehaviorSubject = new BehaviorSubject<
   keyof typeof Subpages

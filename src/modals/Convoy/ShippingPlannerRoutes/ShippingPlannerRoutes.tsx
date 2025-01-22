@@ -29,42 +29,33 @@ export function ShippingPlannerRoutes({ plan }: { plan: ID | null }) {
 
   const tradeRoutes = useDBValue(getAllTradeRoute, updateEvents);
 
-  const addRoute = useCallback(() => {
+  const addRoute = () => {
     setAddState(true);
-  }, []);
+  };
 
-  const back = useCallback(() => {
+  const back = () => {
     setAddState(false);
-  }, []);
+  };
 
-  const addThisRoute = useCallback(
-    (id: ID) => () => {
-      addRouteToShipping(id, plan);
-      setAddState(false);
-    },
-    [plan]
-  );
+  const addThisRoute = (id: ID, cityAID: ID, cityBID: ID) => () => {
+    addRouteToShipping(id, plan, cityAID, cityBID);
+    setAddState(false);
+  };
 
   const [addState, setAddState] = useState(false);
 
-  const onDelete = useCallback(
-    (id: ID) => () => {
-      deleteRouteFromShipping(id);
-    },
-    []
-  );
+  const onDelete = (id: ID) => () => {
+    deleteRouteFromShipping(id);
+  };
 
   const [, setCurrentModal] = useCurrentModal();
 
   const [, setCurrentShippingPlan] = useCurrentShippingPlan();
 
-  const onRouteClick = useCallback(
-    (routeID: ID) => () => {
-      setCurrentShippingPlan(routeID);
-      setCurrentModal("shippingPlanner");
-    },
-    [setCurrentModal, setCurrentShippingPlan]
-  );
+  const onRouteClick = (routeID: ID) => () => {
+    setCurrentShippingPlan(routeID);
+    setCurrentModal("shippingPlanner");
+  };
 
   return (
     <TerminalScreen style={{ height: "80%" }}>
@@ -80,8 +71,8 @@ export function ShippingPlannerRoutes({ plan }: { plan: ID | null }) {
         </>
       ) : (
         <>
-          {tradeRoutes?.map(({ ID, name }) => (
-            <Link key={ID} onClick={addThisRoute(ID)}>
+          {tradeRoutes?.map(({ ID, name, cityAID, cityBID }) => (
+            <Link key={ID} onClick={addThisRoute(ID, cityAID, cityBID)}>
               {name}
             </Link>
           ))}

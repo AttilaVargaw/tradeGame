@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 import { Input } from "./input";
@@ -20,12 +18,9 @@ export function WarehouseRow({
   onChange?: (id: ID, newValue: number) => void;
   direction?: "row" | "column";
 }) {
-  const onNumberChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      id && onChange?.(id, Number.parseInt(event.target.value));
-    },
-    [id, onChange]
-  );
+  const onNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    id && onChange?.(id, Number.parseInt(event.target.value));
+  };
 
   return editable && onChange && id ? (
     <div

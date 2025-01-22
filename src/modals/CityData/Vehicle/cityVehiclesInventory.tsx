@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { InventoryExchange } from "@Components/InventoryExchange";
 import { Row } from "@Components/grid";
@@ -21,12 +21,6 @@ import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
 const updateEvents = [DBEvents.inventoryUpdate];
 
-export const categorySelectorElements = [
-  { value: 0, label: "Human necessities" },
-  { value: 1, label: "Weapons" },
-  { value: 2, label: "Industrial goods" },
-] as PagerProps<number>["values"];
-
 export function CityVehiclesInventory() {
   const [cityData] = useCurrentSelectedCity();
 
@@ -46,35 +40,29 @@ export function CityVehiclesInventory() {
     updateEvents
   );
 
-  const goals = useMemo(
-    () =>
-      [
-        { label: currentConvoy?.name ?? "", value: -1 },
-        ...(vehicles
-          ? vehicles.map((vehicle) => ({
-              label: vehicle.name,
-              value: vehicle.inventory,
-            }))
-          : []),
-      ] as PagerProps<number>["values"],
-    [currentConvoy, vehicles]
-  );
+  const goals = [
+    { label: currentConvoy?.name ?? "", value: -1 },
+    ...(vehicles
+      ? vehicles.map((vehicle) => ({
+          label: vehicle.name,
+          value: vehicle.inventory,
+        }))
+      : []),
+  ] as PagerProps<number>["values"];
 
-  const header = useMemo(() => {
-    return (
-      <Row>
-        <Label style={{ width: "100%" }} type="painted">
-          City
-        </Label>
-        <Pager
-          style={{ width: "100%" }}
-          onChange={setCurrentGoal}
-          values={goals}
-          selected={currentGoal}
-        />
-      </Row>
-    );
-  }, [currentGoal, goals]);
+  const header = (
+    <Row>
+      <Label style={{ width: "100%" }} type="painted">
+        City
+      </Label>
+      <Pager
+        style={{ width: "100%" }}
+        onChange={setCurrentGoal}
+        values={goals}
+        selected={currentGoal}
+      />
+    </Row>
+  );
 
   const cityInventoryWeight = useDBValue(
     useCallback(

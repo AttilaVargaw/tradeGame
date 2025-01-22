@@ -1,11 +1,4 @@
-import {
-  ChangeEventHandler,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ChangeEventHandler, useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Button } from "@Components/button";
@@ -46,6 +39,8 @@ const Col = styled.div`
   justify-content: start;
 `;
 
+const multiplyCeil = (a: number, b: number) => Math.ceil(a * b);
+
 export default function CityPopulation() {
   const [cityID] = useCurrentSelectedCity();
 
@@ -83,40 +78,28 @@ export default function CityPopulation() {
     }
   }, [reload, cityID]);
 
-  const onSetPopulation = useCallback(
-    (ID: ID, newValue: number) => {
-      setPopulation(ID, newValue);
+  const onSetPopulation = (ID: ID, newValue: number) => {
+    setPopulation(ID, newValue);
+    setReload(!reload);
+  };
+
+  const setNewClass: ChangeEventHandler<HTMLSelectElement> = ({
+    target: { value },
+  }) => {
+    setNewCityClass((old) => ({
+      ...old,
+      populationClass: Number.parseInt(value),
+    }));
+    setReload(!reload);
+  };
+
+  const addNewClass = async function () {
+    const { city, populationClass } = newCityClass;
+    if (city && populationClass) {
+      await addCityClass(city, populationClass);
       setReload(!reload);
-    },
-    [reload]
-  );
-
-  const setNewClass = useCallback<ChangeEventHandler<HTMLSelectElement>>(
-    ({ target: { value } }) => {
-      setNewCityClass((old) => ({
-        ...old,
-        populationClass: Number.parseInt(value),
-      }));
-      setReload(!reload);
-    },
-    [reload]
-  );
-
-  const addNewClass = useCallback(
-    async function () {
-      const { city, populationClass } = newCityClass;
-      if (city && populationClass) {
-        await addCityClass(city, populationClass);
-        setReload(!reload);
-      }
-    },
-    [newCityClass, reload]
-  );
-
-  const multiplyCeil = useMemo(
-    () => (a: number, b: number) => Math.ceil(a * b),
-    []
-  );
+    }
+  };
 
   return (
     <Container>

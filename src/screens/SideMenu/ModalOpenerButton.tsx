@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-
 import { Button } from "@Components/button";
 import { Modal, useCurrentModal, useDBValue } from "@Hooks/index";
 
@@ -14,10 +12,7 @@ export function ModalOpenerButton({
 }) {
   const [, setCurrentModal] = useCurrentModal();
 
-  const onClick = useCallback(
-    () => setCurrentModal(modal),
-    [modal, setCurrentModal]
-  );
+  const onClick = () => setCurrentModal(modal);
 
   return (
     <Button black={black} onClick={onClick}>

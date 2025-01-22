@@ -1,4 +1,4 @@
-import { PropsWithChildren, useCallback } from "react";
+import { PropsWithChildren } from "react";
 import styled, { CSSProperties, css } from "styled-components";
 
 export const ButtonBase = styled.div<{
@@ -93,10 +93,7 @@ export const Button = ({
   disabled,
   ...props
 }: ButtonProps) => {
-  const onClick2 = useCallback(
-    () => !disabled && onClick?.(),
-    [disabled, onClick]
-  );
+  const onClick2 = () => !disabled && onClick?.();
 
   return (
     <ButtonBase

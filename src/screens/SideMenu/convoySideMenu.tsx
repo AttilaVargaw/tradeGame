@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 
-import { StackPager } from "@Components/StackPager";
 import { Col, Row } from "@Components/grid";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
 import { Toggle } from "@Components/toggle";
@@ -57,20 +56,14 @@ export function ConvoySideMenu() {
     updateEvents
   );
 
-  const openConvoyModals = useCallback(
-    () => setCurrentModal("convoyTradeRoute"),
-    [setCurrentModal]
-  );
+  const openConvoyModals = () => setCurrentModal("convoyTradeRoute");
 
-  const openShippingPlanner = useCallback(
-    () => setCurrentModal("shippingPlanner"),
-    [setCurrentModal]
-  );
+  const openShippingPlanner = () => setCurrentModal("shippingPlanner");
 
-  const activateTradeRoute = useCallback(() => {
+  const activateTradeRoute = () => {
     convoyData &&
       setConvoyRouteActive(convoyData.ID, !convoyData.isRouteActive);
-  }, [convoyData]);
+  };
 
   return (
     <Col>

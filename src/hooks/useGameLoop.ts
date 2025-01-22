@@ -19,6 +19,8 @@ const updateFrequency = 30;
 
 const convoyAI = ConvoyAI();
 
+const debug = false;
+
 export function GameLoop() {
   let gameLoopAnimationFrame: number;
   let oldTimeStamp = 0;
@@ -29,15 +31,18 @@ export function GameLoop() {
     const dMs = timeStamp - oldTimeStamp;
     const ds = dMs * 0.001;
     const fps = Math.round(1 / ds);
-    /*fpsCounter.innerHTML = fps.toString();
 
-    if (fps < 30) {
-      fpsCounter.style.setProperty("color", "red");
-    } else if (fps < 45) {
-      fpsCounter.style.setProperty("color", "yellow");
-    } else {
-      fpsCounter.style.setProperty("color", "white");
-    }*/
+    if (debug) {
+      fpsCounter.innerHTML = fps.toString();
+
+      if (fps < 30) {
+        fpsCounter.style.setProperty("color", "red");
+      } else if (fps < 45) {
+        fpsCounter.style.setProperty("color", "yellow");
+      } else {
+        fpsCounter.style.setProperty("color", "white");
+      }
+    }
 
     if (dMs >= updateFrequency) {
       oldTimeStamp = timeStamp;

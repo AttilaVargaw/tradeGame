@@ -1,11 +1,11 @@
 import { isUndefined } from "lodash-es";
-import { PropsWithChildren, useMemo, useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import styled from "styled-components";
 
+import { categorySelectorElements } from "@Modals/CityData/Vehicle/categorySelectorElements";
 import { ItemsByCategory } from "@Services/GameState/queries/inventory";
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
-import { categorySelectorElements } from "../modals/CityData/Vehicle/cityVehiclesInventory";
 import { LoadingBar } from "./LoadingBar";
 import { WarehouseTransferItem } from "./WarehouseTransferItem";
 import { Grid, Row } from "./grid";
@@ -70,26 +70,24 @@ export function InventoryExchange({
 }>) {
   const [inCategory, setInCategory] = useState<number>(0);
 
-  const items = useMemo(() => {
-    if (bInventory && bInventory.has(inCategory)) {
-      return bInventory
-        .get(inCategory)
-        ?.map(({ number, translation, ID }, index) => (
-          <WarehouseTransferItem
-            allwaysEnabled={planner}
-            item={ID}
-            interchange={moveFn}
-            aID={aId}
-            bID={bId}
-            aNum={aInventory?.get(inCategory)?.[index]?.number ?? 0}
-            bNum={number}
-            label={translation}
-            key={ID}
-          />
-        ));
-    }
-    return false;
-  }, [aId, aInventory, bId, bInventory, inCategory, moveFn, planner]);
+  const items =
+    bInventory && bInventory.has(inCategory)
+      ? bInventory
+          .get(inCategory)
+          ?.map(({ number, translation, ID }, index) => (
+            <WarehouseTransferItem
+              allwaysEnabled={planner}
+              item={ID}
+              interchange={moveFn}
+              aID={aId}
+              bID={bId}
+              aNum={aInventory?.get(inCategory)?.[index]?.number ?? 0}
+              bNum={number}
+              label={translation}
+              key={ID}
+            />
+          ))
+      : false;
 
   return (
     <>

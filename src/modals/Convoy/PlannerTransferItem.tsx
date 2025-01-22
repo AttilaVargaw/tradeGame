@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Button } from "@Components/button";
@@ -39,19 +39,17 @@ export function PlannerTransferItem({
 
   const [direction, setDirection] = useState(false);
 
-  const onTransfer = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
-    ({ target: { value } }) => {
-      const num2 = (direction ? 1 : -1) * Number.parseInt(value);
-      setNum(Number.parseInt(value));
-      moveBetweenInventories(plan, num2, item);
-    },
-    [direction, item, plan]
-  );
-
-  const onTargetClick = useCallback(() => {
+  const onTransfer: React.ChangeEventHandler<HTMLInputElement> = ({
+    target: { value },
+  }) => {
+    const num2 = (direction ? 1 : -1) * Number.parseInt(value);
+    setNum(Number.parseInt(value));
+    moveBetweenInventories(plan, num2, item);
+  };
+  const onTargetClick = () => {
     moveBetweenInventories(plan, direction ? -num : num, item);
     setDirection((value) => !value);
-  }, [direction, item, num, plan]);
+  };
 
   return (
     <>

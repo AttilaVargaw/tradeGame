@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 import { StackPager } from "@Components/StackPager";
 import { Row } from "@Components/grid";
@@ -50,91 +50,72 @@ export function ConvoyTradeRouteModal() {
 
   const [, setCurrentModal] = useCurrentModal();
 
-  const onEdit = useCallback(
-    (id: ID | null) => () => {
-      setCurrentModal("ShippingPlannerRoutes");
-      setCurrentShippingPlan(id);
-    },
-    [setCurrentModal, setCurrentShippingPlan]
-  );
+  const onEdit = (id: ID | null) => () => {
+    setCurrentModal("ShippingPlannerRoutes");
+    setCurrentShippingPlan(id);
+  };
 
-  const PagerLinkWithEdit = useCallback(
-    (item: PagerItemProps<ID>) => {
-      return (
-        <Row>
-          <PagerLink {...item} />
-          <Link onClick={onEdit(item.value)}>Edit</Link>
-        </Row>
-      );
-    },
-    [onEdit]
-  );
+  const PagerLinkWithEdit = (item: PagerItemProps<ID>) => {
+    return (
+      <Row>
+        <PagerLink {...item} />
+        <Link onClick={onEdit(item.value)}>Edit</Link>
+      </Row>
+    );
+  };
 
   const currentTraderoute = useDBValue(
     useCallback(() => getTradeRouteByID(currentConvoy?.route), [currentConvoy]),
     updateEvents
   );
 
-  const header = useMemo(() => {
-    return <Label type="led">{currentConvoy?.name || ""}</Label>;
-  }, [currentConvoy]);
+  const header = <Label type="led">{currentConvoy?.name || ""}</Label>;
 
-  const activateTradeRoute = useCallback(
-    (active: boolean) =>
-      currentConvoyID && setConvoyRouteActive(currentConvoyID, active),
-    [currentConvoyID]
+  const activateTradeRoute = (active: boolean) =>
+    currentConvoyID && setConvoyRouteActive(currentConvoyID, active);
+
+  const selectTradeRoute = (ID: ID | null) => {
+    if (currentConvoyID) {
+      setConvoyTradeRoute(currentConvoyID, ID);
+    }
+  };
+
+  const body = (
+    <>
+      <Label type="painted">Traderoutes</Label>
+      <div style={{ height: "80%" }}>
+        <TerminalScreen style={{ height: "100%" }}>
+          {tradeRoutes && (
+            <StackPager
+              ItemTemplate={PagerLinkWithEdit}
+              onChange={selectTradeRoute}
+              values={tradeRoutes.map(TradeRouteToLink)}
+              selected={currentTraderoute?.ID}
+            />
+          )}
+          <div>
+            <PagerLink
+              active={!currentTraderoute}
+              onChange={() => selectTradeRoute(null)}
+              value={null}
+            >
+              Off
+            </PagerLink>
+          </div>
+        </TerminalScreen>
+      </div>
+    </>
   );
 
-  const selectTradeRoute = useCallback(
-    (ID: ID | null) => {
-      if (currentConvoyID) {
-        setConvoyTradeRoute(currentConvoyID, ID);
-      }
-    },
-    [currentConvoyID]
+  const footer = (
+    <Toggle
+      disabled={!currentTraderoute}
+      onChange={activateTradeRoute}
+      active={!!currentConvoy?.isRouteActive}
+    >
+      ON
+    </Toggle>
   );
-
-  const body = useMemo(
-    () => (
-      <>
-        <Label type="painted">Traderoutes</Label>
-        <div style={{ height: "80%" }}>
-          <TerminalScreen style={{ height: "100%" }}>
-            {tradeRoutes && (
-              <StackPager
-                ItemTemplate={PagerLinkWithEdit}
-                onChange={selectTradeRoute}
-                values={tradeRoutes.map(TradeRouteToLink)}
-                selected={currentTraderoute?.ID}
-              />
-            )}
-            <div>
-              <PagerLink
-                active={!currentTraderoute}
-                onChange={() => selectTradeRoute(null)}
-                value={null}
-              >
-                Off
-              </PagerLink>
-            </div>
-          </TerminalScreen>
-        </div>
-      </>
-    ),
-    [tradeRoutes, PagerLinkWithEdit, selectTradeRoute, currentTraderoute]
-  );
-
-  const footer = useMemo(() => {
-    return (
-      <Toggle
-        disabled={!currentTraderoute}
-        onChange={activateTradeRoute}
-        active={!!currentConvoy?.isRouteActive}
-      >
-        ON
-      </Toggle>
-    );
-  }, [currentTraderoute, activateTradeRoute, currentConvoy?.isRouteActive]);
 
   return <Modal body={body} footer={footer} header={header} />;
 }

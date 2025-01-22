@@ -40,7 +40,7 @@ export default function CityIndustry() {
   );
 
   const allIndustrialBuildings = useDBValue(
-    useCallback(getAllIndustrialBuildings, [])
+    useCallback(() => getAllIndustrialBuildings(), [])
   );
 
   // needs city change event in the future
@@ -48,28 +48,25 @@ export default function CityIndustry() {
     useCallback(() => getCityIndustrialBuildings(cityID?.ID), [cityID?.ID])
   );
 
-  const setNewBuildingDropdown = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) => {
-      setNewBuilding(value);
-    },
-    []
-  );
+  const setNewBuildingDropdown = ({
+    target: { value },
+  }: React.ChangeEvent<HTMLSelectElement>) => {
+    setNewBuilding(value);
+  };
 
-  const addNewBuilding = useCallback(async () => {
+  const addNewBuilding = async () => {
     if (cityID) {
       await addIndustrialBuildings(1, newBuilding, cityID.ID);
       setReload(!reload);
     }
-  }, [newBuilding, cityID, reload]);
+  };
 
-  const setBuildingNumber = useCallback(
+  const setBuildingNumber =
     (ID: ID) =>
-      async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-        await setIndustrialBuildingNumber(ID, Number.parseInt(value));
-        setReload(!reload);
-      },
-    [reload]
-  );
+    async ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+      await setIndustrialBuildingNumber(ID, Number.parseInt(value));
+      setReload(!reload);
+    };
 
   const [aggeratedView, setAggeratedView] = useState(false);
 

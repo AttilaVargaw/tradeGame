@@ -1,4 +1,4 @@
-import { PropsWithChildren, useCallback } from "react";
+import { PropsWithChildren } from "react";
 import styled, { css } from "styled-components";
 
 import { DangerouslySetInnerHTML } from "@Services/utils";
@@ -21,12 +21,12 @@ export function Toggle({
   dangerouslySetInnerHTML,
   onClick,
 }: ToggleProps) {
-  const onToggleClick = useCallback(() => {
+  const onToggleClick = () => {
     if (!disabled) {
       onChange?.(!active);
       onClick?.();
     }
-  }, [active, disabled, onChange, onClick]);
+  };
 
   return (
     <ToggleBody

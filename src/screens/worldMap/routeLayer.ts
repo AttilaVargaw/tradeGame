@@ -1,5 +1,5 @@
 import L, { PathOptions, tooltip } from "leaflet";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { useCurrentModal } from "@Hooks/index";
 import { useSelectedRouteAtom } from "@Hooks/useSelectedTradeRoute";
@@ -26,13 +26,10 @@ export function useTradeRoutes() {
   const [, setSelectedTradeRoute] = useSelectedRouteAtom();
   const [, setCurrentModal] = useCurrentModal();
 
-  const routeClick = useCallback(
-    (ID: ID) => () => {
-      setSelectedTradeRoute(ID);
-      setCurrentModal("tradeRoute");
-    },
-    [setSelectedTradeRoute, setCurrentModal]
-  );
+  const routeClick = (ID: ID) => () => {
+    setSelectedTradeRoute(ID);
+    setCurrentModal("tradeRoute");
+  };
 
   useEffect(() => {
     getTradeRoutesAsGeoJson().then((tradeRoutes) => {

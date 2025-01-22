@@ -1,5 +1,5 @@
 import { isUndefined } from "lodash-es";
-import { PropsWithChildren, useCallback, useMemo, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { LoadingBar } from "@Components/LoadingBar";
@@ -8,14 +8,14 @@ import { Label } from "@Components/label";
 import { TogglePager } from "@Components/togglePager";
 import { useCurrentShippingPlan } from "@Hooks/useCurrentShippingPlan";
 import { useDBValue } from "@Hooks/useDBValue";
+import { categorySelectorElements } from "@Modals/CityData/Vehicle/categorySelectorElements";
 import { DBEvents } from "@Services/GameState/dbTypes";
 import {
-  getShippingPlan,
   getShippingPlanItems,
+  getShippingPlans,
 } from "@Services/GameState/tables/ShippingPlan/ShippingPlanQueries";
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 
-import { categorySelectorElements } from "../../CityData/Vehicle/cityVehiclesInventory";
 import Modal from "../../Modal";
 import { PlannerTransferItem } from "../PlannerTransferItem";
 
@@ -70,9 +70,9 @@ export function ShippingTransferPlanner({
 
   const [currentShippingPlan] = useCurrentShippingPlan();
 
-  const plan = useDBValue(
+  const plans = useDBValue(
     useCallback(
-      () => getShippingPlan(currentShippingPlan),
+      () => getShippingPlans(currentShippingPlan),
       [currentShippingPlan]
     ),
     updateEvents
@@ -85,28 +85,24 @@ export function ShippingTransferPlanner({
     )
   );
 
-  const items = useMemo(() => {
-    if (inventory && inventory.has(inCategory)) {
-      return (
-        plan &&
-        inventory
-          .get(inCategory)!
-          .map(({ translation, ID, number }) => (
-            <PlannerTransferItem
-              plan={plan.ID}
-              item={ID}
-              label={translation}
-              key={ID}
-              number={number}
-            />
-          ))
-      );
-    }
-    return false;
-  }, [inventory, inCategory, plan]);
+  const body = () => {
+    const items =
+      plans && inventory && inventory.has(inCategory)
+        ? plans[0] &&
+          inventory
+            .get(inCategory)!
+            .map(({ translation, ID, number }) => (
+              <PlannerTransferItem
+                plan={plans[0].ID}
+                item={ID}
+                label={translation}
+                key={ID}
+                number={number}
+              />
+            ))
+        : false;
 
-  const body = useMemo(
-    () => (
+    return (
       <>
         {children}
         <TogglePager
@@ -122,16 +118,12 @@ export function ShippingTransferPlanner({
           </Row>
         )}
       </>
-    ),
-    [aCapacity, aWeight, bCapacity, bWeight, children, inCategory, items]
-  );
+    );
+  };
 
-  const footer = useMemo(() => <></>, []);
+  const footer = <></>;
 
-  const header = useMemo(
-    () => <Label type="painted">{plan?.name ?? ""}</Label>,
-    [plan?.name]
-  );
+  const header = <Label type="painted">{plans?.[0]?.name ?? ""}</Label>;
 
-  return <Modal body={body} footer={footer} header={header} />;
+  return <Modal body={body()} footer={footer} header={header} />;
 }

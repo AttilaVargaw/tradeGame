@@ -1,4 +1,4 @@
-import { MouseEventHandler, useCallback, useMemo } from "react";
+import { MouseEventHandler } from "react";
 import styled from "styled-components";
 
 import { ModalRouter } from "@Components/ModalRouter";
@@ -31,26 +31,19 @@ export function WorldMap(): React.ReactElement {
 
   const { height, width } = useWindowSize();
 
-  const menuWidth = useMemo(() => width * 0.18, [width]);
-  const mapWidth = useMemo(() => width * 0.82, [width]);
+  const menuWidth = width * 0.18;
+  const mapWidth = width * 0.82;
 
-  const sideMenuStyle = useMemo(
-    () => ({ height: height, width: menuWidth, top: 0 }),
-    [menuWidth, height]
-  );
-
+  const sideMenuStyle = { height: height, width: menuWidth, top: 0 };
   const [currentConvoy] = useCurrentConvoy();
   const [currentSelectedCity] = useCurrentSelectedCity();
   const [currentSelectedCities] = useCurrentSelectedCities();
 
-  const onContextMenu = useCallback<MouseEventHandler>(
-    (event) => {
-      if (!currentConvoy && !currentSelectedCity && currentSelectedCities) {
-        ContextMenuPosition.next([event.clientX, event.clientY]);
-      }
-    },
-    [currentConvoy, currentSelectedCities, currentSelectedCity]
-  );
+  const onContextMenu: MouseEventHandler = (event) => {
+    if (!currentConvoy && !currentSelectedCity && currentSelectedCities) {
+      ContextMenuPosition.next([event.clientX, event.clientY]);
+    }
+  };
 
   return (
     <Container>

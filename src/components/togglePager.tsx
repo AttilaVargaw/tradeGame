@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 import { CreateInnerFromChildrenOrInnerHTML } from "@Services/utils";
@@ -30,13 +30,10 @@ export function TogglePager<T = string>({
     selected ?? null
   );
 
-  const onClick = useCallback(
-    (value: T) => () => {
-      setInnerSelected(value);
-      onChange(value);
-    },
-    [onChange]
-  );
+  const onClick = (value: T) => () => {
+    setInnerSelected(value);
+    onChange(value);
+  };
 
   return (
     <Grid $num={values.length}>

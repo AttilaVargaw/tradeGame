@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { CreateInnerFromChildrenOrInnerHTML } from "@Services/utils";
@@ -22,13 +22,10 @@ export function StackPager<T = string | number>({
     selected ?? null
   );
 
-  const onClick = useCallback(
-    (value: T) => () => {
-      setInnerSelected(value);
-      onChange(value);
-    },
-    [onChange]
-  );
+  const onClick = (value: T) => () => {
+    setInnerSelected(value);
+    onChange(value);
+  };
 
   useEffect(() => {
     setInnerSelected(selected ?? null);

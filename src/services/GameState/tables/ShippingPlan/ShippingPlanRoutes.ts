@@ -6,6 +6,7 @@ export type ShippingPlanRoute = {
   ID: ID;
   plan: ID;
   route: ID;
+  city: ID;
 };
 
 export default {
@@ -13,6 +14,7 @@ export default {
   createData: [
     { name: "plan", type: "INTEGER" },
     { name: "route", type: "INTEGER" },
+    { name: "inventory", type: "INTEGER" },
   ],
   initData: [{ plan: 0, route: 0 }],
 } as TableData<ShippingPlanRoute>;

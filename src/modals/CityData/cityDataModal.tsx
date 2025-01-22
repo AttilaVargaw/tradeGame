@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import { Label, LoadingBar, Router, TogglePager } from "@Components/index";
 import { PagerProps } from "@Components/pagerProps";
@@ -69,36 +69,28 @@ export default function CityDataModal(): React.ReactElement | boolean {
     CityModalSubPages.population
   );
 
-  const cityData = useDBValue(useCallback(() => getCity(cityID?.ID), [cityID]));
+  const cityData = useDBValue(() => getCity(cityID?.ID));
 
-  const body = useMemo(() => {
+  const body = (() => {
     if (!cityData) {
       return false;
     }
 
     return <Router pages={subPages} value={selectedPage} />;
-  }, [cityData, selectedPage]);
+  })();
 
-  const footer = useMemo(
-    () =>
-      !!cityData && (
-        <TogglePager
-          selected={selectedPage}
-          onChange={setSelectedPage}
-          values={pagerPages}
-        />
-      ),
-    [cityData, selectedPage]
+  const footer = !!cityData && (
+    <TogglePager
+      selected={selectedPage}
+      onChange={setSelectedPage}
+      values={pagerPages}
+    />
   );
 
-  const header = useMemo(
-    () =>
-      !!cityData && (
-        <div style={{ width: "100%" }}>
-          <Label type="led">{`< ${cityData.name} >`}</Label>
-        </div>
-      ),
-    [cityData]
+  const header = !!cityData && (
+    <div style={{ width: "100%" }}>
+      <Label type="led">{`< ${cityData.name} >`}</Label>
+    </div>
   );
 
   return !!cityData && <Modal header={header} body={body} footer={footer} />;

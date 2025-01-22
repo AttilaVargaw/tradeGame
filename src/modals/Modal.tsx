@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { Button } from "@Components/button";
@@ -65,10 +65,7 @@ export default function Modal({
     return () => window.removeEventListener("click", ClickEvenListener);
   }, [setCurrentModal]);
 
-  const onCloseButtonCLick = useCallback(
-    () => setCurrentModal(null),
-    [setCurrentModal]
-  );
+  const onCloseButtonCLick = () => setCurrentModal(null);
 
   return (
     <Container ref={containerRef}>

@@ -1,8 +1,10 @@
-import { createRoot } from "react-dom/client";
-import App from "./app";
+import "leaflet/dist/leaflet.css";
 
 import "./index.scss";
-import "leaflet/dist/leaflet.css";
+
+import { createRoot } from "react-dom/client";
+
+import App from "./app";
 
 const rootElement = document.getElementById("root");
 

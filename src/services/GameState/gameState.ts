@@ -1,7 +1,7 @@
 import { BehaviorSubject } from "rxjs";
-import Database from "tauri-plugin-sql-api";
 
 import { path } from "@tauri-apps/api";
+import Database from "@tauri-apps/plugin-sql";
 
 import { creatorSQL } from "../creatorSQL";
 import { DBEvent, DBEvents } from "./dbTypes";
@@ -93,12 +93,9 @@ export const init = async () => {
     FillTable(ShippingPlanRoutes) +
     "COMMIT;";
 
-  await Promise.all([
-    db.execute(creatorSQL1),
-    db.execute(creatorSQL2),
-    db.execute(creatorSQL3),
-    db.execute(creatorSQL),
-  ]);
+  await db.execute(creatorSQL1);
+  await db.execute(creatorSQL2);
+  await Promise.all([db.execute(creatorSQL3), db.execute(creatorSQL)]);
 
   dbObservable.next({ type: DBEvents.initialized });
   dbObservable.next({ type: DBEvents.tradeRouteUpdate });

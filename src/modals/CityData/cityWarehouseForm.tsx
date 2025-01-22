@@ -1,5 +1,5 @@
 import { unionBy } from "lodash-es";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 
 import { LoadingBar } from "@Components/LoadingBar";
 import { Row } from "@Components/grid";
@@ -12,7 +12,6 @@ import {
 } from "@Services/GameState/queries/inventory";
 import { getCityRequiredItemsWithQuantity } from "@Services/GameState/tables/City/cityQueries";
 
-import { WarehouseRow } from "../../components/WarehouseRow";
 import debugModeContext from "../../debugModeContext";
 
 const updateEvents = [DBEvents.inventoryUpdate];
@@ -45,14 +44,12 @@ export default function CityWarehouseForm() {
     updateEvents
   );
 
-  const items3 = useMemo(() => {
-    return unionBy(
-      [items2, items].reduce((prev, item4) => {
-        return [...prev, ...(item4?.values() ?? [])];
-      }, []),
-      (item) => item
-    );
-  }, [categories, items, items2]);
+  const items3 = unionBy(
+    [items2, items].reduce((prev, item4) => {
+      return [...prev, ...(item4?.values() ?? [])];
+    }, []),
+    (item) => item
+  );
 
   return (
     <Row>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Link, TerminalScreen } from "@Components/terminalScreen";
@@ -43,31 +43,21 @@ export default function CityVehicles() {
     cityID && getDockedConvoysForCity(cityID.ID).then(setConvoys);
   }, [cityID]);
 
-  const body = useMemo(() => {
-    if (currentConvoy) {
-      return (
-        <>
-          <TogglePager
-            selected={subpage}
-            onChange={setSubpage}
-            values={pages}
-          />
-          {subpage === Subpages.Crew && <CityVehiclesCrew />}
-          {subpage === Subpages.List && <CityVehiclesInventory />}
-        </>
-      );
-    }
-
-    return (
-      <TerminalScreen style={{ height: "-webkit-fill-available" }}>
-        {convoys.map((convoy) => (
-          <Link onClick={() => setCurrentConvoy(convoy)} key={convoy.ID}>
-            {convoy.name}
-          </Link>
-        ))}
-      </TerminalScreen>
-    );
-  }, [convoys, currentConvoy, setCurrentConvoy, subpage]);
+  const body = currentConvoy ? (
+    <>
+      <TogglePager selected={subpage} onChange={setSubpage} values={pages} />
+      {subpage === Subpages.Crew && <CityVehiclesCrew />}
+      {subpage === Subpages.List && <CityVehiclesInventory />}
+    </>
+  ) : (
+    <TerminalScreen style={{ height: "-webkit-fill-available" }}>
+      {convoys.map((convoy) => (
+        <Link onClick={() => setCurrentConvoy(convoy)} key={convoy.ID}>
+          {convoy.name}
+        </Link>
+      ))}
+    </TerminalScreen>
+  );
 
   return (
     <Container style={{ margin: "16pt", height: "80%" }}>{body}</Container>

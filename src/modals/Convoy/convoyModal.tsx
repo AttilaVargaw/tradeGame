@@ -1,10 +1,4 @@
-import {
-  ChangeEventHandler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ChangeEventHandler, useEffect, useState } from "react";
 
 import { Button } from "@Components/button";
 import { GridItem } from "@Components/grid";
@@ -42,9 +36,9 @@ export const ConvoyItem = ({
 }) => {
   const [, setCurrentConvoy] = useCurrentConvoy();
 
-  const onClick = useCallback(() => {
+  const onClick = () => {
     setCurrentConvoy(id);
-  }, [setCurrentConvoy, id]);
+  };
 
   return (
     <div>
@@ -67,15 +61,11 @@ const Footer = (
 export const ConvoyModal = () => {
   const [currentConvoy] = useCurrentConvoy();
 
-  const convoysData = useDBValue(
-    getConvoys,
-    useMemo(() => [DBEvents.convoyUpdated], [])
-  );
+  const convoysData = useDBValue(getConvoys, [DBEvents.convoyUpdated]);
 
-  const availableCommandVehicles = useDBValue(
-    getConvoylessVehicles,
-    useMemo(() => [DBEvents.convoyUpdated], [])
-  );
+  const availableCommandVehicles = useDBValue(getConvoylessVehicles, [
+    DBEvents.convoyUpdated,
+  ]);
 
   useEffect(() => {
     if (availableCommandVehicles && availableCommandVehicles?.length > 0) {
@@ -93,82 +83,69 @@ export const ConvoyModal = () => {
     commandVehicle: number | null;
   }>({ name: "", commandVehicle: null });
 
-  const setNewConvoyName = useCallback<
-    React.ChangeEventHandler<HTMLInputElement>
-  >(({ currentTarget: { value: name } }) => {
+  const setNewConvoyName: React.ChangeEventHandler<HTMLInputElement> = ({
+    currentTarget: { value: name },
+  }) => {
     setNewConvoyData((old) => ({ ...old, name }));
-  }, []);
+  };
 
-  const setCommandVehicle = useCallback<ChangeEventHandler<HTMLSelectElement>>(
-    ({ target: { value } }) => {
-      setNewConvoyData((old) => ({
-        ...old,
-        commandVehicle: Number.parseInt(value),
-      }));
-    },
-    []
-  );
+  const setCommandVehicle: ChangeEventHandler<HTMLSelectElement> = ({
+    target: { value },
+  }) => {
+    setNewConvoyData((old) => ({
+      ...old,
+      commandVehicle: Number.parseInt(value),
+    }));
+  };
 
-  const onCreate = useCallback(() => {
+  const onCreate = () => {
     const { commandVehicle } = newConvoyData;
 
     if (commandVehicle) {
       CreateConvoy(newConvoyData.name).then((id) => {
-        addVehicleToConvoy(id, commandVehicle);
+        id && addVehicleToConvoy(id, commandVehicle);
       });
     }
-  }, [newConvoyData]);
+  };
 
-  const body = useMemo(() => {
-    if (!currentConvoy) {
-      return (
-        <>
-          <Screen style={{ height: "50%" }}>
-            {convoysData?.map(({ ID, name }) => (
-              <ConvoyItem id={ID} key={ID} name={name} />
+  const body = !currentConvoy ? (
+    <>
+      <Screen style={{ height: "50%" }}>
+        {convoysData?.map(({ ID, name }) => (
+          <ConvoyItem id={ID} key={ID} name={name} />
+        ))}
+      </Screen>
+      <div style={{ height: "50%" }}>
+        <GridItem $col={1} $row={1}>
+          <Label style={{ flex: 1 }} type="painted">
+            Name
+          </Label>
+          <Input
+            style={{ flex: 1 }}
+            min={0}
+            value={newConvoyData.name}
+            type={"input"}
+            onChange={setNewConvoyName}
+          />
+        </GridItem>
+        <GridItem $col={1} $row={1}>
+          <Label style={{ flex: 1 }} type="painted">
+            Command vehicle
+          </Label>
+          <Select style={{ flex: 1 }} onSelect={setCommandVehicle}>
+            {availableCommandVehicles?.map(({ ID, name }) => (
+              <option key={ID} value={ID}>
+                {name}
+              </option>
             ))}
-          </Screen>
-          <div style={{ height: "50%" }}>
-            <GridItem $col={1} $row={1}>
-              <Label style={{ flex: 1 }} type="painted">
-                Name
-              </Label>
-              <Input
-                style={{ flex: 1 }}
-                min={0}
-                value={newConvoyData.name}
-                type={"input"}
-                onChange={setNewConvoyName}
-              />
-            </GridItem>
-            <GridItem $col={1} $row={1}>
-              <Label style={{ flex: 1 }} type="painted">
-                Command vehicle
-              </Label>
-              <Select style={{ flex: 1 }} onSelect={setCommandVehicle}>
-                {availableCommandVehicles?.map(({ ID, name }) => (
-                  <option key={ID} value={ID}>
-                    {name}
-                  </option>
-                ))}
-              </Select>
-            </GridItem>
-            <Button onClick={onCreate}>Create</Button>
-          </div>
-        </>
-      );
-    } else {
-      return <ConvoyInfo />;
-    }
-  }, [
-    currentConvoy,
-    convoysData,
-    newConvoyData.name,
-    setNewConvoyName,
-    setCommandVehicle,
-    availableCommandVehicles,
-    onCreate,
-  ]);
+          </Select>
+        </GridItem>
+        <Button onClick={onCreate}>Create</Button>
+      </div>
+    </>
+  ) : (
+    <ConvoyInfo />
+  );
 
   return <Modal header={Header} body={body} footer={Footer} />;
 };

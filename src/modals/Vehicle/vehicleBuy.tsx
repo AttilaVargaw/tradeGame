@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import { Button } from "@Components/button";
 import { Grid } from "@Components/grid";
@@ -33,7 +33,7 @@ export const OrderPage: FC<{ ID: ID; onBack: () => void }> = ({
     getVehicleType(ID).then((result) => setVehicleDescription(result[0]));
   }, [ID, setCurrentModal]);
 
-  const onOrder = useCallback(() => {
+  const onOrder = () => {
     if (vehicleDescription) {
       addVehicle(
         ID,
@@ -41,7 +41,7 @@ export const OrderPage: FC<{ ID: ID; onBack: () => void }> = ({
       ).then(console.log);
       //setCurrentModal();
     }
-  }, [ID, vehicleDescription]);
+  };
 
   if (!vehicleDescription) {
     return false;
@@ -103,19 +103,13 @@ export const VehicleBuyModal = () => {
     getVehicleTypes(selectedVehicleType).then(setVehicleDescriptions);
   }, [selectedVehicleType]);
 
-  const setVehicleType = useCallback(
-    (type: string) => () => {
-      setSelectedVehicleType(type);
-    },
-    []
-  );
+  const setVehicleType = (type: string) => () => {
+    setSelectedVehicleType(type);
+  };
 
-  const onOrderClick = useCallback(
-    (ID: ID) => () => {
-      setCurrentVehicle(ID);
-    },
-    []
-  );
+  const onOrderClick = (ID: ID) => () => {
+    setCurrentVehicle(ID);
+  };
 
   return (
     <>

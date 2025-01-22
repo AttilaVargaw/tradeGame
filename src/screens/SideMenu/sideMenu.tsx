@@ -5,9 +5,8 @@ import { SevenDigitClock } from "@Components/SevenDigitClock";
 import { Router } from "@Components/router";
 import { useObservableValue } from "@Hooks/index";
 
-import { DefaultSideMenu } from "./DefaultSideMenu";
-import { ConvoySideMenu } from "./convoySideMenu";
 import { currentSideMenuObservable } from "./currentSideMenu";
+import { Subpages } from "./subpages";
 
 const Container = styled.div`
   position: fixed;
@@ -21,11 +20,6 @@ const Container = styled.div`
   z-index: 1000;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 `;
-
-export const Subpages = {
-  default: <DefaultSideMenu />,
-  convoy: <ConvoySideMenu />,
-};
 
 export default forwardRef<
   HTMLDivElement,

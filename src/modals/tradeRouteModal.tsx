@@ -1,5 +1,3 @@
-import { useCallback, useMemo } from "react";
-
 import { Label } from "@Components/label";
 import { TerminalScreen } from "@Components/terminalScreen";
 import { useDBValue } from "@Hooks/index";
@@ -18,13 +16,9 @@ const body = (
 export default function TradeRouteModal(): React.ReactElement | false {
   const [routeID] = useSelectedRouteAtom();
 
-  const routeData = useDBValue(
-    useCallback(() => getTradeRouteByID(routeID), [routeID])
-  );
+  const routeData = useDBValue(() => getTradeRouteByID(routeID));
 
-  const header = useMemo(() => {
-    return <Label type="led">{routeData?.name ?? ""}</Label>;
-  }, [routeData?.name]);
+  const header = <Label type="led">{routeData?.name ?? ""}</Label>;
 
   return !!routeData && <Modal header={header} body={body} />;
 }

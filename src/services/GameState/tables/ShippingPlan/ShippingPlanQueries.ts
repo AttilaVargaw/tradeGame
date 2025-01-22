@@ -1,4 +1,4 @@
-import { isNull, isUndefined } from "lodash-es";
+import { isNull } from "lodash-es";
 
 import { DBEvents } from "@Services/GameState/dbTypes";
 import { db, dbObservable } from "@Services/GameState/gameState";
@@ -10,6 +10,7 @@ import {
 import { Delete } from "@Services/GameState/utils/SimpleQueryBuider/delete";
 import { GroupBy } from "@Services/utils";
 
+import { CityData } from "../City/CityTable";
 import { TradeRoute } from "../TradeRoutes";
 import { Translations } from "../Translations";
 import { Item } from "../common";
@@ -17,10 +18,29 @@ import { ShippingPlan } from "./ShippingPlan";
 import { ShippingPlanExchange } from "./ShippingPlanExchange";
 import { ShippingPlanRoute } from "./ShippingPlanRoutes";
 
-export async function addRouteToShipping(id: ID | null, plan: ID | null) {
+export async function addRouteToShipping(
+  id: ID | null,
+  plan: ID | null,
+  CityA: ID,
+  CityB: ID
+) {
   await db.execute(
-    insert<Pick<ShippingPlanRoute, "plan" | "route">, "ShippingPlanRoutes">({
-      attributes: { plan: plan, route: id },
+    insert<
+      Pick<ShippingPlanRoute, "plan" | "route" | "city">,
+      "ShippingPlanRoutes"
+    >({
+      attributes: { plan: plan, route: id, city: CityA },
+      table: "ShippingPlanRoutes",
+    }),
+    [plan, id]
+  );
+
+  await db.execute(
+    insert<
+      Pick<ShippingPlanRoute, "plan" | "route" | "city">,
+      "ShippingPlanRoutes"
+    >({
+      attributes: { plan: plan, route: id, city: CityB },
       table: "ShippingPlanRoutes",
     }),
     [plan, id]
@@ -44,9 +64,31 @@ export async function deleteRouteFromShipping(id: ID) {
   });
 }
 
-const getShippingPlanQuery = select<ShippingPlan, "ShippingPlans">({
+const getShippingPlanQuery = select<
+  ShippingPlan & CityData,
+  "ShippingPlans" | "inventory"
+>({
   table: "ShippingPlans",
   attributes: [["ShippingPlans", ["ID", "name"]]],
+  where: [
+    { A: ["inventory", "ID"], value: "$1" },
+    { A: ["ShippingPlans", "ID"], value: "$2" },
+  ],
+  join: [
+    {
+      A: "inventory",
+      equation: { A: ["inventory", "ID"], B: ["ShippingPlans", "inventory"] },
+    },
+  ],
+});
+
+const getShippingPlansQuery = select<
+  ShippingPlan & CityData,
+  "ShippingPlans" | "inventory"
+>({
+  table: "ShippingPlans",
+  attributes: [["ShippingPlans", ["ID", "name"]]],
+  where: [{ A: ["ShippingPlans", "ID"], value: "$1" }],
 });
 
 const getShippingPlanRoutesQuery = select<
@@ -69,12 +111,24 @@ const getShippingPlanRoutesQuery = select<
   ],
 });
 
-export async function getShippingPlan(id: ID | null) {
+export async function getShippingPlan(id: ID | null, inventory: ID) {
   if (isNull(id)) {
     return null;
   }
 
-  return (await db.select<ShippingPlan[]>(getShippingPlanQuery))[0];
+  return (
+    await db.select<ShippingPlan[]>(getShippingPlanQuery, [inventory, id])
+  )[0];
+}
+
+export async function getShippingPlans(id: ID | null) {
+  if (isNull(id)) {
+    return null;
+  }
+
+  return await db.select<[ShippingPlan, ShippingPlan]>(getShippingPlansQuery, [
+    id,
+  ]);
 }
 
 export async function getShippingPlanRoutes(id: ID | null) {
