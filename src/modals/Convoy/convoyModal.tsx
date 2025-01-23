@@ -20,11 +20,6 @@ import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
 import Modal from "../Modal";
 import { ConvoyInfo } from "./convoyInfo";
 
-/*enum ConvoyModalSubpages {
-  list,
-  info,
-}*/
-
 export const ConvoyItem = ({
   icon,
   name,

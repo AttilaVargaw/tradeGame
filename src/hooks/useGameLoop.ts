@@ -19,30 +19,37 @@ const updateFrequency = 30;
 
 const convoyAI = ConvoyAI();
 
-const debug = false;
+const debug = true;
 
 export function GameLoop() {
   let gameLoopAnimationFrame: number;
   let oldTimeStamp = 0;
   let currentTick = startTick;
+  let fpsInterval: number;
+  let ds = 0;
+
+  if (debug) {
+    fpsInterval = setInterval(
+      function () {
+        const fps = Math.round(1 / ds);
+        fpsCounter.innerHTML = fps.toString();
+
+        if (fps < 30) {
+          fpsCounter.style.setProperty("color", "red");
+        } else if (fps < 45) {
+          fpsCounter.style.setProperty("color", "yellow");
+        } else {
+          fpsCounter.style.setProperty("color", "white");
+        }
+      } as TimerHandler,
+      200
+    );
+  }
 
   async function gameLoop(timeStamp: number) {
     //const t = Date.now();
     const dMs = timeStamp - oldTimeStamp;
-    const ds = dMs * 0.001;
-    const fps = Math.round(1 / ds);
-
-    if (debug) {
-      fpsCounter.innerHTML = fps.toString();
-
-      if (fps < 30) {
-        fpsCounter.style.setProperty("color", "red");
-      } else if (fps < 45) {
-        fpsCounter.style.setProperty("color", "yellow");
-      } else {
-        fpsCounter.style.setProperty("color", "white");
-      }
-    }
+    ds = dMs * 0.001;
 
     if (dMs >= updateFrequency) {
       oldTimeStamp = timeStamp;
@@ -70,5 +77,8 @@ export function GameLoop() {
     //("Used time in the update loop:", Date.now() - t);
   }
   gameLoopAnimationFrame = window.requestAnimationFrame(gameLoop);
-  return () => cancelAnimationFrame(gameLoopAnimationFrame);
+  return () => {
+    debug && clearInterval(fpsInterval);
+    cancelAnimationFrame(gameLoopAnimationFrame);
+  };
 }
