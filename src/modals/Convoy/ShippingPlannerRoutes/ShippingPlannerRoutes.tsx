@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { useBoolean } from "usehooks-ts";
 
 import { Row } from "@Components/grid";
 import { Link, TerminalScreen } from "@Components/terminalScreen";
@@ -23,26 +24,22 @@ const updateEvents = [DBEvents.shippingPlanUpdate];
 
 export function ShippingPlannerRoutes({ plan }: { plan: ID | null }) {
   const currentRoutes = useDBValue(
-    useCallback(() => getShippingPlanRoutes(plan), [plan]),
+    useCallback(() => getShippingPlanRoutes(plan ?? null), [plan]),
     updateEvents
   );
 
   const tradeRoutes = useDBValue(getAllTradeRoute, updateEvents);
 
-  const addRoute = () => {
-    setAddState(true);
-  };
+  const {
+    setFalse: addRoute,
+    setTrue: back,
+    value: addState,
+  } = useBoolean(false);
 
-  const back = () => {
-    setAddState(false);
+  const addThisRoute = (id: ID) => () => {
+    addRouteToShipping(id, plan);
+    back();
   };
-
-  const addThisRoute = (id: ID, cityAID: ID, cityBID: ID) => () => {
-    addRouteToShipping(id, plan, cityAID, cityBID);
-    setAddState(false);
-  };
-
-  const [addState, setAddState] = useState(false);
 
   const onDelete = (id: ID) => () => {
     deleteRouteFromShipping(id);
@@ -71,8 +68,8 @@ export function ShippingPlannerRoutes({ plan }: { plan: ID | null }) {
         </>
       ) : (
         <>
-          {tradeRoutes?.map(({ ID, name, cityAID, cityBID }) => (
-            <Link key={ID} onClick={addThisRoute(ID, cityAID, cityBID)}>
+          {tradeRoutes?.map(({ ID, name }) => (
+            <Link key={ID} onClick={addThisRoute(ID)}>
               {name}
             </Link>
           ))}

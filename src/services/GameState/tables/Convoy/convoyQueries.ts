@@ -67,7 +67,7 @@ const getConvoysQuery = select({
       [
         "name",
         "ID",
-        "route",
+        "shippingPlan",
         "posY",
         "posX",
         "goalX",
@@ -86,7 +86,7 @@ export const getConvoys = () => {
 
 const getConvoyQuery = select({
   attributes: [
-    ["Convoy", ["name", "ID", "route", "posY", "posX", "isRouteActive"]],
+    ["Convoy", ["name", "ID", "shippingPlan", "posY", "posX", "isRouteActive"]],
   ],
   table: "Convoy",
   where: [{ A: ["Convoy", "ID"], value: "?" }],
@@ -343,9 +343,12 @@ export async function GetTraderouteCount() {
   )[0].count;
 }
 
-const setConvoyTradeRouteQuery = update<{ route: string; ID: ID }, "Convoy">({
+const setConvoyTradeRouteQuery = update<
+  { shippingPlan: string; ID: ID },
+  "Convoy"
+>({
   table: "Convoy",
-  updateRows: [["route", "$1"]],
+  updateRows: [["shippingPlan", "$1"]],
   where: [{ A: ["Convoy", "ID"], value: "$2" }],
 });
 

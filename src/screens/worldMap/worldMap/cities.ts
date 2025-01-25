@@ -53,7 +53,9 @@ export function useCitites() {
   const [currentConvoy, setCurrentConvoy] = useCurrentSelectedConvoyAtom();
 
   const citiesGeoJson =
-    useRef<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>();
+    useRef<GeoJSON.FeatureCollection<GeoJSON.Point, CityPositionProperty>>(
+      undefined
+    );
 
   useEffect(() => {
     getCities().then((cities) => {

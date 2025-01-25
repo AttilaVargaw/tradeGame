@@ -5,13 +5,18 @@ import styled from "styled-components";
 import { LoadingBar } from "@Components/LoadingBar";
 import { Grid, Row } from "@Components/grid";
 import { Label } from "@Components/label";
+import { Link, Screen } from "@Components/terminalScreen";
 import { TogglePager } from "@Components/togglePager";
+import { useCurrentConvoy } from "@Hooks/useCurrentConvoy";
 import { useCurrentShippingPlan } from "@Hooks/useCurrentShippingPlan";
 import { useDBValue } from "@Hooks/useDBValue";
 import { categorySelectorElements } from "@Modals/CityData/Vehicle/categorySelectorElements";
 import { DBEvents } from "@Services/GameState/dbTypes";
+import { getConvoy } from "@Services/GameState/tables/Convoy/convoyQueries";
+import ShippingPlan from "@Services/GameState/tables/ShippingPlan/ShippingPlan";
 import {
   getShippingPlanItems,
+  getShippingPlanRoutes,
   getShippingPlans,
 } from "@Services/GameState/tables/ShippingPlan/ShippingPlanQueries";
 import { ID } from "@Services/GameState/utils/SimpleQueryBuider";
@@ -68,62 +73,99 @@ export function ShippingTransferPlanner({
 }>) {
   const [inCategory, setInCategory] = useState<number>(0);
 
-  const [currentShippingPlan] = useCurrentShippingPlan();
+  const [currentConvoy] = useCurrentConvoy();
+
+  const [currentCity, setCurrentCity] = useState<number>();
+  const [currentTradeRoute, setCurrentTradeRoute] = useState<number>();
+
+  const [currentTroudeStart, setCurrentTroudeStart] = useState<boolean>(true);
+
+  const convoy = useDBValue(() => getConvoy(currentConvoy), updateEvents);
 
   const plans = useDBValue(
-    useCallback(
-      () => getShippingPlans(currentShippingPlan),
-      [currentShippingPlan]
-    ),
+    () => getShippingPlans(convoy?.shippingPlan),
+    updateEvents
+  );
+
+  const plansRoutes = useDBValue(
+    () => getShippingPlanRoutes(convoy?.shippingPlan),
     updateEvents
   );
 
   const inventory = useDBValue(
-    useCallback(
-      () => getShippingPlanItems(currentShippingPlan),
-      [currentShippingPlan]
-    )
+    () =>
+      getShippingPlanItems(convoy?.shippingPlan ?? null, currentTroudeStart),
+    updateEvents
   );
 
-  const body = () => {
-    const items =
-      plans && inventory && inventory.has(inCategory)
-        ? plans[0] &&
-          inventory
-            .get(inCategory)!
-            .map(({ translation, ID, number }) => (
-              <PlannerTransferItem
-                plan={plans[0].ID}
-                item={ID}
-                label={translation}
-                key={ID}
-                number={number}
-              />
-            ))
-        : false;
 
-    return (
-      <>
-        {children}
-        <TogglePager
-          selected={inCategory}
-          onChange={setInCategory}
-          values={categorySelectorElements}
-        />
-        {items && (
-          <Row style={{ gap: "1em" }}>
-            <InventoryLoadingBar capacity={aCapacity} weight={aWeight} />
-            <Container $num={2}>{items}</Container>
-            <InventoryLoadingBar capacity={bCapacity} weight={bWeight} />
-          </Row>
-        )}
-      </>
-    );
-  };
+  const items =
+    plans && inventory && inventory.has(inCategory)
+      ? plans[0] &&
+        inventory
+          .get(inCategory)!
+          .map(({ translation, ID, number, start }) => (
+            <PlannerTransferItem
+              plan={plans[0].ID}
+              item={ID}
+              label={translation}
+              key={ID}
+              number={number}
+              start={currentTroudeStart}
+            />
+          ))
+      : false;
+
+  const handleCurrentCity =
+    (city: number, tradeRoute: number, start: boolean) => () => {
+      setCurrentCity(city);
+      setCurrentTradeRoute(tradeRoute);
+      setCurrentTroudeStart(start);
+    };
+
+  const body = (
+    <>
+      {children}
+      <Grid $num={2}>
+        <Label type="painted">Start</Label>
+        <Label type="painted">End</Label>
+        {plansRoutes?.map(({ ID, cityAName, cityBName, CityA, CityB }) => (
+          <>
+            <Screen>
+              <Link onClick={handleCurrentCity(CityA, ID, true)}>
+                {cityAName} {currentCity === CityA && "[X]"}
+              </Link>
+            </Screen>
+            <Screen>
+              <Link onClick={handleCurrentCity(CityB, ID, false)}>
+                {cityBName} {currentCity === CityB && "[X]"}
+              </Link>
+            </Screen>
+          </>
+        ))}
+      </Grid>
+      <TogglePager
+        selected={inCategory}
+        onChange={setInCategory}
+        values={categorySelectorElements}
+      />
+      {items && (
+        <Row style={{ gap: "1em" }}>
+          <InventoryLoadingBar capacity={aCapacity} weight={aWeight} />
+          <Container $num={2}>{items}</Container>
+          <InventoryLoadingBar capacity={bCapacity} weight={bWeight} />
+        </Row>
+      )}
+    </>
+  );
 
   const footer = <></>;
 
-  const header = <Label type="painted">{plans?.[0]?.name ?? ""}</Label>;
+  const header = (
+    <>
+      <Label type="painted">{plans?.[0]?.name ?? ""}</Label>
+    </>
+  );
 
-  return <Modal body={body()} footer={footer} header={header} />;
+  return <Modal body={body} footer={footer} header={header} />;
 }

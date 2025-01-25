@@ -1,19 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import {} from "@tauri-apps/api";
+
+import { useEffect, useRef } from "react";
+import { useBoolean } from "usehooks-ts";
 
 import { init } from "@Services/GameState/gameState";
-import {  } from "@tauri-apps/api";
+import * as dialog from "@tauri-apps/plugin-dialog";
 
 import { GameLoop } from "./useGameLoop";
-import * as dialog from "@tauri-apps/plugin-dialog"
 
 export function useGameState() {
-  const [gameLoaded, setGameLoaded] = useState(false);
-  const gameLoopCleanup = useRef<() => void>();
+  const { setTrue: setGameLoaded, value: gameLoaded } = useBoolean(false);
+  const gameLoopCleanup = useRef<() => void>(undefined);
 
   useEffect(() => {
     init()
       .then(() => {
-        setGameLoaded(true);
+        setGameLoaded();
         gameLoopCleanup.current = GameLoop();
       })
       .catch((err) =>
@@ -23,7 +25,7 @@ export function useGameState() {
     return () => {
       gameLoopCleanup.current?.();
     };
-  }, []);
+  }, [setGameLoaded]);
 
   return { gameLoaded };
 }

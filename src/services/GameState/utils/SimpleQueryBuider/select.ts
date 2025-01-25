@@ -34,6 +34,10 @@ export type SelectEvent<
     (
       | (
           | SelectAttribute<keyof RESULT & string, keyof SELECT & string>
+          | `${SelectAttribute<
+              keyof RESULT & string,
+              keyof SELECT & string
+            >} as ${string}`
           | Aggregation<keyof SELECT & string, keyof RESULT & string, TABLES>
         )[]
       | "*"

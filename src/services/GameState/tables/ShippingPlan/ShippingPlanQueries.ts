@@ -18,29 +18,18 @@ import { ShippingPlan } from "./ShippingPlan";
 import { ShippingPlanExchange } from "./ShippingPlanExchange";
 import { ShippingPlanRoute } from "./ShippingPlanRoutes";
 
-export async function addRouteToShipping(
-  id: ID | null,
-  plan: ID | null,
-  CityA: ID,
-  CityB: ID
-) {
+export async function addRouteToShipping(id: ID | null, plan: ID | null) {
   await db.execute(
-    insert<
-      Pick<ShippingPlanRoute, "plan" | "route" | "city">,
-      "ShippingPlanRoutes"
-    >({
-      attributes: { plan: plan, route: id, city: CityA },
+    insert<Pick<ShippingPlanRoute, "plan" | "route">, "ShippingPlanRoutes">({
+      attributes: { plan: plan, route: id },
       table: "ShippingPlanRoutes",
     }),
     [plan, id]
   );
 
   await db.execute(
-    insert<
-      Pick<ShippingPlanRoute, "plan" | "route" | "city">,
-      "ShippingPlanRoutes"
-    >({
-      attributes: { plan: plan, route: id, city: CityB },
+    insert<Pick<ShippingPlanRoute, "plan" | "route">, "ShippingPlanRoutes">({
+      attributes: { plan: plan, route: id },
       table: "ShippingPlanRoutes",
     }),
     [plan, id]
@@ -92,13 +81,15 @@ const getShippingPlansQuery = select<
 });
 
 const getShippingPlanRoutesQuery = select<
-  TradeRoute & ShippingPlanRoute,
-  "ShippingPlanRoutes" | "TradeRoutes"
+  TradeRoute & ShippingPlanRoute & { cityAName: string; cityBName: string },
+  "ShippingPlanRoutes" | "TradeRoutes" | "CityA" | "CityB" | "City"
 >({
   table: "ShippingPlanRoutes",
   attributes: [
     ["TradeRoutes", ["name", "CityA", "CityB"]],
     ["ShippingPlanRoutes", ["ID"]],
+    ["CityA", ["name as cityAName"]],
+    ["CityB", ["name as cityBName"]],
   ],
   join: [
     {
@@ -107,6 +98,22 @@ const getShippingPlanRoutesQuery = select<
         A: ["TradeRoutes", "ID"],
         B: ["ShippingPlanRoutes", "route"],
       },
+    },
+    {
+      A: "City",
+      equation: {
+        A: ["TradeRoutes", "CityA"],
+        B: ["CityA", "ID"],
+      },
+      as: "CityA",
+    },
+    {
+      A: "City",
+      equation: {
+        A: ["TradeRoutes", "CityB"],
+        B: ["CityB", "ID"],
+      },
+      as: "CityB",
     },
   ],
 });
@@ -121,7 +128,7 @@ export async function getShippingPlan(id: ID | null, inventory: ID) {
   )[0];
 }
 
-export async function getShippingPlans(id: ID | null) {
+export async function getShippingPlans(id?: ID | null) {
   if (isNull(id)) {
     return null;
   }
@@ -131,60 +138,71 @@ export async function getShippingPlans(id: ID | null) {
   ]);
 }
 
-export async function getShippingPlanRoutes(id: ID | null) {
+export async function getShippingPlanRoutes(id?: ID | null) {
   if (isNull(id)) {
     return null;
   }
 
-  return await db.select<TradeRoute[]>(getShippingPlanRoutesQuery);
+  return await db.select<
+    (TradeRoute & { cityAName: string; cityBName: string })[]
+  >(getShippingPlanRoutesQuery);
 }
 
-const getShippingPlanItemsQuery = select<
-  ShippingPlanExchange & Item & Translations,
-  "ShippingPlans" | "ShippingPlanExchanges" | "Item" | "translations"
->({
-  table: "Item",
-  attributes: [
-    ["Item", ["ID", "nameKey", "descriptionKey", "weight", "category"]],
-    ["ShippingPlanExchanges", ["number"]],
-    ["translations", ["key", "lang", "translation"]],
-  ],
-  //where: [{ A: ["ShippingPlanExchanges", "plan"], value: "?" }],
-  join: [
-    {
-      A: "ShippingPlanExchanges",
-      equation: {
-        A: ["Item", "ID"],
-        B: ["ShippingPlanExchanges", "item"],
+const getShippingPlanItemsQuery = (id: ID, start: boolean) =>
+  select<
+    ShippingPlanExchange & Item & Translations,
+    "ShippingPlans" | "ShippingPlanExchanges" | "Item" | "translations"
+  >({
+    table: "Item",
+    attributes: [
+      ["Item", ["ID", "nameKey", "descriptionKey", "weight", "category"]],
+      ["ShippingPlanExchanges", ["number"]],
+      ["translations", ["key", "lang", "translation"]],
+    ],
+    join: [
+      {
+        A: "ShippingPlanExchanges",
+        equation: {
+          A: ["Item", "ID"],
+          B: ["ShippingPlanExchanges", "item"],
+        },
+        type: "left outer",
       },
-      type: "left outer",
-    },
-    {
-      A: "translations",
-      equation: { A: ["Item", "nameKey"], B: ["translations", "key"] },
-    },
-  ],
-});
+      {
+        A: "translations",
+        equation: { A: ["Item", "nameKey"], B: ["translations", "key"] },
+      },
+    ],
+    where: [
+      { A: ["ShippingPlanExchanges", "plan"], value: id },
+      {
+        A: ["ShippingPlanExchanges", "start"],
+        value: Number(start),
+      },
+    ],
+  });
 
 // @TODO
 export async function moveBetweenInventories(
   plan: ID,
   amount: number,
-  item: ID
+  item: ID,
+  start: boolean
 ) {
-  await Promise.all([
+  const t = await Promise.all([
     db.execute(
-      "insert into ShippingPlanExchanges (item, number, plan) values(?, ?, ?) ON CONFLICT (item, plan) DO UPDATE SET number = ? WHERE plan=? and item = ?;",
-      [item, amount, plan, amount, plan, item]
+      "insert into ShippingPlanExchanges (item, number, plan, start) values(?, ?, ?, ?) ON CONFLICT (item, plan, start) DO UPDATE SET number = ? WHERE plan=? and item = ? and start = ?;",
+      [item, amount, plan, Number(start), amount, plan, item, Number(start)]
     ),
   ]);
+  console.log(t);
 
   dbObservable.next({
     type: DBEvents.shippingPlanUpdate,
   });
 }
 
-export async function getShippingPlanItems(id: ID | null) {
+export async function getShippingPlanItems(id: ID | null, start: boolean) {
   if (isNull(id)) {
     return new Map<number, (ShippingPlanExchange & Item & Translations)[]>();
   }
@@ -192,8 +210,8 @@ export async function getShippingPlanItems(id: ID | null) {
   return GroupBy(
     (
       await db.select<(ShippingPlanExchange & Item & Translations)[]>(
-        getShippingPlanItemsQuery,
-        [id]
+        getShippingPlanItemsQuery(id, start),
+        [id, start]
       )
     ).map((change) => {
       if (isNull(change.number)) {

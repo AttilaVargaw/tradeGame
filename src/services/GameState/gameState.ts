@@ -49,8 +49,8 @@ export const init = async () => {
     DropTableIfExist(IndustrialBuildingDailyRequirement.name) +
     DropTableIfExist(ShippingPlan.name) +
     DropTableIfExist(ShippingPlanExchange.name) +
-    DropTableIfExist(Inventory.name);
-  DropTableIfExist(ShippingPlanRoutes.name);
+    DropTableIfExist(Inventory.name) +
+    DropTableIfExist(ShippingPlanRoutes.name);
 
   const creatorSQL2 =
     "BEGIN TRANSACTION;" +
@@ -66,8 +66,8 @@ export const init = async () => {
     create(Encyclopedia.name, Encyclopedia.createData) +
     create(Inventory.name, Inventory.createData) +
     create(ShippingPlan.name, ShippingPlan.createData) +
-    create(ShippingPlanExchange.name, ShippingPlanExchange.createData) +
     create(ShippingPlanRoutes.name, ShippingPlanRoutes.createData) +
+    create(ShippingPlanExchange.name, ShippingPlanExchange.createData) +
     create(
       IndustrialBuildingDailyRequirement.name,
       IndustrialBuildingDailyRequirement.createData

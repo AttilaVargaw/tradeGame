@@ -24,11 +24,13 @@ export function PlannerTransferItem({
   item,
   plan,
   number,
+  start,
 }: {
   label: string;
   item: ID;
   plan: ID;
   number: number;
+  start: boolean;
 }) {
   const [num, setNum] = useState(number);
 
@@ -44,10 +46,11 @@ export function PlannerTransferItem({
   }) => {
     const num2 = (direction ? 1 : -1) * Number.parseInt(value);
     setNum(Number.parseInt(value));
-    moveBetweenInventories(plan, num2, item);
+    moveBetweenInventories(plan, num2, item, start);
   };
+
   const onTargetClick = () => {
-    moveBetweenInventories(plan, direction ? -num : num, item);
+    moveBetweenInventories(plan, direction ? -num : num, item, start);
     setDirection((value) => !value);
   };
 

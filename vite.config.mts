@@ -66,7 +66,7 @@ export default defineConfig({
       "@Components": path.resolve(__dirname, "./src/components"),
       "@Screens": path.resolve(__dirname, "./src/screens"),
       "@Hooks": path.resolve(__dirname, "./src/hooks"),
-      "@Modals": path.resolve(__dirname, "./src/modals"), 
+      "@Modals": path.resolve(__dirname, "./src/modals"),
     },
   },
 });
